@@ -63,6 +63,56 @@ export const authAPI = {
   createStudent: (studentData) => api.post('/admin/create-student', studentData),
 };
 
+// Admin API functions
+export const adminAPI = {
+  // Get all teachers
+  getAllTeachers: () => api.get('/admin/teachers'),
+  
+  // Get all students
+  getAllStudents: () => api.get('/admin/students'),
+  
+  // Update teacher
+  updateTeacher: (id, data) => api.put(`/admin/update-teacher/${id}`, data),
+  
+  // Delete teacher
+  deleteTeacher: (id) => api.delete(`/admin/delete-teacher/${id}`),
+  
+  // Update student
+  updateStudent: (id, data) => api.put(`/admin/update-student/${id}`, data),
+  
+  // Delete student
+  deleteStudent: (id) => api.delete(`/admin/delete-student/${id}`),
+  
+  // Get dashboard stats
+  getStats: () => api.get('/admin/stats'),
+  
+  // Clean up teachers without ID
+  cleanupTeachers: () => api.post('/admin/cleanup-teachers'),
+  
+  // Clean up students without ID
+  cleanupStudents: () => api.post('/admin/cleanup-students'),
+  
+  // App Configuration
+  getAppConfig: () => api.get('/admin/app-config'),
+  updateAppConfig: (data) => api.put('/admin/app-config', data),
+  resetAppConfig: () => api.post('/admin/app-config/reset'),
+};
+
+// Teacher API functions
+export const teacherAPI = {
+  // Get all students
+  getAllStudents: () => api.get('/teacher/students'),
+  
+  // Assign student ID
+  assignStudentId: (id, studentId) => api.put(`/teacher/assign-student-id/${id}`, { studentId }),
+  
+  // Update student
+  updateStudent: (id, data) => api.put(`/teacher/update-student/${id}`, data),
+  
+  // Get students by class and section
+  getStudentsByClass: (className, section) => api.get(`/teacher/students/${className}/${section}`),
+};
+
 // User API functions
 export const userAPI = {
   // Get teacher profile

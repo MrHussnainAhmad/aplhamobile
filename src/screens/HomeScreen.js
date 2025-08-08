@@ -10,15 +10,23 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { storage } from '../utils/storage';
+import { adminAPI } from '../services/api';
 
 const HomeScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ teachers: 0, students: 0, announcements: 0 });
 
   useEffect(() => {
     loadUserData();
   }, []);
+
+  useEffect(() => {
+    if (userType === 'admin') {
+      loadStats();
+    }
+  }, [userType]);
 
   const loadUserData = async () => {
     try {
@@ -30,6 +38,16 @@ const HomeScreen = ({ navigation }) => {
       Alert.alert('Error', 'Failed to load user data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadStats = async () => {
+    try {
+      const response = await adminAPI.getStats();
+      setStats(response.data.stats);
+    } catch (error) {
+      console.error('Error loading stats:', error);
+      // Don't show alert for stats error, just keep default values
     }
   };
 
@@ -101,7 +119,10 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.menuContainer}>
         <Text style={styles.menuTitle}>Quick Actions</Text>
         
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('ManageStudents')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="people" size={24} color="#4A90E2" />
@@ -179,17 +200,17 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Ionicons name="people" size={30} color="#4A90E2" />
-          <Text style={styles.statNumber}>--</Text>
+          <Text style={styles.statNumber}>{stats.teachers}</Text>
           <Text style={styles.statLabel}>Teachers</Text>
         </View>
         <View style={styles.statCard}>
           <Ionicons name="school" size={30} color="#27AE60" />
-          <Text style={styles.statNumber}>--</Text>
+          <Text style={styles.statNumber}>{stats.students}</Text>
           <Text style={styles.statLabel}>Students</Text>
         </View>
         <View style={styles.statCard}>
           <Ionicons name="megaphone" size={30} color="#9B59B6" />
-          <Text style={styles.statNumber}>--</Text>
+          <Text style={styles.statNumber}>{stats.announcements}</Text>
           <Text style={styles.statLabel}>Announcements</Text>
         </View>
       </View>
@@ -210,7 +231,10 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('ManageStudents')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="school" size={24} color="#27AE60" />
@@ -270,6 +294,22 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuItemTitle}>Fee Management</Text>
               <Text style={styles.menuItemSubtitle}>Monitor and approve fee submissions</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('ManageApp')}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="phone-portrait" size={24} color="#8E44AD" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Manage App</Text>
+              <Text style={styles.menuItemSubtitle}>Customize app logo and college name</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>
