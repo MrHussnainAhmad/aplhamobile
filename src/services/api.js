@@ -89,7 +89,7 @@ export const adminAPI = {
   // Assign Teacher ID (admin only)
   assignTeacherId: (id, customTeacherId) => api.put(`/admin/assign-teacher-id/${id}`, { customTeacherId }),
   
-  // Assign Student ID (admin and teachers)
+  // Assign Student ID (admin only)
   assignStudentId: (id, customStudentId) => api.put(`/admin/assign-student-id/${id}`, { customStudentId }),
   
   // Get dashboard stats

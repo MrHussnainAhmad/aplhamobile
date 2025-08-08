@@ -23,28 +23,30 @@ const ManageStudentsScreen = ({ navigation }) => {
   const [userType, setUserType] = useState(null);
 
   useEffect(() => {
-    checkUserType();
-    loadStudents();
+    initializeScreen();
   }, []);
 
   useEffect(() => {
     filterStudents();
   }, [searchQuery, students]);
 
-  const checkUserType = async () => {
+  const initializeScreen = async () => {
     try {
       const { userType: storedUserType } = await storage.getUserData();
       setUserType(storedUserType);
+      await loadStudents(storedUserType);
     } catch (error) {
-      console.error('Error checking user type:', error);
+      console.error('Error initializing screen:', error);
+      Alert.alert('Error', 'Failed to initialize screen');
+      setLoading(false);
     }
   };
 
-  const loadStudents = async () => {
+  const loadStudents = async (currentUserType = userType) => {
     try {
       setLoading(true);
       // Use appropriate API based on user type
-      const response = userType === 'admin' 
+      const response = currentUserType === 'admin' 
         ? await adminAPI.getAllStudents() 
         : await teacherAPI.getAllStudents();
       
@@ -105,15 +107,15 @@ const ManageStudentsScreen = ({ navigation }) => {
     );
   };
 
-  const assignStudentId = async (studentId, newStudentId) => {
+  const assignStudentId = async (studentObjectId, newStudentId) => {
     try {
-      // Use appropriate API based on user type
+      // Use appropriate API based on user type with correct parameter names
       const response = userType === 'admin'
-        ? await adminAPI.assignStudentId(studentId, newStudentId)
-        : await teacherAPI.assignStudentId(studentId, newStudentId);
+        ? await adminAPI.assignStudentId(studentObjectId, newStudentId)
+        : await teacherAPI.assignStudentId(studentObjectId, newStudentId);
 
       Alert.alert('Success', 'Student ID assigned successfully');
-      loadStudents(); // Refresh the list
+      await loadStudents(); // Refresh the list
     } catch (error) {
       console.error('Error assigning student ID:', error);
       Alert.alert('Error', error.response?.data?.message || 'Failed to assign student ID');

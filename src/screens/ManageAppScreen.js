@@ -73,28 +73,36 @@ const ManageAppScreen = ({ navigation }) => {
 
   const pickImage = async () => {
     try {
+      // Check permissions first
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Sorry, we need camera roll permissions to change the logo.');
+        return;
+      }
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1], // Square aspect ratio for logo
         quality: 0.8,
         base64: true,
+        allowsMultipleSelection: false,
       });
 
-      if (!result.canceled && result.assets[0]) {
+      if (!result.canceled && result.assets && result.assets[0]) {
         const asset = result.assets[0];
         setAppConfig(prev => ({
           ...prev,
           localLogo: {
             uri: asset.uri,
             base64: asset.base64,
-            type: 'image/jpeg',
+            type: asset.mimeType || 'image/jpeg',
           }
         }));
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to select image');
+      Alert.alert('Error', `Failed to select image: ${error.message || 'Unknown error'}`);
     }
   };
 
