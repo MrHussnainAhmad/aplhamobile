@@ -2,6 +2,9 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL, getApiUrl } from '../config/api.config';
 
+// Export API_BASE_URL for direct fetch calls
+export const API_BASE_URL = BASE_URL;
+
 // Get API URL from configuration
 getApiUrl(); // This will log the current API URL
 
