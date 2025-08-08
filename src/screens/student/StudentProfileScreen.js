@@ -62,7 +62,7 @@ const StudentProfileScreen = ({ navigation }) => {
         // Include isVerified status from student data
         setProfile({
           ...data.profile,
-          isVerified: data.student?.isVerified || false
+          isVerified: data.profile.isVerified || false
         });
       } else {
         Alert.alert('Error', 'Failed to load profile');
@@ -86,46 +86,18 @@ const StudentProfileScreen = ({ navigation }) => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.8,
-      allowsMultipleSelection: false,
+      quality: 0.5,
+      base64: true, // Request base64 directly
     });
 
     if (!result.canceled && result.assets[0]) {
-      const imageUri = result.assets[0].uri;
-      uploadImage(imageUri);
-    }
-  };
-
-  const uploadImage = async (imageUri) => {
-    try {
-      setSaving(true);
-      const formData = new FormData();
-      formData.append('image', {
-        uri: imageUri,
-        type: 'image/jpeg',
-        name: 'profile.jpg',
-      });
-
-      const response = await fetch(`${API_BASE_URL}/upload-profile`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setProfile(prev => ({ ...prev, profileImage: data.imageUrl }));
-        Alert.alert('Success', 'Profile image updated');
-      } else {
-        Alert.alert('Error', 'Failed to upload image');
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      Alert.alert('Error', 'Failed to upload image');
-    } finally {
-      setSaving(false);
+      const selectedImage = result.assets[0];
+      setProfile(prev => ({
+        ...prev,
+        profileImage: selectedImage.uri, // For local display
+        profileImageBase64: selectedImage.base64, // For sending to backend
+        profileImageType: selectedImage.mimeType, // For sending to backend
+      }));
     }
   };
 
@@ -153,8 +125,14 @@ const StudentProfileScreen = ({ navigation }) => {
         motherName: profile.motherName,
         dateOfBirth: profile.dateOfBirth,
         gender: profile.gender,
-        profileImage: profile.profileImage,
+        rollNumber: profile.rollNumber,
       };
+
+      // Only include image data if a new image was picked
+      if (profile.profileImageBase64 && profile.profileImageType) {
+        updateData.profileImageBase64 = profile.profileImageBase64;
+        updateData.profileImageType = profile.profileImageType;
+      }
 
       if (showPasswordSection && password) {
         updateData.password = password;
@@ -174,6 +152,8 @@ const StudentProfileScreen = ({ navigation }) => {
         setPassword('');
         setConfirmPassword('');
         setShowPasswordSection(false);
+        // Clear base64 data after successful upload to prevent re-upload on next save
+        setProfile(prev => ({ ...prev, profileImageBase64: null, profileImageType: null }));
       } else {
         const error = await response.json();
         Alert.alert('Error', error.message || 'Failed to update profile');
@@ -239,7 +219,14 @@ const StudentProfileScreen = ({ navigation }) => {
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Roll Number</Text>
-          <Text style={styles.readOnlyText}>{profile.rollNumber || 'Not assigned'}</Text>
+          <TextInput
+            style={[styles.input, profile.rollNumber && styles.readOnlyInput]}
+            value={profile.rollNumber}
+            onChangeText={(text) => setProfile(prev => ({ ...prev, rollNumber: text }))}
+            placeholder="Enter your roll number"
+            keyboardType="numeric"
+            editable={!profile.rollNumber} // Editable only if rollNumber is not set
+          />
         </View>
       </View>
 

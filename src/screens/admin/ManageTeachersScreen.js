@@ -9,9 +9,11 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { adminAPI } from '../../services/api';
+import VerifiedBadge from '../../components/VerifiedBadge';
 
 const ManageTeachersScreen = ({ navigation }) => {
   const [teachers, setTeachers] = useState([]);
@@ -36,6 +38,7 @@ const ManageTeachersScreen = ({ navigation }) => {
   const fetchTeachers = async () => {
     try {
       const response = await adminAPI.getAllTeachers();
+      console.log('Fetched teachers data:', response.data.teachers);
       setTeachers(response.data.teachers);
     } catch (error) {
       console.error('Error fetching teachers:', error);
@@ -49,6 +52,17 @@ const ManageTeachersScreen = ({ navigation }) => {
     setRefreshing(true);
     fetchTeachers().finally(() => setRefreshing(false));
   }, []);
+
+  const handleVerifyTeacher = async (teacherId, isVerified) => {
+    try {
+      await adminAPI.verifyTeacher(teacherId, isVerified);
+      Alert.alert('Success', `Teacher ${isVerified ? 'verified' : 'unverified'} successfully`);
+      onRefresh(); // Refresh the list
+    } catch (error) {
+      console.error('Error verifying teacher:', error);
+      Alert.alert('Error', 'Failed to verify teacher');
+    }
+  };
 
   const handleDeleteTeacher = async (teacherId) => {
     Alert.alert(
@@ -113,27 +127,71 @@ const ManageTeachersScreen = ({ navigation }) => {
 
   const renderTeacherItem = ({ item }) => (
     <View style={styles.teacherCard}>
-      <View style={styles.teacherInfo}>
-        <View style={styles.avatarPlaceholder}>
-          <Ionicons name="person" size={30} color="#4A90E2" />
-        </View>
-        <View style={styles.teacherDetails}>
-          <Text style={styles.teacherName}>{item.fullname}</Text>
-          <Text style={styles.teacherEmail}>{item.email}</Text>
-          <Text style={[styles.teacherId, !item.teacherId && styles.idMissing]}>
-            ID: {item.teacherId || 'Not Assigned'}
-          </Text>
+      {/* Institute Header with Gradient */}
+      <View style={styles.cardHeader}>
+        <Text style={styles.instituteName}>Superior Science College</Text>
+        <View style={styles.verifiedBadgeContainer}>
+          <VerifiedBadge isVerified={item.isVerified} showText={false} />
         </View>
       </View>
-      <View style={styles.actionsContainer}>
-        <TouchableOpacity onPress={() => handleAssignTeacherId(item)} style={styles.actionButton}>
-          <Ionicons name="card-outline" size={20} color="#4A90E2" />
+
+      {/* Main Card Content */}
+      <View style={styles.cardBody}>
+        {/* Teacher Avatar and Info Section */}
+        <View style={styles.teacherMainInfo}>
+          <View style={styles.avatarSection}>
+            <View style={styles.avatarContainer}>
+              {item.img ? (
+                <Image key={item.img} source={{ uri: item.img }} style={styles.avatar} />
+              ) : (
+                <Ionicons name="person" size={40} color="#4A90E2" />
+              )}
+            </View>
+          </View>
+          
+          <View style={styles.teacherDetailsSection}>
+            <Text style={styles.teacherName}>{item.fullname}</Text>
+            
+            {/* Teacher Information in ID Card Style */}
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Teacher ID:</Text>
+              <Text style={styles.infoValue}>
+                {item.teacherId || 'Not Assigned'}
+              </Text>
+            </View>
+            
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Email:</Text>
+              <Text style={styles.infoValue}>{item.email}</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Action Buttons */}
+      <View style={styles.actionButtons}>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.updateButton]}
+          onPress={() => handleUpdateTeacher(item)}
+        >
+          <Ionicons name="create" size={16} color="#fff" />
+          <Text style={styles.actionButtonText}>Update</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleUpdateTeacher(item)} style={styles.actionButton}>
-          <Ionicons name="create-outline" size={20} color="#F39C12" />
+
+        <TouchableOpacity
+          style={[styles.actionButton, styles.deleteButton]}
+          onPress={() => handleDeleteTeacher(item._id)}
+        >
+          <Ionicons name="trash" size={16} color="#fff" />
+          <Text style={styles.actionButtonText}>Delete</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDeleteTeacher(item._id)} style={styles.actionButton}>
-          <Ionicons name="trash-outline" size={20} color="#E74C3C" />
+
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: item.isVerified ? '#E74C3C' : '#2ECC71' }]}
+          onPress={() => handleVerifyTeacher(item._id, !item.isVerified)}
+        >
+          <Ionicons name={item.isVerified ? 'close-circle' : 'checkmark-circle'} size={16} color="#fff" />
+          <Text style={styles.actionButtonText}>{item.isVerified ? 'Unverify' : 'Verify'}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -151,11 +209,11 @@ const ManageTeachersScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Manage Teachers</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('CreateTeacherScreen')} style={styles.addButton}>
-          <Ionicons name="add" size={24} color="#FFFFFF" />
-          <Text style={styles.addButtonText}>Add Teacher</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color="#2C3E50" />
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Manage Teachers</Text>
+        <View style={styles.headerRight} />
       </View>
 
       <View style={styles.searchContainer}>
@@ -201,32 +259,26 @@ const styles = StyleSheet.create({
     color: '#7F8C8D',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
     backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E1E8ED',
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  title: {
-    fontSize: 24,
+  headerTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#2C3E50',
   },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#4A90E2',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  addButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 5,
+  headerRight: {
+    width: 24,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -253,60 +305,116 @@ const styles = StyleSheet.create({
   },
   teacherCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 15,
+    borderRadius: 15,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  cardHeader: {
+    backgroundColor: '#4A5FD7',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
   },
-  teacherInfo: {
+  instituteName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  verifiedBadgeContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 12,
+    padding: 4,
+  },
+  cardBody: {
+    padding: 20,
+  },
+  teacherMainInfo: {
     flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
+    marginBottom: 20,
   },
-  avatarPlaceholder: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#F8F9FA',
+  avatarSection: {
+    marginRight: 20,
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    backgroundColor: '#E8F4FD',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    borderWidth: 2,
+    borderColor: '#4A90E2',
   },
-  teacherDetails: {
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  teacherDetailsSection: {
     flex: 1,
+    justifyContent: 'center',
   },
   teacherName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#2C3E50',
+    marginBottom: 12,
   },
-  teacherEmail: {
-    fontSize: 14,
-    color: '#7F8C8D',
-    marginVertical: 2,
-  },
-  teacherId: {
-    fontSize: 14,
-    color: '#4A90E2',
-    fontWeight: '600',
-  },
-  idMissing: {
-    color: '#E74C3C',
-    fontStyle: 'italic',
-  },
-  actionsContainer: {
+  infoRow: {
     flexDirection: 'row',
-    gap: 15,
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  infoLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#7F8C8D',
+    width: 80,
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#2C3E50',
+    flex: 1,
+    fontWeight: '500',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    gap: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#ECF0F1',
+    paddingTop: 15,
   },
   actionButton: {
-    padding: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    gap: 4,
+  },
+  updateButton: {
+    backgroundColor: '#FFC107',
+  },
+  deleteButton: {
+    backgroundColor: '#DC3545',
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   emptyContainer: {
     flex: 1,

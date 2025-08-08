@@ -29,6 +29,7 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
     whatsappNumber: teacher.whatsappNumber || '',
     joiningYear: teacher.joiningYear?.toString() || new Date().getFullYear().toString(),
     teacherId: teacher.teacherId || '',
+    subjects: teacher.subjects?.join(', ') || '',
   });
   
   const [loading, setLoading] = useState(false);
@@ -73,6 +74,7 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
         ...formData,
         age: parseInt(formData.age),
         joiningYear: parseInt(formData.joiningYear),
+        subjects: formData.subjects.split(',').map(s => s.trim()).filter(s => s.length > 0),
       };
 
       await adminAPI.updateTeacher(teacher._id, updateData);
@@ -230,6 +232,16 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
                 })}
               </Picker>
             </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Subjects (comma-separated)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g., Math, Physics, Chemistry"
+              value={formData.subjects}
+              onChangeText={(value) => handleInputChange('subjects', value)}
+            />
           </View>
         </View>
       </ScrollView>

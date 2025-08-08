@@ -55,10 +55,11 @@ const TeacherProfileScreen = ({ navigation }) => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Fetched profile data:', data);
         // Include isVerified status from teacher data
         setProfile({
           ...data.profile,
-          isVerified: data.teacher?.isVerified || false
+          isVerified: data.profile.isVerified || false
         });
       } else {
         Alert.alert('Error', 'Failed to load profile');
@@ -82,46 +83,19 @@ const TeacherProfileScreen = ({ navigation }) => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.8,
+      quality: 0.5,
+      base64: true, // Request base64 directly
       allowsMultipleSelection: false,
     });
 
     if (!result.canceled && result.assets[0]) {
-      const imageUri = result.assets[0].uri;
-      uploadImage(imageUri);
-    }
-  };
-
-  const uploadImage = async (imageUri) => {
-    try {
-      setSaving(true);
-      const formData = new FormData();
-      formData.append('image', {
-        uri: imageUri,
-        type: 'image/jpeg',
-        name: 'profile.jpg',
-      });
-
-      const response = await fetch(`${API_BASE_URL}/upload-profile`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setProfile(prev => ({ ...prev, profileImage: data.imageUrl }));
-        Alert.alert('Success', 'Profile image updated');
-      } else {
-        Alert.alert('Error', 'Failed to upload image');
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      Alert.alert('Error', 'Failed to upload image');
-    } finally {
-      setSaving(false);
+      const selectedImage = result.assets[0];
+      setProfile(prev => ({
+        ...prev,
+        profileImage: selectedImage.uri, // For local display
+        profileImageBase64: selectedImage.base64, // For sending to backend
+        profileImageType: selectedImage.mimeType, // For sending to backend
+      }));
     }
   };
 
@@ -147,8 +121,14 @@ const TeacherProfileScreen = ({ navigation }) => {
         address: profile.address,
         qualification: profile.qualification,
         experience: profile.experience,
-        profileImage: profile.profileImage,
+        subjects: profile.subjects,
       };
+
+      // Only include image data if a new image was picked
+      if (profile.profileImageBase64 && profile.profileImageType) {
+        updateData.profileImageBase64 = profile.profileImageBase64;
+        updateData.profileImageType = profile.profileImageType;
+      }
 
       if (showPasswordSection && password) {
         updateData.password = password;
@@ -164,10 +144,32 @@ const TeacherProfileScreen = ({ navigation }) => {
       });
 
       if (response.ok) {
+        const responseData = await response.json();
         Alert.alert('Success', 'Profile updated successfully');
         setPassword('');
         setConfirmPassword('');
         setShowPasswordSection(false);
+        // Clear base64 data after successful upload to prevent re-upload on next save
+        setProfile(prev => {
+          const newProfile = {
+            ...prev,
+            profileImage: responseData.profile.profileImage, // Update profileImage with the URL from the backend
+            profileImageBase64: null,
+            profileImageType: null
+          };
+          console.log('Profile state after update:', newProfile.profileImage);
+          return newProfile;
+        });
+
+        // Update user data in AsyncStorage
+        const storedUserData = await AsyncStorage.getItem('userData');
+        let parsedUserData = storedUserData ? JSON.parse(storedUserData) : {};
+        parsedUserData.img = responseData.profile.profileImage;
+        console.log('Updating AsyncStorage with:', parsedUserData);
+        await AsyncStorage.setItem('userData', JSON.stringify(parsedUserData));
+        console.log('AsyncStorage updated.');
+
+        fetchProfile(); // Re-fetch profile to ensure latest data, including image, is displayed
       } else {
         const error = await response.json();
         Alert.alert('Error', error.message || 'Failed to update profile');
@@ -210,7 +212,7 @@ const TeacherProfileScreen = ({ navigation }) => {
         </View>
         <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
           {profile.profileImage ? (
-            <Image source={{ uri: profile.profileImage }} style={styles.profileImage} />
+            <Image key={profile.profileImage} source={{ uri: profile.profileImage }} style={styles.profileImage} />
           ) : (
             <Image source={require('../../../assets/images/teacher.png')} style={styles.profileImage} />
           )}
@@ -285,8 +287,8 @@ const TeacherProfileScreen = ({ navigation }) => {
           <Text style={styles.label}>Experience (years)</Text>
           <TextInput
             style={styles.input}
-            value={profile.experience}
-            onChangeText={(text) => setProfile(prev => ({ ...prev, experience: text }))}
+            value={String(profile.experience)}
+            onChangeText={(text) => setProfile(prev => ({ ...prev, experience: Number(text) }))}
             placeholder="Enter years of experience"
             keyboardType="numeric"
           />

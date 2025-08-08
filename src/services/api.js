@@ -118,6 +118,9 @@ export const teacherAPI = {
   // Get all students
   getAllStudents: () => api.get('/teacher/students'),
   
+  // Get teacher dashboard stats
+  getDashboardStats: () => api.get('/teacher/dashboard-stats'),
+  
   // Assign student ID
   assignStudentId: (id, studentId) => api.put(`/teacher/assign-student-id/${id}`, { studentId }),
   

@@ -7,19 +7,30 @@ import {
   ScrollView,
   Alert,
   Image,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { storage } from '../utils/storage';
-import { adminAPI } from '../services/api';
+import { adminAPI, teacherAPI } from '../services/api';
 
 const HomeScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ teachers: 0, students: 0, announcements: 0 });
+  const [supportPhoneNumber, setSupportPhoneNumber] = useState('');
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadUserData();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   useEffect(() => {
     loadUserData();
+    loadAppConfig();
   }, []);
 
   useEffect(() => {
@@ -31,6 +42,7 @@ const HomeScreen = ({ navigation }) => {
   const loadUserData = async () => {
     try {
       const { userData: storedUserData, userType: storedUserType } = await storage.getUserData();
+      console.log('HomeScreen: User data loaded from storage:', storedUserData);
       setUserData(storedUserData);
       setUserType(storedUserType);
     } catch (error) {
@@ -41,10 +53,24 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const loadAppConfig = async () => {
+    try {
+      const response = await adminAPI.getAppConfig();
+      setSupportPhoneNumber(response.data.config.phoneNumber || '');
+    } catch (error) {
+      console.error('Error loading app config:', error);
+    }
+  };
+
   const loadStats = async () => {
     try {
-      const response = await adminAPI.getStats();
-      setStats(response.data.stats);
+      if (userType === 'admin') {
+        const response = await adminAPI.getStats();
+        setStats(response.data.stats);
+      } else if (userType === 'teacher') {
+        const response = await teacherAPI.getDashboardStats();
+        setStats(response.data.stats);
+      }
     } catch (error) {
       console.error('Error loading stats:', error);
       // Don't show alert for stats error, just keep default values
@@ -74,6 +100,15 @@ const HomeScreen = ({ navigation }) => {
     );
   };
 
+  const handleWhatsAppSupport = () => {
+    if (supportPhoneNumber) {
+      const whatsappUrl = `https://wa.me/${supportPhoneNumber}`;
+      Linking.openURL(whatsappUrl).catch(err => console.error('An error occurred', err));
+    } else {
+      Alert.alert('Error', 'Support phone number not available.');
+    }
+  };
+
   const renderTeacherHome = () => (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -83,8 +118,9 @@ const HomeScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('TeacherProfile')}
           >
             {userData?.img ? (
-              <Image source={{ uri: userData.img }} style={styles.avatar} />
+              <Image key={userData.img} source={{ uri: `${userData.img}?t=${new Date().getTime()}` }} style={styles.avatar} />
             ) : (
+              console.log('HomeScreen: Using default image. userData.img is:', userData?.img),
               <View style={styles.avatarPlaceholder}>
                 <Ionicons name="person" size={40} color="#4A90E2" />
               </View>
@@ -104,18 +140,18 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Ionicons name="school" size={30} color="#4A90E2" />
-          <Text style={styles.statNumber}>--</Text>
+          <Text style={styles.statNumber}>{stats.students}</Text>
           <Text style={styles.statLabel}>Students</Text>
         </View>
         <View style={styles.statCard}>
           <Ionicons name="book" size={30} color="#27AE60" />
-          <Text style={styles.statNumber}>--</Text>
+          <Text style={styles.statNumber}>{stats.classes}</Text>
           <Text style={styles.statLabel}>Classes</Text>
         </View>
         <View style={styles.statCard}>
           <Ionicons name="checkmark-circle" size={30} color="#F39C12" />
-          <Text style={styles.statNumber}>--</Text>
-          <Text style={styles.statLabel}>Assignments</Text>
+          <Text style={styles.statNumber}>{stats.assignments}</Text>
+          <Text style={styles.statLabel}>Tasks</Text>
         </View>
       </View>
 
@@ -192,6 +228,22 @@ const HomeScreen = ({ navigation }) => {
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>
         </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={handleWhatsAppSupport}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Need Support?</Text>
+              <Text style={styles.menuItemSubtitle}>Contact us via WhatsApp</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -230,7 +282,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.statCard}>
           <Ionicons name="megaphone" size={30} color="#9B59B6" />
           <Text style={styles.statNumber}>{stats.announcements}</Text>
-          <Text style={styles.statLabel}>Announcements</Text>
+          <Text style={styles.statLabel}>Posts</Text>
         </View>
       </View>
 
@@ -288,7 +340,7 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="megaphone" size={24} color="#9B59B6" />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuItemTitle}>School Announcements</Text>
+              <Text style={styles.menuItemTitle}>School Posts</Text>
               <Text style={styles.menuItemSubtitle}>Post and manage school-wide updates</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
@@ -378,7 +430,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.statCard}>
           <Ionicons name="checkmark-done" size={30} color="#4A90E2" />
           <Text style={styles.statNumber}>--</Text>
-          <Text style={styles.statLabel}>Completed</Text>
+          <Text style={styles.statLabel}>Done</Text>
         </View>
         <View style={styles.statCard}>
           <Ionicons name="trophy" size={30} color="#F39C12" />
@@ -451,7 +503,7 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="card" size={24} color="#9B59B6" />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuItemTitle}>Fee Vouchers</Text>
+              <Text style={styles.menuItemTitle}>Upload Fee Vouchers</Text>
               <Text style={styles.menuItemSubtitle}>Submit and track fee payments</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
@@ -466,6 +518,22 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuItemTitle}>Announcements</Text>
               <Text style={styles.menuItemSubtitle}>View latest updates</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={handleWhatsAppSupport}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Need Support?</Text>
+              <Text style={styles.menuItemSubtitle}>Contact us via WhatsApp</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>

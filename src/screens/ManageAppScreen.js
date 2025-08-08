@@ -26,6 +26,7 @@ const ManageAppScreen = ({ navigation }) => {
 
   const [formData, setFormData] = useState({
     collegeName: '',
+    phoneNumber: '',
   });
 
   useEffect(() => {
@@ -50,6 +51,7 @@ const ManageAppScreen = ({ navigation }) => {
       setAppConfig(config);
       setFormData({
         collegeName: config.collegeName || '',
+        phoneNumber: config.phoneNumber || '',
       });
     } catch (error) {
       console.error('Error loading app config:', error);
@@ -80,20 +82,13 @@ const ManageAppScreen = ({ navigation }) => {
         return;
       }
 
-      // Use proper MediaTypeOptions enum or fallback
-      const pickerOptions = {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [1, 1], // Square aspect ratio for logo
-        quality: 0.8,
+        aspect: [1, 1],
+        quality: 0.5,
         base64: true,
-      };
-
-      // Add mediaTypes only if it exists
-      if (ImagePicker.MediaTypeOptions && ImagePicker.MediaTypeOptions.Images) {
-        pickerOptions.mediaTypes = ImagePicker.MediaTypeOptions.Images;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
+      });
 
       // Handle both old and new API responses
       if (result.cancelled || result.canceled) {
@@ -140,6 +135,7 @@ const ManageAppScreen = ({ navigation }) => {
     try {
       const updateData = {
         collegeName: formData.collegeName.trim(),
+        phoneNumber: formData.phoneNumber.trim(),
       };
 
       // If a new logo was selected, include it in the update
@@ -281,6 +277,21 @@ const ManageAppScreen = ({ navigation }) => {
             />
             <Text style={styles.helperText}>
               This will appear on the splash screen
+            </Text>
+          </View>
+        <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Support Phone Number</Text>
+            <TextInput
+              style={styles.textInput}
+              value={formData.phoneNumber}
+              onChangeText={(value) => handleInputChange('phoneNumber', value)}
+              placeholder="Enter support phone number"
+              placeholderTextColor="#95A5A6"
+              keyboardType="phone-pad"
+              maxLength={20}
+            />
+            <Text style={styles.helperText}>
+              This number will be used for WhatsApp support
             </Text>
           </View>
         </View>

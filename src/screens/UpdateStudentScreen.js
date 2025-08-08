@@ -10,6 +10,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { adminAPI, teacherAPI } from '../services/api';
@@ -27,6 +28,7 @@ const UpdateStudentScreen = ({ navigation, route }) => {
     class: student.class || '',
     section: student.section || '',
     studentId: student.studentId || '',
+    rollNumber: student.rollNumber || '',
   });
 
   const [errors, setErrors] = useState({});
@@ -147,7 +149,11 @@ const UpdateStudentScreen = ({ navigation, route }) => {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.studentInfo}>
           <View style={styles.avatarContainer}>
-            <Ionicons name="person" size={40} color="#4A90E2" />
+            {student.img ? (
+              <Image source={{ uri: student.img }} style={styles.avatar} />
+            ) : (
+              <Ionicons name="person" size={40} color="#4A90E2" />
+            )}
           </View>
           <Text style={styles.studentName}>{student.fullname}</Text>
           <Text style={styles.studentEmail}>{student.email}</Text>
@@ -163,20 +169,7 @@ const UpdateStudentScreen = ({ navigation, route }) => {
           {renderInput('class', 'Class *', 'Enter class')}
           {renderInput('section', 'Section *', 'Enter section')}
           
-          {/* Student ID field - read-only display */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Student ID</Text>
-            <TextInput
-              style={[styles.textInput, styles.readOnlyInput]}
-              value={formData.studentId}
-              placeholder="Not assigned"
-              editable={false}
-              placeholderTextColor="#95A5A6"
-            />
-            <Text style={styles.infoText}>
-              Student ID can be assigned using the "Assign ID" button in the student list
-            </Text>
-          </View>
+          {renderInput('rollNumber', 'Roll Number', 'Enter roll number', 'numeric')}
         </View>
       </ScrollView>
 
@@ -237,6 +230,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
+    paddingBottom: 100, // Added padding to account for footer height
   },
   studentInfo: {
     backgroundColor: '#FFFFFF',
@@ -260,6 +254,11 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderWidth: 2,
     borderColor: '#E1E8ED',
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   studentName: {
     fontSize: 20,
