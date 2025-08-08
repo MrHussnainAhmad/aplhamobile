@@ -59,11 +59,11 @@ export const authAPI = {
   // Student login
   studentLogin: (credentials) => api.post('/student/login', credentials),
   
-  // Admin create teacher (for signup)
-  createTeacher: (teacherData) => api.post('/admin/create-teacher', teacherData),
+  // Teacher self-signup (no ID assigned)
+  createTeacher: (teacherData) => api.post('/teacher/signup', teacherData),
   
-  // Admin create student (for signup)
-  createStudent: (studentData) => api.post('/admin/create-student', studentData),
+  // Student self-signup (no ID assigned)
+  createStudent: (studentData) => api.post('/student/signup', studentData),
 };
 
 // Admin API functions
@@ -85,6 +85,12 @@ export const adminAPI = {
   
   // Delete student
   deleteStudent: (id) => api.delete(`/admin/delete-student/${id}`),
+  
+  // Assign Teacher ID (admin only)
+  assignTeacherId: (id, customTeacherId) => api.put(`/admin/assign-teacher-id/${id}`, { customTeacherId }),
+  
+  // Assign Student ID (admin and teachers)
+  assignStudentId: (id, customStudentId) => api.put(`/admin/assign-student-id/${id}`, { customStudentId }),
   
   // Get dashboard stats
   getStats: () => api.get('/admin/stats'),

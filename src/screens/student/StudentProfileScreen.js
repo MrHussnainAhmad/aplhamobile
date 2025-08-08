@@ -203,9 +203,7 @@ const StudentProfileScreen = ({ navigation }) => {
           {profile.profileImage ? (
             <Image source={{ uri: profile.profileImage }} style={styles.profileImage} />
           ) : (
-            <View style={styles.placeholderImage}>
-              <Text style={styles.placeholderText}>Tap to add photo</Text>
-            </View>
+            <Image source={require('../../../assets/images/student.png')} style={styles.profileImage} />
           )}
         </TouchableOpacity>
       </View>
