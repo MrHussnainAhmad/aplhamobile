@@ -30,25 +30,47 @@ const LoginScreen = ({ navigation }) => {
       // Try different login types
       let response = null;
       let userType = null;
+      let lastError = null;
 
-      try {
-        // First try admin login
-        response = await authAPI.adminLogin({ email: email.trim(), password });
-        userType = 'admin';
-      } catch (adminError) {
+      // Check if this looks like admin email first
+      if (email.trim().toLowerCase() === 'admin@gmail.com') {
         try {
-          // Then try teacher login
+          console.log('Trying admin login for admin email');
+          response = await authAPI.adminLogin({ email: email.trim(), password });
+          userType = 'admin';
+        } catch (adminError) {
+          console.log('Admin login failed:', adminError.response?.data?.message || adminError.message);
+          lastError = adminError;
+        }
+      }
+
+      // If not admin or admin login failed, try teacher login
+      if (!response) {
+        try {
+          console.log('Trying teacher login');
           response = await authAPI.teacherLogin({ email: email.trim(), password });
           userType = 'teacher';
         } catch (teacherError) {
-          try {
-            // Finally try student login
-            response = await authAPI.studentLogin({ email: email.trim(), password });
-            userType = 'student';
-          } catch (studentError) {
-            throw new Error('Invalid credentials');
-          }
+          console.log('Teacher login failed:', teacherError.response?.data?.message || teacherError.message);
+          lastError = teacherError;
         }
+      }
+
+      // If teacher login failed, try student login
+      if (!response) {
+        try {
+          console.log('Trying student login');
+          response = await authAPI.studentLogin({ email: email.trim(), password });
+          userType = 'student';
+        } catch (studentError) {
+          console.log('Student login failed:', studentError.response?.data?.message || studentError.message);
+          lastError = studentError;
+        }
+      }
+
+      // If all logins failed
+      if (!response) {
+        throw lastError || new Error('Invalid credentials');
       }
 
       // Store user data
