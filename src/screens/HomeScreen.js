@@ -218,7 +218,10 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.menuContainer}>
         <Text style={styles.menuTitle}>System Administration</Text>
         
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('ManageTeachers')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="person-add" size={24} color="#4A90E2" />
