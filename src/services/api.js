@@ -61,9 +61,19 @@ export const authAPI = {
   
   // Teacher self-signup (no ID assigned)
   createTeacher: (teacherData) => api.post('/teacher/signup', teacherData),
-  
+};
+
+export const studentAPI = {
   // Student self-signup (no ID assigned)
   createStudent: (studentData) => api.post('/student/signup', studentData),
+  // Upload fee voucher
+  uploadFeeVoucher: (formData) => api.post('/fee-vouchers/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  // Get student's fee vouchers
+  getFeeVouchers: () => api.get('/fee-vouchers/my-vouchers'),
 };
 
 // Admin API functions
@@ -111,6 +121,10 @@ export const adminAPI = {
   getAppConfig: () => api.get('/admin/app-config'),
   updateAppConfig: (data) => api.put('/admin/app-config', data),
   resetAppConfig: () => api.post('/admin/app-config/reset'),
+
+  // Fee Voucher Management
+  getAllFeeVouchersAdmin: (searchQuery) => api.get(`/fee-vouchers/admin/all?search=${searchQuery}`),
+  getStudentFeeVouchersAdmin: (specialStudentId) => api.get(`/fee-vouchers/admin/${specialStudentId}`),
 };
 
 // Teacher API functions

@@ -5,22 +5,30 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
+  ImageBackground, // Import ImageBackground
 } from 'react-native';
 import { authAPI } from '../services/api';
 import { storage } from '../utils/storage';
+import SuccessModal from '../components/SuccessModal';
+import ErrorModal from '../components/ErrorModal';
+
+const backgroundImage = require('../../assets/images/bg.jpg'); // Import the background image
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+      setModalMessage('Please fill in all fields');
+      setShowErrorModal(true);
       return;
     }
 
@@ -81,84 +89,111 @@ const LoginScreen = ({ navigation }) => {
       
       await storage.storeUserData(token, userData, userType);
 
-      Alert.alert('Success', `Welcome ${userData.fullname}!`, [
-        { text: 'OK', onPress: () => navigation.replace('Home') }
-      ]);
+      setModalMessage(`Welcome ${userData.fullname}!`);
+      setShowSuccessModal(true);
 
     } catch (error) {
       console.error('Login error:', error);
-      Alert.alert(
-        'Login Failed', 
-        error.response?.data?.message || error.message || 'Please check your credentials and try again'
-      );
+      setModalMessage(error.response?.data?.message || error.message || 'Please check your credentials and try again');
+      setShowErrorModal(true);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    navigation.replace('Home');
+  };
+
+  const handleErrorModalClose = () => {
+    setShowErrorModal(false);
+  };
+
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to continue</Text>
-        </View>
-
-        <View style={styles.formContainer}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
+    <ImageBackground source={backgroundImage} style={styles.backgroundImage} resizeMode="cover">
+      <KeyboardAvoidingView 
+        style={styles.keyboardAvoidingContainer} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.headerContainer}>
+            <Text style={styles.title}>Welcome Back</Text>
+            <Text style={styles.subtitle}>Sign in to continue</Text>
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-          </View>
+          <View style={styles.formContainer}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                placeholderTextColor="#7F8C8D"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
 
-          <TouchableOpacity
-            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            <Text style={styles.loginButtonText}>
-              {loading ? 'Signing In...' : 'Sign In'}
-            </Text>
-          </TouchableOpacity>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your password"
+                placeholderTextColor="#7F8C8D"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+            </View>
 
-          <View style={styles.signupContainer}>
-            <Text style={styles.signupText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('UserType')}>
-              <Text style={styles.signupLink}>Sign Up</Text>
+            <TouchableOpacity
+              style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              <Text style={styles.loginButtonText}>
+                {loading ? 'Signing In...' : 'Sign In'}
+              </Text>
             </TouchableOpacity>
+
+            <View style={styles.signupContainer}>
+              <Text style={styles.signupText}>Don't have an account? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('UserType')}>
+                <Text style={styles.signupLink}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      <SuccessModal
+        isVisible={showSuccessModal}
+        message={modalMessage}
+        onClose={handleSuccessModalClose}
+      />
+
+      <ErrorModal
+        isVisible={showErrorModal}
+        message={modalMessage}
+        onClose={handleErrorModalClose}
+      />
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
+  },
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -172,15 +207,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#FFFFFF', // Changed text color for better contrast
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#7F8C8D',
+    color: '#E0E0E0', // Changed text color for better contrast
   },
   formContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent background
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',

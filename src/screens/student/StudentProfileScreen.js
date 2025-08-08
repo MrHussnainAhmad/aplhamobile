@@ -126,6 +126,8 @@ const StudentProfileScreen = ({ navigation }) => {
         dateOfBirth: profile.dateOfBirth,
         gender: profile.gender,
         rollNumber: profile.rollNumber,
+        // Section is now derived from gender
+        section: profile.gender === 'male' ? 'Boys' : (profile.gender === 'female' ? 'Girls' : ''),
       };
 
       // Only include image data if a new image was picked
@@ -291,12 +293,22 @@ const StudentProfileScreen = ({ navigation }) => {
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Gender</Text>
-          <TextInput
+          <Picker
+            selectedValue={profile.gender}
+            onValueChange={(itemValue) => {
+              setProfile(prev => ({
+                ...prev,
+                gender: itemValue,
+                section: itemValue === 'male' ? 'Boys' : (itemValue === 'female' ? 'Girls' : ''),
+              }));
+            }}
             style={styles.input}
-            value={profile.gender}
-            onChangeText={(text) => setProfile(prev => ({ ...prev, gender: text }))}
-            placeholder="Enter your gender"
-          />
+          >
+            <Picker.Item label="Select Gender" value="" />
+            <Picker.Item label="Male" value="male" />
+            <Picker.Item label="Female" value="female" />
+            <Picker.Item label="Other" value="other" />
+          </Picker>
         </View>
       </View>
 

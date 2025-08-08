@@ -9,9 +9,12 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ImageBackground, // Import ImageBackground
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { authAPI } from '../services/api';
+
+const signupBackground = require('../../assets/images/bg3.jpg'); // Import the background image
 
 const TeacherSignupScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -104,173 +107,192 @@ const TeacherSignupScreen = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.title}>Teacher Signup</Text>
-          <Text style={styles.subtitle}>Create your teacher account</Text>
-        </View>
-
-        <View style={styles.formContainer}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Full Name *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your full name"
-              value={formData.fullname}
-              onChangeText={(value) => handleInputChange('fullname', value)}
-            />
+    <ImageBackground source={signupBackground} style={styles.backgroundImage} resizeMode="cover">
+      <KeyboardAvoidingView 
+        style={styles.keyboardAvoidingContainer} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.headerContainer}>
+            <Text style={styles.title}>Teacher Signup</Text>
+            <Text style={styles.subtitle}>Create your teacher account</Text>
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              value={formData.email}
-              onChangeText={(value) => handleInputChange('email', value)}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
+          <View style={styles.formContainer}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Full Name *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your full name"
+                placeholderTextColor="#7F8C8D"
+                value={formData.fullname}
+                onChangeText={(value) => handleInputChange('fullname', value)}
+              />
+            </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter password (min 6 characters)"
-              value={formData.password}
-              onChangeText={(value) => handleInputChange('password', value)}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-          </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Email *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                placeholderTextColor="#7F8C8D"
+                value={formData.email}
+                onChangeText={(value) => handleInputChange('email', value)}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Confirm Password *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChangeText={(value) => handleInputChange('confirmPassword', value)}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-          </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Password *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter password (min 6 characters)"
+                placeholderTextColor="#7F8C8D"
+                value={formData.password}
+                onChangeText={(value) => handleInputChange('password', value)}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+            </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Phone Number *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your phone number"
-              value={formData.phoneNumber}
-              onChangeText={(value) => handleInputChange('phoneNumber', value)}
-              keyboardType="phone-pad"
-            />
-          </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Confirm Password *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Confirm your password"
+                placeholderTextColor="#7F8C8D"
+                value={formData.confirmPassword}
+                onChangeText={(value) => handleInputChange('confirmPassword', value)}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+            </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>WhatsApp Number *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your WhatsApp number"
-              value={formData.whatsappNumber}
-              onChangeText={(value) => handleInputChange('whatsappNumber', value)}
-              keyboardType="phone-pad"
-            />
-          </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Phone Number *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your phone number"
+                placeholderTextColor="#7F8C8D"
+                value={formData.phoneNumber}
+                onChangeText={(value) => handleInputChange('phoneNumber', value)}
+                keyboardType="phone-pad"
+              />
+            </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>CNIC Number *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter 11-digit CNIC number"
-              value={formData.cnicNumber}
-              onChangeText={(value) => handleInputChange('cnicNumber', value)}
-              keyboardType="numeric"
-              maxLength={11}
-            />
-          </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>WhatsApp Number *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your WhatsApp number"
+                placeholderTextColor="#7F8C8D"
+                value={formData.whatsappNumber}
+                onChangeText={(value) => handleInputChange('whatsappNumber', value)}
+                keyboardType="phone-pad"
+              />
+            </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Gender *</Text>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={formData.gender}
-                onValueChange={(value) => handleInputChange('gender', value)}
-                style={styles.picker}
-              >
-                <Picker.Item label="Select Gender" value="" />
-                <Picker.Item label="Male" value="male" />
-                <Picker.Item label="Female" value="female" />
-                <Picker.Item label="Other" value="other" />
-              </Picker>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>CNIC Number *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter 11-digit CNIC number"
+                placeholderTextColor="#7F8C8D"
+                value={formData.cnicNumber}
+                onChangeText={(value) => handleInputChange('cnicNumber', value)}
+                keyboardType="numeric"
+                maxLength={11}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Gender *</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={formData.gender}
+                  onValueChange={(value) => handleInputChange('gender', value)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select Gender" value="" />
+                  <Picker.Item label="Male" value="male" />
+                  <Picker.Item label="Female" value="female" />
+                  <Picker.Item label="Other" value="other" />
+                </Picker>
+              </View>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Age *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your age (18-70)"
+                placeholderTextColor="#7F8C8D"
+                value={formData.age}
+                onChangeText={(value) => handleInputChange('age', value)}
+                keyboardType="numeric"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Address *</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Enter your full address"
+                placeholderTextColor="#7F8C8D"
+                value={formData.address}
+                onChangeText={(value) => handleInputChange('address', value)}
+                multiline
+                numberOfLines={3}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Joining Year</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter joining year"
+                placeholderTextColor="#7F8C8D"
+                value={formData.joiningYear}
+                onChangeText={(value) => handleInputChange('joiningYear', value)}
+                keyboardType="numeric"
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.signupButton, loading && styles.signupButtonDisabled]}
+              onPress={handleSignup}
+              disabled={loading}
+            >
+              <Text style={styles.signupButtonText}>
+                {loading ? 'Creating Account...' : 'Create Account'}
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.loginContainer}>
+              <Text style={styles.loginText}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.loginLink}>Sign In</Text>
+              </TouchableOpacity>
             </View>
           </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Age *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your age (18-70)"
-              value={formData.age}
-              onChangeText={(value) => handleInputChange('age', value)}
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Address *</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Enter your full address"
-              value={formData.address}
-              onChangeText={(value) => handleInputChange('address', value)}
-              multiline
-              numberOfLines={3}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Joining Year</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter joining year"
-              value={formData.joiningYear}
-              onChangeText={(value) => handleInputChange('joiningYear', value)}
-              keyboardType="numeric"
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.signupButton, loading && styles.signupButtonDisabled]}
-            onPress={handleSignup}
-            disabled={loading}
-          >
-            <Text style={styles.signupButtonText}>
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </Text>
-          </TouchableOpacity>
-
-          <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.loginLink}>Sign In</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
+  },
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  keyboardAvoidingContainer: {
+    flex: 1,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -284,15 +306,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#FFFFFF', // Changed text color for better contrast
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#7F8C8D',
+    color: '#E0E0E0', // Changed text color for better contrast
   },
   formContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent background
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',
@@ -357,7 +379,7 @@ const styles = StyleSheet.create({
   },
   loginText: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: '#E0E0E0', // Changed text color for better contrast
   },
   loginLink: {
     fontSize: 14,

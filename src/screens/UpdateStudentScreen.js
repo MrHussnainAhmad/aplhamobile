@@ -13,6 +13,7 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 import { adminAPI, teacherAPI } from '../services/api';
 import { storage } from '../utils/storage';
 
@@ -29,6 +30,7 @@ const UpdateStudentScreen = ({ navigation, route }) => {
     section: student.section || '',
     studentId: student.studentId || '',
     rollNumber: student.rollNumber || '',
+    gender: student.gender || '', // Add gender to formData
   });
 
   const [errors, setErrors] = useState({});
@@ -76,7 +78,19 @@ const UpdateStudentScreen = ({ navigation, route }) => {
   };
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newFormData = { ...prev, [field]: value };
+      if (field === 'gender') {
+        if (value === 'male') {
+          newFormData.section = 'Boys';
+        } else if (value === 'female') {
+          newFormData.section = 'Girls';
+        } else {
+          newFormData.section = ''; // Clear section if gender is not male or female
+        }
+      }
+      return newFormData;
+    });
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }));
     }
@@ -167,7 +181,35 @@ const UpdateStudentScreen = ({ navigation, route }) => {
           {renderInput('email', 'Email *', 'Enter email address', 'email-address')}
           {renderInput('phoneNumber', 'Phone Number', 'Enter phone number', 'phone-pad')}
           {renderInput('class', 'Class *', 'Enter class')}
-          {renderInput('section', 'Section *', 'Enter section')}
+          
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Gender *</Text>
+            <Picker
+              selectedValue={formData.gender}
+              onValueChange={(itemValue) => handleInputChange('gender', itemValue)}
+              style={styles.textInput}
+            >
+              <Picker.Item label="Select Gender" value="" />
+              <Picker.Item label="Male" value="male" />
+              <Picker.Item label="Female" value="female" />
+              <Picker.Item label="Other" value="other" />
+            </Picker>
+            {errors.gender && (
+              <Text style={styles.errorText}>{errors.gender}</Text>
+            )}
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Section *</Text>
+            <TextInput
+              style={[styles.textInput, styles.readOnlyInput]}
+              value={formData.section}
+              editable={false} // Make it non-editable
+            />
+            {errors.section && (
+              <Text style={styles.errorText}>{errors.section}</Text>
+            )}
+          </View>
           
           {renderInput('rollNumber', 'Roll Number', 'Enter roll number', 'numeric')}
         </View>

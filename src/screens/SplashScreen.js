@@ -6,6 +6,9 @@ import { storage } from '../utils/storage';
 import { BASE_URL } from '../config/api.config';
 
 const { width, height } = Dimensions.get('window');
+const loginBackground = require('../../assets/images/bg.jpg'); // Import the background image
+const userTypeBackground = require('../../assets/images/bg2.jpg'); // Import the new background image
+const signupBackground = require('../../assets/images/bg3.jpg'); // Import the new background image
 
 const SplashScreen = ({ navigation }) => {
   const [appConfig, setAppConfig] = useState({
@@ -34,6 +37,18 @@ const SplashScreen = ({ navigation }) => {
         // Fetch app configuration first
         await fetchAppConfig();
         
+        // Preload login background image
+        await Image.prefetch(Image.resolveAssetSource(loginBackground).uri);
+        console.log('Login background image prefetched.');
+
+        // Preload user type background image
+        await Image.prefetch(Image.resolveAssetSource(userTypeBackground).uri);
+        console.log('User type background image prefetched.');
+
+        // Preload signup background image
+        await Image.prefetch(Image.resolveAssetSource(signupBackground).uri);
+        console.log('Signup background image prefetched.');
+
         // Show splash for 3 seconds total
         setTimeout(async () => {
           const isAuthenticated = await storage.isAuthenticated();

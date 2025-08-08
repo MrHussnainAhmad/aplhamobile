@@ -5,10 +5,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  ImageBackground, // Import ImageBackground
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
+const userTypeBackground = require('../../assets/images/bg2.jpg'); // Import the background image
 
 const UserTypeScreen = ({ navigation }) => {
   const handleUserTypeSelection = (userType) => {
@@ -20,56 +22,68 @@ const UserTypeScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.title}>Join as</Text>
-        <Text style={styles.subtitle}>Choose your account type</Text>
-      </View>
+    <ImageBackground source={userTypeBackground} style={styles.backgroundImage} resizeMode="cover">
+      <View style={styles.overlay}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.title}>Join as</Text>
+          <Text style={styles.subtitle}>Choose your account type</Text>
+        </View>
 
-      <View style={styles.optionsContainer}>
-        <TouchableOpacity
-          style={styles.optionCard}
-          onPress={() => handleUserTypeSelection('teacher')}
-          activeOpacity={0.8}
-        >
-          <View style={styles.iconContainer}>
-            <Ionicons name="person" size={50} color="#4A90E2" />
-          </View>
-          <Text style={styles.optionTitle}>Teacher</Text>
-          <Text style={styles.optionDescription}>
-            Create courses, manage students, and track progress
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.optionsContainer}>
+          <TouchableOpacity
+            style={styles.optionCard}
+            onPress={() => handleUserTypeSelection('teacher')}
+            activeOpacity={0.8}
+          >
+            <View style={styles.iconContainer}>
+              <Ionicons name="person" size={50} color="#4A90E2" />
+            </View>
+            <Text style={styles.optionTitle}>Teacher</Text>
+            <Text style={styles.optionDescription}>
+              Create courses, manage students, and track progress
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.optionCard}
-          onPress={() => handleUserTypeSelection('student')}
-          activeOpacity={0.8}
-        >
-          <View style={styles.iconContainer}>
-            <Ionicons name="school" size={50} color="#27AE60" />
-          </View>
-          <Text style={styles.optionTitle}>Student</Text>
-          <Text style={styles.optionDescription}>
-            Access courses, submit assignments, and view grades
-          </Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={styles.optionCard}
+            onPress={() => handleUserTypeSelection('student')}
+            activeOpacity={0.8}
+          >
+            <View style={styles.iconContainer}>
+              <Ionicons name="school" size={50} color="#27AE60" />
+            </View>
+            <Text style={styles.optionTitle}>Student</Text>
+            <Text style={styles.optionDescription}>
+              Access courses, submit assignments, and view grades
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.loginContainer}>
-        <Text style={styles.loginText}>Already have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.loginLink}>Sign In</Text>
-        </TouchableOpacity>
+        <View style={styles.loginContainer}>
+          <Text style={styles.loginText}>Already have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.loginLink}>Sign In</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
+    // backgroundColor: '#F5F7FA', // Removed background color
+    padding: 20,
+  },
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent overlay
     padding: 20,
   },
   headerContainer: {
@@ -80,12 +94,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#FFFFFF', // Changed text color for better contrast
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#7F8C8D',
+    color: '#E0E0E0', // Changed text color for better contrast
     textAlign: 'center',
   },
   optionsContainer: {
@@ -94,7 +108,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   optionCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent background
     borderRadius: 16,
     padding: 30,
     alignItems: 'center',
@@ -137,7 +151,7 @@ const styles = StyleSheet.create({
   },
   loginText: {
     fontSize: 16,
-    color: '#7F8C8D',
+    color: '#E0E0E0', // Changed text color for better contrast
   },
   loginLink: {
     fontSize: 16,

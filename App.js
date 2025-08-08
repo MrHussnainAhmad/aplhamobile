@@ -18,6 +18,9 @@ import UpdateTeacherScreen from './src/screens/UpdateTeacherScreen';
 import CreateTeacherScreen from './src/screens/CreateTeacherScreen';
 import TeacherProfileScreen from './src/screens/teacher/TeacherProfileScreen';
 import StudentProfileScreen from './src/screens/student/StudentProfileScreen';
+import UploadFeeVoucherScreen from './src/screens/student/UploadFeeVoucherScreen';
+import FeeVoucherDetailPage from './src/screens/admin/FeeVoucherDetailPage';
+import FeeManagementScreen from './src/screens/admin/FeeManagementScreen';
 
 const Stack = createStackNavigator();
 
@@ -45,6 +48,9 @@ export default function App() {
         <Stack.Screen name="CreateTeacherScreen" component={CreateTeacherScreen} />
         <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} />
         <Stack.Screen name="StudentProfile" component={StudentProfileScreen} />
+        <Stack.Screen name="UploadFeeVoucher" component={UploadFeeVoucherScreen} />
+        <Stack.Screen name="FeeVoucherDetail" component={FeeVoucherDetailPage} />
+        <Stack.Screen name="FeeManagement" component={FeeManagementScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

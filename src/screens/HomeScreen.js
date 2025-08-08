@@ -222,8 +222,8 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="megaphone" size={24} color="#9B59B6" />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuItemTitle}>Announcements</Text>
-              <Text style={styles.menuItemSubtitle}>Post updates and notifications</Text>
+              <Text style={styles.menuItemTitle}>School Posts</Text>
+              <Text style={styles.menuItemSubtitle}>Post and manage school-wide updates</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>
@@ -360,7 +360,10 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('FeeManagement')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="card" size={24} color="#F39C12" />
@@ -497,7 +500,10 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('UploadFeeVoucher')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="card" size={24} color="#9B59B6" />
@@ -516,7 +522,7 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="notifications" size={24} color="#E74C3C" />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuItemTitle}>Announcements</Text>
+              <Text style={styles.menuItemTitle}>School Posts</Text>
               <Text style={styles.menuItemSubtitle}>View latest updates</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />

@@ -346,9 +346,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
+    width: 60,
+    height: 60,
+    borderRadius: 6,
     backgroundColor: '#E8F4FD',
     justifyContent: 'center',
     alignItems: 'center',
@@ -356,9 +356,9 @@ const styles = StyleSheet.create({
     borderColor: '#4A90E2',
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
+    width: 60,
+    height: 60,
+    borderRadius: 6,
   },
   teacherDetailsSection: {
     flex: 1,
@@ -376,13 +376,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   infoLabel: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: '#7F8C8D',
     width: 80,
   },
   infoValue: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#2C3E50',
     flex: 1,
     fontWeight: '500',
