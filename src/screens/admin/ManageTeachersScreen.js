@@ -11,7 +11,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { adminAPI } from '../services/api';
+import { adminAPI } from '../../services/api';
 
 const ManageTeachersScreen = ({ navigation }) => {
   const [teachers, setTeachers] = useState([]);
