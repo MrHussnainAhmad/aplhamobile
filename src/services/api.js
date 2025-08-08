@@ -1,11 +1,9 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_URL, getApiUrl } from '../config/api.config';
 
-// Replace with your actual backend URL
-// For testing with Expo on physical device, use your computer's IP address
-// For Android emulator: http://10.0.2.2:5000/api
-// For iOS simulator: http://localhost:5000/api
-const BASE_URL = 'http://localhost:5000/api';
+// Get API URL from configuration
+getApiUrl(); // This will log the current API URL
 
 const api = axios.create({
   baseURL: BASE_URL,
