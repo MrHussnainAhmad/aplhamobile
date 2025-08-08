@@ -80,28 +80,52 @@ const ManageAppScreen = ({ navigation }) => {
         return;
       }
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions?.Images || 'Images', // Fallback to string
+      // Use proper MediaTypeOptions enum or fallback
+      const pickerOptions = {
         allowsEditing: true,
         aspect: [1, 1], // Square aspect ratio for logo
         quality: 0.8,
         base64: true,
-      });
+      };
 
-      if (!result.canceled && result.assets && result.assets[0]) {
-        const asset = result.assets[0];
+      // Add mediaTypes only if it exists
+      if (ImagePicker.MediaTypeOptions && ImagePicker.MediaTypeOptions.Images) {
+        pickerOptions.mediaTypes = ImagePicker.MediaTypeOptions.Images;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
+
+      // Handle both old and new API responses
+      if (result.cancelled || result.canceled) {
+        // User cancelled the picker
+        return;
+      }
+
+      // Get the image data - handle both old and new API formats
+      let imageData = null;
+      if (result.assets && result.assets[0]) {
+        // New API format (Expo SDK 48+)
+        imageData = result.assets[0];
+      } else if (result.uri) {
+        // Old API format
+        imageData = result;
+      }
+
+      if (imageData && imageData.uri) {
         setAppConfig(prev => ({
           ...prev,
           localLogo: {
-            uri: asset.uri,
-            base64: asset.base64,
-            type: asset.mimeType || 'image/jpeg',
+            uri: imageData.uri,
+            base64: imageData.base64 || null,
+            type: imageData.mimeType || imageData.type || 'image/jpeg',
           }
         }));
+      } else {
+        console.log('No image data received');
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert('Error', `Failed to select image: ${error.message || 'Unknown error'}`);
+      Alert.alert('Error', 'Failed to select image. Please try again.');
     }
   };
 

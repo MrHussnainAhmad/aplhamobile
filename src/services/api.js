@@ -77,11 +77,17 @@ export const adminAPI = {
   // Update teacher
   updateTeacher: (id, data) => api.put(`/admin/update-teacher/${id}`, data),
   
+  // Verify/Unverify teacher
+  verifyTeacher: (id, isVerified) => api.put(`/admin/verify-teacher/${id}`, { isVerified }),
+  
   // Delete teacher
   deleteTeacher: (id) => api.delete(`/admin/delete-teacher/${id}`),
   
   // Update student
   updateStudent: (id, data) => api.put(`/admin/update-student/${id}`, data),
+  
+  // Verify/Unverify student
+  verifyStudent: (id, isVerified) => api.put(`/admin/verify-student/${id}`, { isVerified }),
   
   // Delete student
   deleteStudent: (id) => api.delete(`/admin/delete-student/${id}`),

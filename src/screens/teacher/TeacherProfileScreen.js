@@ -14,6 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { API_BASE_URL } from '../../services/api';
+import VerifiedBadge from '../../components/VerifiedBadge';
 
 const TeacherProfileScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
@@ -27,6 +28,7 @@ const TeacherProfileScreen = ({ navigation }) => {
     experience: '',
     subjects: [],
     profileImage: '',
+    isVerified: false,
   });
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -38,7 +40,12 @@ const TeacherProfileScreen = ({ navigation }) => {
 
   const fetchProfile = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        Alert.alert('Error', 'Authentication token not found. Please login again.');
+        navigation.replace('Login');
+        return;
+      }
       const response = await fetch(`${API_BASE_URL}/profile/teacher`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -48,7 +55,11 @@ const TeacherProfileScreen = ({ navigation }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setProfile(data.profile);
+        // Include isVerified status from teacher data
+        setProfile({
+          ...data.profile,
+          isVerified: data.teacher?.isVerified || false
+        });
       } else {
         Alert.alert('Error', 'Failed to load profile');
       }
@@ -127,7 +138,7 @@ const TeacherProfileScreen = ({ navigation }) => {
 
     try {
       setSaving(true);
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem('userToken');
       
       const updateData = {
         name: profile.name,
@@ -193,6 +204,10 @@ const TeacherProfileScreen = ({ navigation }) => {
 
       {/* Profile Image */}
       <View style={styles.imageSection}>
+        {/* Verification Badge */}
+        <View style={styles.verificationContainer}>
+          <VerifiedBadge isVerified={profile.isVerified} size="large" />
+        </View>
         <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
           {profile.profileImage ? (
             <Image source={{ uri: profile.profileImage }} style={styles.profileImage} />
@@ -387,6 +402,9 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     position: 'relative',
+  },
+  verificationContainer: {
+    marginBottom: 10,
   },
   profileImage: {
     width: 120,
