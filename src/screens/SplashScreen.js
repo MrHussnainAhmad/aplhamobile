@@ -27,10 +27,15 @@ const SplashScreen = ({ navigation }) => {
         }
       }
 
-      // Fetch latest app config from API in background
+      // Fetch latest app config from API in background with a timeout
       const fetchAppConfig = async () => {
+        const apiCall = axios.get(`${BASE_URL}/app-config`);
+        const timeoutPromise = new Promise((resolve, reject) => 
+          setTimeout(() => reject(new Error('API fetch timeout')), 5000) // 5 seconds timeout
+        );
+
         try {
-          const response = await axios.get(`${BASE_URL}/app-config`);
+          const response = await Promise.race([apiCall, timeoutPromise]);
           if (response.data.success && response.data.config) {
             setAppConfig(response.data.config);
             await storage.storeAppConfig(response.data.config);
@@ -39,19 +44,27 @@ const SplashScreen = ({ navigation }) => {
             }
           }
         } catch (error) {
-          console.log('Could not fetch app config, using defaults or stored:', error.message);
+          console.log('Could not fetch app config (or timed out), using defaults or stored:', error.message);
         }
       };
 
       fetchAppConfig();
 
-      // Preload background images
-      await Image.prefetch(Image.resolveAssetSource(loginBackground).uri);
-      console.log('Login background image prefetched.');
-      await Image.prefetch(Image.resolveAssetSource(userTypeBackground).uri);
-      console.log('User type background image prefetched.');
-      await Image.prefetch(Image.resolveAssetSource(signupBackground).uri);
-      console.log('Signup background image prefetched.');
+      // Preload background images and logo concurrently
+      await Promise.allSettled([
+        Image.prefetch(Image.resolveAssetSource(loginBackground).uri),
+        Image.prefetch(Image.resolveAssetSource(userTypeBackground).uri),
+        Image.prefetch(Image.resolveAssetSource(signupBackground).uri),
+        appConfig.logoUrl ? Image.prefetch(appConfig.logoUrl) : Promise.resolve(),
+      ]).then((results) => {
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            const imageNames = ['Login background', 'User type background', 'Signup background', 'App logo'];
+            console.log(`Prefetching ${imageNames[index]} failed:`, result.reason);
+          }
+        });
+      });
+      console.log('All images prefetching attempted.');
 
       // Show splash for 3 seconds total before navigating
       setTimeout(async () => {
