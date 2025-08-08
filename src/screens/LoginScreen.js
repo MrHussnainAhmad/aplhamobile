@@ -27,30 +27,39 @@ const LoginScreen = ({ navigation }) => {
     setLoading(true);
 
     try {
-      // First try teacher login
+      // Try different login types
       let response = null;
       let userType = null;
 
       try {
-        response = await authAPI.teacherLogin({ email: email.trim(), password });
-        userType = 'teacher';
-      } catch (teacherError) {
+        // First try admin login
+        response = await authAPI.adminLogin({ email: email.trim(), password });
+        userType = 'admin';
+      } catch (adminError) {
         try {
-          // If teacher login fails, try student login
-          response = await authAPI.studentLogin({ email: email.trim(), password });
-          userType = 'student';
-        } catch (studentError) {
-          throw new Error('Invalid credentials');
+          // Then try teacher login
+          response = await authAPI.teacherLogin({ email: email.trim(), password });
+          userType = 'teacher';
+        } catch (teacherError) {
+          try {
+            // Finally try student login
+            response = await authAPI.studentLogin({ email: email.trim(), password });
+            userType = 'student';
+          } catch (studentError) {
+            throw new Error('Invalid credentials');
+          }
         }
       }
 
       // Store user data
       const { token } = response.data;
-      const userData = userType === 'teacher' ? response.data.teacher : response.data.student;
+      const userData = userType === 'admin' ? response.data.admin : 
+                      userType === 'teacher' ? response.data.teacher : 
+                      response.data.student;
       
       await storage.storeUserData(token, userData, userType);
 
-      Alert.alert('Success', 'Login successful!', [
+      Alert.alert('Success', `Welcome ${userData.fullname}!`, [
         { text: 'OK', onPress: () => navigation.replace('Home') }
       ]);
 

@@ -47,6 +47,9 @@ api.interceptors.response.use(
 
 // Auth API functions
 export const authAPI = {
+  // Admin login
+  adminLogin: (credentials) => api.post('/admin/login', credentials),
+  
   // Teacher login
   teacherLogin: (credentials) => api.post('/teacher/login', credentials),
   

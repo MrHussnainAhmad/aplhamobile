@@ -156,6 +156,128 @@ const HomeScreen = ({ navigation }) => {
     </ScrollView>
   );
 
+  const renderAdminHome = () => (
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.profileSection}>
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatarPlaceholder}>
+              <Ionicons name="shield-checkmark" size={40} color="#E74C3C" />
+            </View>
+          </View>
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeText}>Welcome back,</Text>
+            <Text style={styles.userName}>{userData?.fullname || 'Admin'}</Text>
+            <Text style={styles.userInfo}>Administrator | {userData?.email}</Text>
+          </View>
+        </View>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          <Ionicons name="log-out-outline" size={24} color="#E74C3C" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.statsContainer}>
+        <View style={styles.statCard}>
+          <Ionicons name="people" size={30} color="#4A90E2" />
+          <Text style={styles.statNumber}>--</Text>
+          <Text style={styles.statLabel}>Teachers</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Ionicons name="school" size={30} color="#27AE60" />
+          <Text style={styles.statNumber}>--</Text>
+          <Text style={styles.statLabel}>Students</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Ionicons name="megaphone" size={30} color="#9B59B6" />
+          <Text style={styles.statNumber}>--</Text>
+          <Text style={styles.statLabel}>Announcements</Text>
+        </View>
+      </View>
+
+      <View style={styles.menuContainer}>
+        <Text style={styles.menuTitle}>System Administration</Text>
+        
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="person-add" size={24} color="#4A90E2" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Manage Teachers</Text>
+              <Text style={styles.menuItemSubtitle}>Add, edit, and manage teacher accounts</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="school" size={24} color="#27AE60" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Manage Students</Text>
+              <Text style={styles.menuItemSubtitle}>Add, edit, and manage student accounts</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="analytics" size={24} color="#E67E22" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>System Reports</Text>
+              <Text style={styles.menuItemSubtitle}>View comprehensive system analytics</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="megaphone" size={24} color="#9B59B6" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>School Announcements</Text>
+              <Text style={styles.menuItemSubtitle}>Post and manage school-wide updates</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="settings" size={24} color="#95A5A6" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>System Settings</Text>
+              <Text style={styles.menuItemSubtitle}>Configure system preferences</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="card" size={24} color="#F39C12" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Fee Management</Text>
+              <Text style={styles.menuItemSubtitle}>Monitor and approve fee submissions</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+
   const renderStudentHome = () => (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -281,7 +403,9 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {userType === 'teacher' ? renderTeacherHome() : renderStudentHome()}
+      {userType === 'admin' ? renderAdminHome() : 
+       userType === 'teacher' ? renderTeacherHome() : 
+       renderStudentHome()}
     </View>
   );
 };
