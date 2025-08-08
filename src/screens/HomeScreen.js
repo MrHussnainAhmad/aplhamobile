@@ -78,7 +78,10 @@ const HomeScreen = ({ navigation }) => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.profileSection}>
-          <View style={styles.avatarContainer}>
+          <TouchableOpacity 
+            style={styles.avatarContainer}
+            onPress={() => navigation.navigate('TeacherProfile')}
+          >
             {userData?.img ? (
               <Image source={{ uri: userData.img }} style={styles.avatar} />
             ) : (
@@ -86,7 +89,7 @@ const HomeScreen = ({ navigation }) => {
                 <Ionicons name="person" size={40} color="#4A90E2" />
               </View>
             )}
-          </View>
+          </TouchableOpacity>
           <View style={styles.welcomeContainer}>
             <Text style={styles.welcomeText}>Welcome back,</Text>
             <Text style={styles.userName}>{userData?.fullname || 'Teacher'}</Text>
@@ -119,6 +122,22 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.menuContainer}>
         <Text style={styles.menuTitle}>Quick Actions</Text>
         
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('TeacherProfile')}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="person-circle" size={24} color="#8E44AD" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>My Profile</Text>
+              <Text style={styles.menuItemSubtitle}>View and update your profile</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
         <TouchableOpacity 
           style={styles.menuItem}
           onPress={() => navigation.navigate('ManageStudents')}
@@ -325,7 +344,10 @@ const HomeScreen = ({ navigation }) => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.profileSection}>
-          <View style={styles.avatarContainer}>
+          <TouchableOpacity 
+            style={styles.avatarContainer}
+            onPress={() => navigation.navigate('StudentProfile')}
+          >
             {userData?.img ? (
               <Image source={{ uri: userData.img }} style={styles.avatar} />
             ) : (
@@ -333,7 +355,7 @@ const HomeScreen = ({ navigation }) => {
                 <Ionicons name="person" size={40} color="#27AE60" />
               </View>
             )}
-          </View>
+          </TouchableOpacity>
           <View style={styles.welcomeContainer}>
             <Text style={styles.welcomeText}>Welcome back,</Text>
             <Text style={styles.userName}>{userData?.fullname || 'Student'}</Text>
@@ -368,6 +390,22 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.menuContainer}>
         <Text style={styles.menuTitle}>Student Portal</Text>
         
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('StudentProfile')}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="person-circle" size={24} color="#8E44AD" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>My Profile</Text>
+              <Text style={styles.menuItemSubtitle}>View and update your profile</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.menuItem}>
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
