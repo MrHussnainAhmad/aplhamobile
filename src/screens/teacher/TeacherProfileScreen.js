@@ -13,7 +13,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { API_BASE_URL } from '../../../services/api';
+import { API_BASE_URL } from '../../services/api';
 
 const TeacherProfileScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
