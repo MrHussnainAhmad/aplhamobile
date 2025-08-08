@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "SSC",
-    "slug": "mobile",
+    "slug": "ssc",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -16,14 +16,21 @@
       "supportsTablet": true
     },
     "android": {
+      "jsEngine": "jsc",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "package": "com.rehan.aplhamobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4524b933-098b-46b7-8687-0c8e35c00053"
+      }
+    },
+    "owner": "hussnainahmad"
   }
 }

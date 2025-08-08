@@ -116,7 +116,7 @@ const LoginScreen = ({ navigation }) => {
         style={styles.keyboardAvoidingContainer} 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
           <View style={styles.headerContainer}>
             <Text style={styles.title}>Welcome Back</Text>
             <Text style={styles.subtitle}>Sign in to continue</Text>
@@ -193,16 +193,15 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
-    justifyContent: 'center',
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
     padding: 20,
   },
   headerContainer: {
     alignItems: 'center',
     marginBottom: 40,
+    marginTop: 140,
   },
   title: {
     fontSize: 28,

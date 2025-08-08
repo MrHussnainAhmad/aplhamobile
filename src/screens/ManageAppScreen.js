@@ -14,6 +14,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { adminAPI } from '../services/api';
+import { storage } from '../utils/storage';
+import * as Linking from 'expo-linking';
 
 const ManageAppScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -32,6 +34,7 @@ const ManageAppScreen = ({ navigation }) => {
   useEffect(() => {
     loadAppConfig();
     requestPermissions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const requestPermissions = async () => {
@@ -46,24 +49,42 @@ const ManageAppScreen = ({ navigation }) => {
   const loadAppConfig = async () => {
     try {
       setLoading(true);
+      // Try to load from local storage first for instant display
+      const storedConfig = await storage.getAppConfig();
+      if (storedConfig) {
+        setAppConfig(storedConfig);
+        setFormData({
+          collegeName: storedConfig.collegeName || '',
+          phoneNumber: storedConfig.phoneNumber || '',
+        });
+      }
+
+      // Always fetch from API to ensure latest data
       const response = await adminAPI.getAppConfig();
       const config = response.data.config;
-      setAppConfig(config);
-      setFormData({
-        collegeName: config.collegeName || '',
-        phoneNumber: config.phoneNumber || '',
-      });
+      if (config) {
+        setAppConfig(config);
+        setFormData({
+          collegeName: config.collegeName || '',
+          phoneNumber: config.phoneNumber || '',
+        });
+        // Store the latest config
+        await storage.storeAppConfig(config);
+      }
     } catch (error) {
       console.error('Error loading app config:', error);
-      // Set default values if config doesn't exist
-      setAppConfig({
-        collegeName: 'Your College Name',
-        logoUrl: '',
-        localLogo: null,
-      });
-      setFormData({
-        collegeName: 'Your College Name',
-      });
+      // If no stored config and API fails, set default values
+      if (!appConfig?.collegeName) {
+        setAppConfig({
+          collegeName: 'Your College Name',
+          logoUrl: '',
+          localLogo: null,
+        });
+        setFormData({
+          collegeName: 'Your College Name',
+          phoneNumber: '',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -131,7 +152,7 @@ const ManageAppScreen = ({ navigation }) => {
     }
 
     setSaving(true);
-    
+
     try {
       const updateData = {
         collegeName: formData.collegeName.trim(),
@@ -157,7 +178,7 @@ const ManageAppScreen = ({ navigation }) => {
       ]);
     } catch (error) {
       console.error('Error updating app config:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to update app configuration');
+      Alert.alert('Error', error?.response?.data?.message || 'Failed to update app configuration');
     } finally {
       setSaving(false);
     }
@@ -187,9 +208,9 @@ const ManageAppScreen = ({ navigation }) => {
   };
 
   const renderLogoPreview = () => {
-    const logoSource = appConfig.localLogo 
+    const logoSource = appConfig.localLogo
       ? { uri: appConfig.localLogo.uri }
-      : appConfig.logoUrl 
+      : appConfig.logoUrl
       ? { uri: appConfig.logoUrl }
       : null;
 
@@ -259,12 +280,12 @@ const ManageAppScreen = ({ navigation }) => {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {renderSplashPreview()}
-        
+
         {renderLogoPreview()}
 
         <View style={styles.formSection}>
           <Text style={styles.sectionTitle}>College Information</Text>
-          
+
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>College Name *</Text>
             <TextInput
@@ -279,7 +300,8 @@ const ManageAppScreen = ({ navigation }) => {
               This will appear on the splash screen
             </Text>
           </View>
-        <View style={styles.inputContainer}>
+
+          <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Support Phone Number</Text>
             <TextInput
               style={styles.textInput}
@@ -460,13 +482,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
-    gap: 8,
     alignSelf: 'center',
   },
   changeLogoText: {
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
+    marginLeft: 8,
   },
   formSection: {
     backgroundColor: '#FFFFFF',
@@ -514,7 +536,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderLeftWidth: 4,
     borderLeftColor: '#4A90E2',
-    gap: 10,
   },
   infoText: {
     flex: 1,
@@ -525,7 +546,6 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     padding: 20,
-    gap: 15,
     backgroundColor: '#FFFFFF',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
@@ -540,12 +560,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 15,
     borderRadius: 8,
-    gap: 8,
   },
   cancelButton: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#BDC3C7',
+    marginRight: 10,
   },
   cancelButtonText: {
     color: '#7F8C8D',
@@ -559,6 +579,29 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+    marginLeft: 8,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  detailLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#2C3E50',
+    flex: 1,
+  },
+  detailValue: {
+    fontSize: 15,
+    color: '#34495E',
+    flex: 2,
+    textAlign: 'right',
+  },
+  linkText: {
+    color: '#4A90E2',
+    textDecorationLine: 'underline',
   },
 });
 

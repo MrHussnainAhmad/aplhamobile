@@ -347,14 +347,17 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('SystemDetail')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="settings" size={24} color="#95A5A6" />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuItemTitle}>System Settings</Text>
-              <Text style={styles.menuItemSubtitle}>Configure system preferences</Text>
+              <Text style={styles.menuItemTitle}>System Detail</Text>
+              <Text style={styles.menuItemSubtitle}>View app details and configurations</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>

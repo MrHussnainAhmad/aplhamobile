@@ -21,6 +21,7 @@ import StudentProfileScreen from './src/screens/student/StudentProfileScreen';
 import UploadFeeVoucherScreen from './src/screens/student/UploadFeeVoucherScreen';
 import FeeVoucherDetailPage from './src/screens/admin/FeeVoucherDetailPage';
 import FeeManagementScreen from './src/screens/admin/FeeManagementScreen';
+import SystemDetailScreen from './src/screens/admin/SystemDetailScreen';
 
 const Stack = createStackNavigator();
 
@@ -51,6 +52,7 @@ export default function App() {
         <Stack.Screen name="UploadFeeVoucher" component={UploadFeeVoucherScreen} />
         <Stack.Screen name="FeeVoucherDetail" component={FeeVoucherDetailPage} />
         <Stack.Screen name="FeeManagement" component={FeeManagementScreen} />
+        <Stack.Screen name="SystemDetail" component={SystemDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -15,95 +15,82 @@ const SplashScreen = ({ navigation }) => {
     collegeName: 'Alpha Education',
     logoUrl: ''
   });
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAppConfig = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/app-config`);
-        if (response.data.success && response.data.config) {
-          setAppConfig(response.data.config);
+    const initializeSplash = async () => {
+      // Immediately try to load app config from storage
+      const storedConfig = await storage.getAppConfig();
+      if (storedConfig) {
+        setAppConfig(storedConfig);
+        if (storedConfig.logoUrl) {
+          Image.prefetch(storedConfig.logoUrl).catch(error => console.log("Prefetch error:", error));
         }
-      } catch (error) {
-        console.log('Could not fetch app config, using defaults:', error.message);
-        // Keep default values if fetch fails
-      } finally {
-        setLoading(false);
       }
-    };
 
-    const checkAuthAndNavigate = async () => {
-      try {
-        // Fetch app configuration first
-        await fetchAppConfig();
-        
-        // Preload login background image
-        await Image.prefetch(Image.resolveAssetSource(loginBackground).uri);
-        console.log('Login background image prefetched.');
-
-        // Preload user type background image
-        await Image.prefetch(Image.resolveAssetSource(userTypeBackground).uri);
-        console.log('User type background image prefetched.');
-
-        // Preload signup background image
-        await Image.prefetch(Image.resolveAssetSource(signupBackground).uri);
-        console.log('Signup background image prefetched.');
-
-        // Show splash for 3 seconds total
-        setTimeout(async () => {
-          const isAuthenticated = await storage.isAuthenticated();
-          
-          if (isAuthenticated) {
-            // User is logged in, go to home screen
-            navigation.replace('Home');
-          } else {
-            // User is not logged in, go to login screen
-            navigation.replace('Login');
+      // Fetch latest app config from API in background
+      const fetchAppConfig = async () => {
+        try {
+          const response = await axios.get(`${BASE_URL}/app-config`);
+          if (response.data.success && response.data.config) {
+            setAppConfig(response.data.config);
+            await storage.storeAppConfig(response.data.config);
+            if (response.data.config.logoUrl) {
+              Image.prefetch(response.data.config.logoUrl).catch(error => console.log("Prefetch error:", error));
+            }
           }
-        }, 3000);
-      } catch (error) {
-        console.error('Error in splash screen:', error);
-        // On error, go to login screen after showing splash
-        setTimeout(() => {
+        } catch (error) {
+          console.log('Could not fetch app config, using defaults or stored:', error.message);
+        }
+      };
+
+      fetchAppConfig();
+
+      // Preload background images
+      await Image.prefetch(Image.resolveAssetSource(loginBackground).uri);
+      console.log('Login background image prefetched.');
+      await Image.prefetch(Image.resolveAssetSource(userTypeBackground).uri);
+      console.log('User type background image prefetched.');
+      await Image.prefetch(Image.resolveAssetSource(signupBackground).uri);
+      console.log('Signup background image prefetched.');
+
+      // Show splash for 3 seconds total before navigating
+      setTimeout(async () => {
+        const isAuthenticated = await storage.isAuthenticated();
+        if (isAuthenticated) {
+          navigation.replace('Home');
+        } else {
           navigation.replace('Login');
-        }, 3000);
-      }
+        }
+      }, 3000);
     };
 
-    checkAuthAndNavigate();
+    initializeSplash();
   }, [navigation]);
 
   return (
     <View style={styles.container}>
       <View style={styles.contentContainer}>
-        {loading ? (
-          <View style={styles.logoPlaceholder}>
-            <ActivityIndicator size="large" color="#FFFFFF" />
-            <Text style={styles.loadingText}>Loading...</Text>
-          </View>
-        ) : (
-          <View style={styles.logoSection}>
-            {appConfig.logoUrl ? (
-              <Image 
-                source={{ uri: appConfig.logoUrl }} 
-                style={styles.logoImage}
-                resizeMode="contain"
-              />
-            ) : (
-              <View style={styles.logoPlaceholder}>
-                <Ionicons name="school" size={80} color="#FFFFFF" />
-              </View>
-            )}
-            
-            <Text style={styles.collegeName}>
-              {appConfig.collegeName}
-            </Text>
-            
-            <Text style={styles.subtitle}>
-              Education Management System
-            </Text>
-          </View>
-        )}
+        <View style={styles.logoSection}>
+          {appConfig.logoUrl ? (
+            <Image 
+              source={{ uri: appConfig.logoUrl }} 
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+          ) : (
+            <View style={styles.logoPlaceholder}>
+              <Ionicons name="school" size={80} color="#FFFFFF" />
+            </View>
+          )}
+          
+          <Text style={styles.collegeName}>
+            {appConfig.collegeName}
+          </Text>
+          
+          <Text style={styles.subtitle}>
+            Education Management System
+          </Text>
+        </View>
       </View>
       
       <View style={styles.footerContainer}>

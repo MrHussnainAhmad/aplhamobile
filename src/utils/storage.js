@@ -4,6 +4,7 @@ export const StorageKeys = {
   USER_TOKEN: 'userToken',
   USER_DATA: 'userData',
   USER_TYPE: 'userType',
+  APP_CONFIG: 'appConfig',
 };
 
 export const storage = {
@@ -59,6 +60,26 @@ export const storage = {
     } catch (error) {
       console.error('Error checking authentication:', error);
       return false;
+    }
+  },
+
+  // Store app configuration
+  storeAppConfig: async (config) => {
+    try {
+      await AsyncStorage.setItem(StorageKeys.APP_CONFIG, JSON.stringify(config));
+    } catch (error) {
+      console.error('Error storing app config:', error);
+    }
+  },
+
+  // Get app configuration
+  getAppConfig: async () => {
+    try {
+      const config = await AsyncStorage.getItem(StorageKeys.APP_CONFIG);
+      return config ? JSON.parse(config) : null;
+    } catch (error) {
+      console.error('Error getting app config:', error);
+      return null;
     }
   },
 };
