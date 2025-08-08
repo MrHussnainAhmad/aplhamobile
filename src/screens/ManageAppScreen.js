@@ -74,11 +74,12 @@ const ManageAppScreen = ({ navigation }) => {
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1], // Square aspect ratio for logo
         quality: 0.8,
         base64: true,
+        selectionLimit: 1,
       });
 
       if (!result.canceled && result.assets[0]) {

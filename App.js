@@ -14,6 +14,8 @@ import ManageAppScreen from './src/screens/ManageAppScreen';
 import ManageStudentsScreen from './src/screens/ManageStudentsScreen';
 import ManageTeachersScreen from './src/screens/admin/ManageTeachersScreen';
 import UpdateStudentScreen from './src/screens/UpdateStudentScreen';
+import UpdateTeacherScreen from './src/screens/UpdateTeacherScreen';
+import CreateTeacherScreen from './src/screens/CreateTeacherScreen';
 
 const Stack = createStackNavigator();
 
@@ -37,6 +39,8 @@ export default function App() {
         <Stack.Screen name="ManageStudents" component={ManageStudentsScreen} />
         <Stack.Screen name="ManageTeachers" component={ManageTeachersScreen} />
         <Stack.Screen name="UpdateStudent" component={UpdateStudentScreen} />
+        <Stack.Screen name="UpdateTeacherScreen" component={UpdateTeacherScreen} />
+        <Stack.Screen name="CreateTeacherScreen" component={CreateTeacherScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
