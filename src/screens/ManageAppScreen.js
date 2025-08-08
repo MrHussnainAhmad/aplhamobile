@@ -81,12 +81,11 @@ const ManageAppScreen = ({ navigation }) => {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ImagePicker.MediaTypeOptions?.Images || 'Images', // Fallback to string
         allowsEditing: true,
         aspect: [1, 1], // Square aspect ratio for logo
         quality: 0.8,
         base64: true,
-        allowsMultipleSelection: false,
       });
 
       if (!result.canceled && result.assets && result.assets[0]) {

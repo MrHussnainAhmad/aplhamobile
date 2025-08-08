@@ -85,42 +85,6 @@ const ManageStudentsScreen = ({ navigation }) => {
     setRefreshing(false);
   };
 
-  const handleAssignStudentId = (student) => {
-    Alert.prompt(
-      'Assign Student ID',
-      `Enter student ID for ${student.fullname}:`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Assign',
-          onPress: async (studentId) => {
-            if (!studentId || !studentId.trim()) {
-              Alert.alert('Error', 'Please enter a valid student ID');
-              return;
-            }
-            await assignStudentId(student._id, studentId.trim());
-          },
-        },
-      ],
-      'plain-text',
-      student.studentId || ''
-    );
-  };
-
-  const assignStudentId = async (studentObjectId, newStudentId) => {
-    try {
-      // Use appropriate API based on user type with correct parameter names
-      const response = userType === 'admin'
-        ? await adminAPI.assignStudentId(studentObjectId, newStudentId)
-        : await teacherAPI.assignStudentId(studentObjectId, newStudentId);
-
-      Alert.alert('Success', 'Student ID assigned successfully');
-      await loadStudents(); // Refresh the list
-    } catch (error) {
-      console.error('Error assigning student ID:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to assign student ID');
-    }
-  };
 
   const handleUpdateStudent = (student) => {
     navigation.navigate('UpdateStudent', { student });
@@ -180,16 +144,6 @@ const ManageStudentsScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.actionButtons}>
-        <TouchableOpacity
-          style={[styles.actionButton, styles.assignButton]}
-          onPress={() => handleAssignStudentId(student)}
-        >
-          <Ionicons name="card" size={16} color="#fff" />
-          <Text style={styles.actionButtonText}>
-            {student.studentId ? 'Update ID' : 'Assign ID'}
-          </Text>
-        </TouchableOpacity>
-
         <TouchableOpacity
           style={[styles.actionButton, styles.updateButton]}
           onPress={() => handleUpdateStudent(student)}

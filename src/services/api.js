@@ -124,17 +124,17 @@ export const teacherAPI = {
 
 // User API functions
 export const userAPI = {
-  // Get teacher profile
-  getTeacherProfile: (id) => api.get(`/teacher/profile/${id}`),
+  // Get authenticated teacher profile (no ID needed)
+  getTeacherProfile: () => api.get('/profile/teacher'),
   
-  // Get student profile
-  getStudentProfile: (id) => api.get(`/student/profile/${id}`),
+  // Get authenticated student profile (no ID needed)
+  getStudentProfile: () => api.get('/profile/student'),
   
-  // Update teacher profile
-  updateTeacherProfile: (data) => api.put('/teacher/profile', data),
+  // Update authenticated teacher profile
+  updateTeacherProfile: (data) => api.put('/profile/teacher', data),
   
-  // Update student profile
-  updateStudentProfile: (data) => api.put('/student/profile', data),
+  // Update authenticated student profile
+  updateStudentProfile: (data) => api.put('/profile/student', data),
 };
 
 export default api;
