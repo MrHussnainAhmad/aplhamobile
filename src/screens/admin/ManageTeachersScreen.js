@@ -78,6 +78,39 @@ const ManageTeachersScreen = ({ navigation }) => {
     navigation.navigate('UpdateTeacherScreen', { teacher });
   };
 
+  const handleAssignTeacherId = (teacher) => {
+    Alert.prompt(
+      'Assign Teacher ID',
+      `Enter teacher ID for ${teacher.fullname}:`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Assign',
+          onPress: async (teacherId) => {
+            if (!teacherId || !teacherId.trim()) {
+              Alert.alert('Error', 'Please enter a valid teacher ID');
+              return;
+            }
+            await assignTeacherId(teacher._id, teacherId.trim());
+          },
+        },
+      ],
+      'plain-text',
+      teacher.teacherId || ''
+    );
+  };
+
+  const assignTeacherId = async (teacherId, newTeacherId) => {
+    try {
+      await adminAPI.assignTeacherId(teacherId, newTeacherId);
+      Alert.alert('Success', 'Teacher ID assigned successfully');
+      onRefresh(); // Refresh the list
+    } catch (error) {
+      console.error('Error assigning teacher ID:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to assign teacher ID');
+    }
+  };
+
   const renderTeacherItem = ({ item }) => (
     <View style={styles.teacherCard}>
       <View style={styles.teacherInfo}>
@@ -93,11 +126,14 @@ const ManageTeachersScreen = ({ navigation }) => {
         </View>
       </View>
       <View style={styles.actionsContainer}>
+        <TouchableOpacity onPress={() => handleAssignTeacherId(item)} style={styles.actionButton}>
+          <Ionicons name="card-outline" size={20} color="#4A90E2" />
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => handleUpdateTeacher(item)} style={styles.actionButton}>
-          <Ionicons name="create-outline" size={24} color="#F39C12" />
+          <Ionicons name="create-outline" size={20} color="#F39C12" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleDeleteTeacher(item._id)} style={styles.actionButton}>
-          <Ionicons name="trash-outline" size={24} color="#E74C3C" />
+          <Ionicons name="trash-outline" size={20} color="#E74C3C" />
         </TouchableOpacity>
       </View>
     </View>

@@ -109,7 +109,7 @@ const ManageStudentsScreen = ({ navigation }) => {
     try {
       // Use appropriate API based on user type
       const response = userType === 'admin'
-        ? await adminAPI.updateStudent(studentId, { studentId: newStudentId })
+        ? await adminAPI.assignStudentId(studentId, newStudentId)
         : await teacherAPI.assignStudentId(studentId, newStudentId);
 
       Alert.alert('Success', 'Student ID assigned successfully');
