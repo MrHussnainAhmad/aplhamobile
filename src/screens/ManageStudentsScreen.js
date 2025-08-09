@@ -175,7 +175,7 @@ const ManageStudentsScreen = ({ navigation }) => {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Class:</Text>
               <Text style={styles.infoValue}>
-                {student.class} - {student.section || (student.gender === 'male' ? 'Boys' : (student.gender === 'female' ? 'Girls' : 'N/A'))}
+                {student.class ? student.class.name : 'N/A'}
               </Text>
             </View>
           </View>

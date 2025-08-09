@@ -29,7 +29,7 @@ const API_CONFIG = {
 // - 'PRODUCTION' for production backend
 const CURRENT_ENV = 'PRODUCTION';
 
-export const BASE_URL = API_CONFIG[CURRENT_ENV];
+export const BASE_URL = 'http://192.168.3.58:5000/api';
 
 // Helper function to get the current API URL
 export const getApiUrl = () => {

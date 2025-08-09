@@ -59,8 +59,8 @@ const TeacherSignupScreen = ({ navigation }) => {
       return false;
     }
 
-    if (formData.cnicNumber.length !== 11) {
-      Alert.alert('Error', 'CNIC must be exactly 11 digits');
+    if (formData.cnicNumber.length !== 13) {
+      Alert.alert('Error', 'CNIC must be exactly 13 digits');
       return false;
     }
 
@@ -195,14 +195,15 @@ const TeacherSignupScreen = ({ navigation }) => {
 
             <View style={styles.inputContainer}>
               <Text style={styles.label}>CNIC Number *</Text>
+              <Text style={styles.inputSubtitle}>(without dashes)</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter 11-digit CNIC number"
+                placeholder="Enter 13-digit CNIC number"
                 placeholderTextColor="#7F8C8D"
                 value={formData.cnicNumber}
                 onChangeText={(value) => handleInputChange('cnicNumber', value)}
                 keyboardType="numeric"
-                maxLength={11}
+                maxLength={13}
               />
             </View>
 
@@ -334,6 +335,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#2C3E50',
     marginBottom: 8,
+  },
+  inputSubtitle: {
+    fontSize: 12,
+    color: '#7F8C8D',
+    marginBottom: 4,
   },
   input: {
     borderWidth: 1,

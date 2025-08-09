@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -29,14 +30,18 @@ const TeacherProfileScreen = ({ navigation }) => {
     subjects: [],
     profileImage: '',
     isVerified: false,
+    currentPay: 0,
+    futurePay: 0,
   });
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswordSection, setShowPasswordSection] = useState(false);
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, [])
+  );
 
   const fetchProfile = async () => {
     try {
@@ -301,6 +306,20 @@ const TeacherProfileScreen = ({ navigation }) => {
               ? profile.subjects.join(', ')
               : 'No subjects assigned'
             }
+          </Text>
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Current Pay</Text>
+          <Text style={styles.subjectsText}>
+            {profile.currentPay !== undefined ? `${profile.currentPay}` : 'N/A'}
+          </Text>
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Future Pay</Text>
+          <Text style={styles.subjectsText}>
+            {profile.futurePay !== undefined ? `${profile.futurePay}` : 'N/A'}
           </Text>
         </View>
       </View>

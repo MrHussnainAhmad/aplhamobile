@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,10 +9,11 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  ImageBackground, // Import ImageBackground
+  ImageBackground,
+  ActivityIndicator, // Import ActivityIndicator
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { authAPI } from '../services/api';
+import { authAPI, publicAPI, studentAPI } from '../services/api'; // Import publicAPI and studentAPI
 
 const signupBackground = require('../../assets/images/bg3.jpg'); // Import the background image
 
@@ -29,20 +30,39 @@ const StudentSignupScreen = ({ navigation }) => {
     recordNumber: '',
     gender: '',
     address: '',
-    class: '',
+    class: '', // Will store class ObjectId
     section: '',
     rollNumber: '',
   });
   const [loading, setLoading] = useState(false);
+  const [classes, setClasses] = useState([]); // State to store fetched classes
+  const [fetchingClasses, setFetchingClasses] = useState(true);
+
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const response = await publicAPI.getClasses();
+        if (response.data.classes) {
+          setClasses(response.data.classes);
+        }
+      } catch (error) {
+        console.error('Error fetching classes for signup:', error);
+        Alert.alert('Error', 'Failed to load classes. Please try again later.');
+      } finally {
+        setFetchingClasses(false);
+      }
+    };
+    fetchClasses();
+  }, []);
 
   const handleInputChange = (field, value) => {
     setFormData((prevFormData) => {
       const newFormData = { ...prevFormData, [field]: value };
       if (field === 'gender') {
         if (value === 'male') {
-          newFormData.section = 'Boys';
+          newFormData.section = 'boys'; // Ensure lowercase
         } else if (value === 'female') {
-          newFormData.section = 'Girls';
+          newFormData.section = 'girls'; // Ensure lowercase
         } else {
           newFormData.section = ''; // Clear section if gender is not male or female
         }
@@ -97,7 +117,7 @@ const StudentSignupScreen = ({ navigation }) => {
       };
       delete studentData.confirmPassword;
 
-      const response = await authAPI.createStudent(studentData);
+      const response = await studentAPI.createStudent(studentData);
 
       Alert.alert(
         'Success', 
@@ -269,13 +289,22 @@ const StudentSignupScreen = ({ navigation }) => {
 
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Class *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your class (e.g., 10th, 11th, 12th)"
-                placeholderTextColor="#7F8C8D"
-                value={formData.class}
-                onChangeText={(value) => handleInputChange('class', value)}
-              />
+              {fetchingClasses ? (
+                <ActivityIndicator size="small" color="#007BFF" />
+              ) : (
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={formData.class}
+                    onValueChange={(itemValue) => handleInputChange('class', itemValue)}
+                    style={styles.picker}
+                  >
+                    <Picker.Item label="Select Class" value="" />
+                    {classes.map((cls) => (
+                      <Picker.Item key={cls._id} label={cls.name} value={cls._id} />
+                    ))}
+                  </Picker>
+                </View>
+              )}
             </View>
 
             <View style={styles.inputContainer}>
@@ -304,7 +333,7 @@ const StudentSignupScreen = ({ navigation }) => {
             <TouchableOpacity
               style={[styles.signupButton, loading && styles.signupButtonDisabled]}
               onPress={handleSignup}
-              disabled={loading}
+              disabled={loading || fetchingClasses}
             >
               <Text style={styles.signupButtonText}>
                 {loading ? 'Creating Account...' : 'Create Account'}

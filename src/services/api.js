@@ -125,6 +125,20 @@ export const adminAPI = {
   // Fee Voucher Management
   getAllFeeVouchersAdmin: (searchQuery) => api.get(`/fee-vouchers/admin/all?search=${searchQuery}`),
   getStudentFeeVouchersAdmin: (specialStudentId) => api.get(`/fee-vouchers/admin/${specialStudentId}`),
+
+  // Class Management
+  getClasses: () => api.get('/classes'),
+  createClass: (data) => api.post('/classes', data),
+  updateClass: (id, data) => api.put(`/classes/${id}`, data),
+  deleteClass: (id) => api.delete(`/classes/${id}`),
+
+  // Teacher Class Assignment
+  getVerifiedTeachers: () => api.get('/admin/verified-teachers'),
+  assignClass: (data) => api.post('/admin/assign-class', data),
+  unassignClass: (data) => api.post('/admin/unassign-class', data),
+
+  // Teacher Pay Management
+  updateTeacherPay: (id, data) => api.put(`/admin/update-teacher-pay/${id}`, data),
 };
 
 // Teacher API functions
@@ -143,6 +157,19 @@ export const teacherAPI = {
   
   // Get students by class and section
   getStudentsByClass: (className, section) => api.get(`/teacher/students/${className}/${section}`),
+
+  // Student Class Assignment
+  getVerifiedStudents: (params) => api.get('/teacher/verified-students', { params }),
+  assignStudentClass: (data) => api.post('/teacher/assign-student-class', data),
+  unassignStudentClass: (data) => api.post('/teacher/unassign-student-class', data),
+};
+
+export const publicAPI = {
+  getClasses: () => api.get('/classes/public'),
+};
+
+export const classesAPI = {
+  getAllClasses: () => publicAPI.getClasses(),
 };
 
 // User API functions
@@ -158,6 +185,8 @@ export const userAPI = {
   
   // Update authenticated student profile
   updateStudentProfile: (data) => api.put('/profile/student', data),
+  // Get student's courses
+  getMyCourses: () => api.get('/profile/student/my-courses'),
 };
 
 export default api;

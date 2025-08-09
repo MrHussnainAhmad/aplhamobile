@@ -34,7 +34,7 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    if (userType === 'admin') {
+    if (userType === 'admin' || userType === 'teacher') {
       loadStats();
     }
   }, [userType]);
@@ -69,6 +69,7 @@ const HomeScreen = ({ navigation }) => {
         setStats(response.data.stats);
       } else if (userType === 'teacher') {
         const response = await teacherAPI.getDashboardStats();
+        console.log('Teacher Dashboard Stats Response:', response.data);
         setStats(response.data.stats);
       }
     } catch (error) {
@@ -203,13 +204,15 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem}
+          onPress={() => navigation.navigate('MyClasses')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="analytics" size={24} color="#E67E22" />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuItemTitle}>View Reports</Text>
+              <Text style={styles.menuItemTitle}>My Classes</Text>
               <Text style={styles.menuItemSubtitle}>Check student performance</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
@@ -321,20 +324,26 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('ClassesScreen')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="analytics" size={24} color="#E67E22" />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuItemTitle}>System Reports</Text>
+              <Text style={styles.menuItemTitle}>Manage Classes & More</Text>
               <Text style={styles.menuItemSubtitle}>View comprehensive system analytics</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('SchoolPostsScreen')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="megaphone" size={24} color="#9B59B6" />
@@ -418,7 +427,7 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.welcomeText}>Welcome back,</Text>
             <Text style={styles.userName}>{userData?.fullname || 'Student'}</Text>
             <Text style={styles.userInfo}>
-              {userData?.class} - {userData?.section} | Student ID: {userData?.studentId}
+              {userData?.class?.name} | Student ID: {userData?.studentId}
             </Text>
           </View>
         </View>
@@ -464,7 +473,9 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem}
+          onPress={() => navigation.navigate('MyCourses')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="library" size={24} color="#27AE60" />

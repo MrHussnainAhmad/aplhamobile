@@ -14,29 +14,33 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
-import { adminAPI, teacherAPI } from '../services/api';
+import { adminAPI, teacherAPI, classesAPI } from '../services/api';
 import { storage } from '../utils/storage';
 
 const UpdateStudentScreen = ({ navigation, route }) => {
   const { student } = route.params;
   const [loading, setLoading] = useState(false);
   const [userType, setUserType] = useState(null);
+  const [classes, setClasses] = useState([]);
   
   const [formData, setFormData] = useState({
     fullname: student.fullname || '',
     email: student.email || '',
     phoneNumber: student.phoneNumber || '',
-    class: student.class || '',
+    class: student.class?._id || '',
     section: student.section || '',
     studentId: student.studentId || '',
     rollNumber: student.rollNumber || '',
     gender: student.gender || '', // Add gender to formData
+    currentFee: student.currentFee || 0,
+    futureFee: student.futureFee || 0,
   });
 
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     checkUserType();
+    loadClasses();
   }, []);
 
   const checkUserType = async () => {
@@ -45,6 +49,16 @@ const UpdateStudentScreen = ({ navigation, route }) => {
       setUserType(storedUserType);
     } catch (error) {
       console.error('Error checking user type:', error);
+    }
+  };
+
+  const loadClasses = async () => {
+    try {
+      const response = await classesAPI.getAllClasses();
+      setClasses(response.data.classes || []);
+    } catch (error) {
+      console.error('Error loading classes:', error);
+      Alert.alert('Error', 'Failed to load classes');
     }
   };
 
@@ -61,7 +75,7 @@ const UpdateStudentScreen = ({ navigation, route }) => {
       newErrors.email = 'Email format is invalid';
     }
 
-    if (!formData.class.trim()) {
+    if (!formData.class) {
       newErrors.class = 'Class is required';
     }
 
@@ -79,7 +93,12 @@ const UpdateStudentScreen = ({ navigation, route }) => {
 
   const handleInputChange = (field, value) => {
     setFormData(prev => {
-      const newFormData = { ...prev, [field]: value };
+      let processedValue = value;
+      if (field === 'currentFee' || field === 'futureFee') {
+        processedValue = value === '' ? 0 : Number(value);
+      }
+
+      const newFormData = { ...prev, [field]: processedValue };
       if (field === 'gender') {
         if (value === 'male') {
           newFormData.section = 'Boys';
@@ -97,13 +116,14 @@ const UpdateStudentScreen = ({ navigation, route }) => {
   };
 
   const handleUpdate = async () => {
+    console.log("Update button pressed.");
     if (!validateForm()) {
       Alert.alert('Validation Error', 'Please check the form for errors');
       return;
     }
 
     setLoading(true);
-    
+    console.log("Updating student with data:", formData);
     try {
       // Use appropriate API based on user type
       const response = userType === 'admin'
@@ -133,7 +153,7 @@ const UpdateStudentScreen = ({ navigation, route }) => {
           multiline && styles.textArea,
           errors[field] && styles.inputError
         ]}
-        value={formData[field]}
+        value={String(formData[field])}
         onChangeText={(value) => handleInputChange(field, value)}
         placeholder={placeholder}
         keyboardType={keyboardType}
@@ -180,7 +200,23 @@ const UpdateStudentScreen = ({ navigation, route }) => {
           {renderInput('fullname', 'Full Name *', 'Enter full name')}
           {renderInput('email', 'Email *', 'Enter email address', 'email-address')}
           {renderInput('phoneNumber', 'Phone Number', 'Enter phone number', 'phone-pad')}
-          {renderInput('class', 'Class *', 'Enter class')}
+          
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Class *</Text>
+            <Picker
+              selectedValue={formData.class}
+              onValueChange={(itemValue) => handleInputChange('class', itemValue)}
+              style={styles.textInput}
+            >
+              <Picker.Item label="Select Class" value="" />
+              {classes.map((c) => (
+                <Picker.Item key={c._id} label={c.name} value={c._id} />
+              ))}
+            </Picker>
+            {errors.class && (
+              <Text style={styles.errorText}>{errors.class}</Text>
+            )}
+          </View>
           
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Gender *</Text>
@@ -212,6 +248,13 @@ const UpdateStudentScreen = ({ navigation, route }) => {
           </View>
           
           {renderInput('rollNumber', 'Roll Number', 'Enter roll number', 'numeric')}
+
+          {userType === 'admin' && (
+            <>
+              {renderInput('currentFee', 'Current Fee', 'Enter current fee', 'numeric')}
+              {renderInput('futureFee', 'Future Fee', 'Enter future fee', 'numeric')}
+            </>
+          )}
         </View>
       </ScrollView>
 

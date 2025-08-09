@@ -17,11 +17,17 @@ import UpdateStudentScreen from './src/screens/UpdateStudentScreen';
 import UpdateTeacherScreen from './src/screens/UpdateTeacherScreen';
 import CreateTeacherScreen from './src/screens/CreateTeacherScreen';
 import TeacherProfileScreen from './src/screens/teacher/TeacherProfileScreen';
+import MyClassesScreen from './src/screens/teacher/MyClassesScreen';
+import AssignStudentsScreen from './src/screens/teacher/AssignStudentsScreen';
 import StudentProfileScreen from './src/screens/student/StudentProfileScreen';
 import UploadFeeVoucherScreen from './src/screens/student/UploadFeeVoucherScreen';
+
 import FeeVoucherDetailPage from './src/screens/admin/FeeVoucherDetailPage';
 import FeeManagementScreen from './src/screens/admin/FeeManagementScreen';
 import SystemDetailScreen from './src/screens/admin/SystemDetailScreen';
+import SchoolPostsScreen from './src/screens/admin/SchoolPostsScreen';
+import ClassesScreen from './src/screens/admin/ClassesScreen';
+import AssignClassesScreen from './src/screens/admin/AssignClassesScreen';
 
 const Stack = createStackNavigator();
 
@@ -48,11 +54,17 @@ export default function App() {
         <Stack.Screen name="UpdateTeacherScreen" component={UpdateTeacherScreen} />
         <Stack.Screen name="CreateTeacherScreen" component={CreateTeacherScreen} />
         <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} />
+        <Stack.Screen name="MyClasses" component={MyClassesScreen} />
+        <Stack.Screen name="AssignStudents" component={AssignStudentsScreen} />
         <Stack.Screen name="StudentProfile" component={StudentProfileScreen} />
         <Stack.Screen name="UploadFeeVoucher" component={UploadFeeVoucherScreen} />
+        
         <Stack.Screen name="FeeVoucherDetail" component={FeeVoucherDetailPage} />
         <Stack.Screen name="FeeManagement" component={FeeManagementScreen} />
         <Stack.Screen name="SystemDetail" component={SystemDetailScreen} />
+        <Stack.Screen name="SchoolPostsScreen" component={SchoolPostsScreen} />
+        <Stack.Screen name="ClassesScreen" component={ClassesScreen} />
+        <Stack.Screen name="AssignClasses" component={AssignClassesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

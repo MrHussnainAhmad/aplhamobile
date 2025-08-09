@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -10,6 +11,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -33,14 +35,18 @@ const StudentProfileScreen = ({ navigation }) => {
     section: '',
     rollNumber: '',
     isVerified: false,
+    currentFee: 0,
+    futureFee: 0,
   });
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswordSection, setShowPasswordSection] = useState(false);
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, [])
+  );
 
   const fetchProfile = async () => {
     try {
@@ -229,6 +235,16 @@ const StudentProfileScreen = ({ navigation }) => {
             keyboardType="numeric"
             editable={!profile.rollNumber} // Editable only if rollNumber is not set
           />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Current Fee</Text>
+          <Text style={styles.readOnlyText}>{profile.currentFee || 'Not set'}</Text>
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Future Fee</Text>
+          <Text style={styles.readOnlyText}>{profile.futureFee || 'Not set'}</Text>
         </View>
       </View>
 

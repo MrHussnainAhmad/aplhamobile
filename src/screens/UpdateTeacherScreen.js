@@ -30,6 +30,8 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
     joiningYear: teacher.joiningYear?.toString() || new Date().getFullYear().toString(),
     teacherId: teacher.teacherId || '',
     subjects: teacher.subjects?.join(', ') || '',
+    currentPay: teacher.currentPay?.toString() || '0',
+    futurePay: teacher.futurePay?.toString() || '0',
   });
   
   const [loading, setLoading] = useState(false);
@@ -70,14 +72,29 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
     setLoading(true);
 
     try {
-      const updateData = {
-        ...formData,
+      const generalUpdateData = {
+        fullname: formData.fullname,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        cnicNumber: formData.cnicNumber,
+        gender: formData.gender,
         age: parseInt(formData.age),
+        address: formData.address,
+        whatsappNumber: formData.whatsappNumber,
         joiningYear: parseInt(formData.joiningYear),
         subjects: formData.subjects.split(',').map(s => s.trim()).filter(s => s.length > 0),
       };
 
-      await adminAPI.updateTeacher(teacher._id, updateData);
+      const payUpdateData = {
+        currentPay: parseFloat(formData.currentPay),
+        futurePay: parseFloat(formData.futurePay),
+      };
+
+      // Perform general update
+      await adminAPI.updateTeacher(teacher._id, generalUpdateData);
+
+      // Perform pay update
+      await adminAPI.updateTeacherPay(teacher._id, payUpdateData);
 
       Alert.alert(
         'Success', 
@@ -241,6 +258,28 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
               placeholder="e.g., Math, Physics, Chemistry"
               value={formData.subjects}
               onChangeText={(value) => handleInputChange('subjects', value)}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Current Pay</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter current pay"
+              value={formData.currentPay}
+              onChangeText={(value) => handleInputChange('currentPay', value)}
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Future Pay</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter future pay"
+              value={formData.futurePay}
+              onChangeText={(value) => handleInputChange('futurePay', value)}
+              keyboardType="numeric"
             />
           </View>
         </View>

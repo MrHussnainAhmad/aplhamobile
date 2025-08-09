@@ -87,6 +87,7 @@ const LoginScreen = ({ navigation }) => {
                       userType === 'teacher' ? response.data.teacher : 
                       response.data.student;
       
+      console.log("Storing user data:", userData);
       await storage.storeUserData(token, userData, userType);
 
       setModalMessage(`Welcome ${userData.fullname}!`);
