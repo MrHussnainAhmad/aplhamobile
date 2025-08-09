@@ -19,6 +19,7 @@ import CreateTeacherScreen from './src/screens/CreateTeacherScreen';
 import TeacherProfileScreen from './src/screens/teacher/TeacherProfileScreen';
 import MyClassesScreen from './src/screens/teacher/MyClassesScreen';
 import AssignStudentsScreen from './src/screens/teacher/AssignStudentsScreen';
+import ClassStudentsScreen from './src/screens/teacher/ClassStudentsScreen';
 
 import StudentProfileScreen from './src/screens/student/StudentProfileScreen';
 import UploadFeeVoucherScreen from './src/screens/student/UploadFeeVoucherScreen';
@@ -30,6 +31,10 @@ import SystemDetailScreen from './src/screens/admin/SystemDetailScreen';
 import SchoolPostsScreen from './src/screens/admin/SchoolPostsScreen';
 import ClassesScreen from './src/screens/admin/ClassesScreen';
 import AssignClassesScreen from './src/screens/admin/AssignClassesScreen';
+import ClassManagementMainScreen from './src/screens/admin/ClassManagementMainScreen';
+import ManageClassesScreen from './src/screens/admin/ManageClassesScreen';
+import ManageSubjectsScreen from './src/screens/admin/ManageSubjectsScreen';
+import AssignClassesWithSearchScreen from './src/screens/admin/AssignClassesWithSearchScreen';
 
 const Stack = createStackNavigator();
 
@@ -58,6 +63,7 @@ export default function App() {
         <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} />
         <Stack.Screen name="MyClasses" component={MyClassesScreen} />
         <Stack.Screen name="AssignStudents" component={AssignStudentsScreen} />
+        <Stack.Screen name="ClassStudents" component={ClassStudentsScreen} />
         
         <Stack.Screen name="StudentProfile" component={StudentProfileScreen} />
         <Stack.Screen name="UploadFeeVoucher" component={UploadFeeVoucherScreen} />
@@ -69,6 +75,12 @@ export default function App() {
         <Stack.Screen name="SchoolPostsScreen" component={SchoolPostsScreen} />
         <Stack.Screen name="ClassesScreen" component={ClassesScreen} />
         <Stack.Screen name="AssignClasses" component={AssignClassesScreen} />
+        
+        {/* New Class Management Screens */}
+        <Stack.Screen name="ClassManagementMain" component={ClassManagementMainScreen} />
+        <Stack.Screen name="ManageClasses" component={ManageClassesScreen} />
+        <Stack.Screen name="ManageSubjects" component={ManageSubjectsScreen} />
+        <Stack.Screen name="AssignClassesWithSearch" component={AssignClassesWithSearchScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

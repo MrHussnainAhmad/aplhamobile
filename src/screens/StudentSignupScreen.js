@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,75 +10,60 @@ import {
   KeyboardAvoidingView,
   Platform,
   ImageBackground,
-  ActivityIndicator, // Import ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { authAPI, publicAPI, studentAPI } from '../services/api'; // Import publicAPI and studentAPI
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { authAPI, publicAPI, studentAPI } from '../services/api';
 import { Ionicons } from '@expo/vector-icons';
 
-const signupBackground = require('../../assets/images/bg3.jpg'); // Import the background image
+const signupBackground = require('../../assets/images/bg3.jpg');
 
 const StudentSignupScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
     fullname: '',
     fathername: '',
-    dob: '',
+    dob: new Date(),
     email: '',
     password: '',
     confirmPassword: '',
     phoneNumber: '',
     homePhone: '',
-    recordNumber: '',
     gender: '',
     address: '',
-    class: '', // Will store class ObjectId
-    section: '',
     rollNumber: '',
   });
   const [loading, setLoading] = useState(false);
-  const [classes, setClasses] = useState([]); // State to store fetched classes
-  const [fetchingClasses, setFetchingClasses] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  useEffect(() => {
-    const fetchClasses = async () => {
-      try {
-        const response = await publicAPI.getClasses();
-        if (response.data.classes) {
-          setClasses(response.data.classes);
-        }
-      } catch (error) {
-        console.error('Error fetching classes for signup:', error);
-        Alert.alert('Error', 'Failed to load classes. Please try again later.');
-      } finally {
-        setFetchingClasses(false);
-      }
-    };
-    fetchClasses();
-  }, []);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleInputChange = (field, value) => {
-    setFormData((prevFormData) => {
-      const newFormData = { ...prevFormData, [field]: value };
-      if (field === 'gender') {
-        if (value === 'male') {
-          newFormData.section = 'boys'; // Ensure lowercase
-        } else if (value === 'female') {
-          newFormData.section = 'girls'; // Ensure lowercase
-        } else {
-          newFormData.section = ''; // Clear section if gender is not male or female
-        }
-      }
-      return newFormData;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [field]: value
+    }));
+  };
+
+  const onDateChange = (event, selectedDate) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      handleInputChange('dob', selectedDate);
+    }
+  };
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
     });
   };
 
   const validateForm = () => {
     const requiredFields = [
-      'fullname', 'fathername', 'dob', 'email', 'password', 
-      'phoneNumber', 'homePhone', 'recordNumber', 'gender', 
-      'address', 'class', 'section'
+      'fullname', 'fathername', 'email', 'password', 
+      'phoneNumber', 'homePhone', 'gender', 'address'
     ];
 
     for (let field of requiredFields) {
@@ -98,10 +83,14 @@ const StudentSignupScreen = ({ navigation }) => {
       return false;
     }
 
-    // Validate date format (you might want to use a date picker in production)
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(formData.dob)) {
-      Alert.alert('Error', 'Date of birth must be in YYYY-MM-DD format');
+    // Check if user is at least 5 years old (reasonable minimum for student)
+    const today = new Date();
+    const birthDate = new Date(formData.dob);
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (age < 5 || (age === 5 && monthDiff < 0)) {
+      Alert.alert('Error', 'Student must be at least 5 years old');
       return false;
     }
 
@@ -116,7 +105,7 @@ const StudentSignupScreen = ({ navigation }) => {
     try {
       const studentData = {
         ...formData,
-        dob: new Date(formData.dob),
+        dob: formData.dob,
       };
       delete studentData.confirmPassword;
 
@@ -177,14 +166,25 @@ const StudentSignupScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Date of Birth * (YYYY-MM-DD)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="2005-01-15"
-                placeholderTextColor="#7F8C8D"
-                value={formData.dob}
-                onChangeText={(value) => handleInputChange('dob', value)}
-              />
+              <Text style={styles.label}>Date of Birth *</Text>
+              <TouchableOpacity 
+                style={styles.datePickerButton} 
+                onPress={() => setShowDatePicker(true)}
+              >
+                <Text style={styles.datePickerText}>
+                  {formatDate(formData.dob)}
+                </Text>
+                <Ionicons name="calendar-outline" size={20} color="#7F8C8D" />
+              </TouchableOpacity>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={formData.dob}
+                  mode="date"
+                  display="default"
+                  onChange={onDateChange}
+                  maximumDate={new Date()}
+                />
+              )}
             </View>
 
             <View style={styles.inputContainer}>
@@ -275,17 +275,6 @@ const StudentSignupScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Record Number *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your record number"
-                placeholderTextColor="#7F8C8D"
-                value={formData.recordNumber}
-                onChangeText={(value) => handleInputChange('recordNumber', value)}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
               <Text style={styles.label}>Gender *</Text>
               <View style={styles.pickerContainer}>
                 <Picker
@@ -315,37 +304,6 @@ const StudentSignupScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Class *</Text>
-              {fetchingClasses ? (
-                <ActivityIndicator size="small" color="#007BFF" />
-              ) : (
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={formData.class}
-                    onValueChange={(itemValue) => handleInputChange('class', itemValue)}
-                    style={styles.picker}
-                  >
-                    <Picker.Item label="Select Class" value="" />
-                    {classes.map((cls) => (
-                      <Picker.Item key={cls._id} label={cls.name} value={cls._id} />
-                    ))}
-                  </Picker>
-                </View>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Section *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Section will be set based on Gender"
-                placeholderTextColor="#7F8C8D"
-                value={formData.section}
-                editable={false} // Make it non-editable
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
               <Text style={styles.label}>Roll Number (Optional)</Text>
               <TextInput
                 style={styles.input}
@@ -360,7 +318,7 @@ const StudentSignupScreen = ({ navigation }) => {
             <TouchableOpacity
               style={[styles.signupButton, loading && styles.signupButtonDisabled]}
               onPress={handleSignup}
-              disabled={loading || fetchingClasses}
+              disabled={loading}
             >
               <Text style={styles.signupButtonText}>
                 {loading ? 'Creating Account...' : 'Create Account'}
@@ -404,15 +362,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF', // Changed text color for better contrast
+    color: '#FFFFFF',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#E0E0E0', // Changed text color for better contrast
+    color: '#E0E0E0',
   },
   formContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent background
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',
@@ -472,6 +430,21 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
   },
+  datePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#E1E8ED',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#F8F9FA',
+  },
+  datePickerText: {
+    fontSize: 16,
+    color: '#2C3E50',
+  },
   signupButton: {
     backgroundColor: '#27AE60',
     borderRadius: 8,
@@ -494,7 +467,7 @@ const styles = StyleSheet.create({
   },
   loginText: {
     fontSize: 14,
-    color: '#E0E0E0', // Changed text color for better contrast
+    color: '#E0E0E0',
   },
   loginLink: {
     fontSize: 14,

@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { userAPI } from '../../services/api'; // Assuming userAPI has getTeacherProfile
 
 const MyClassesScreen = ({ navigation }) => {
@@ -37,9 +38,13 @@ const MyClassesScreen = ({ navigation }) => {
   const renderClassItem = ({ item }) => (
     <TouchableOpacity 
       style={styles.classItem}
-      onPress={() => navigation.navigate('AssignStudents', { classId: item._id, className: item.name })}
+      onPress={() => navigation.navigate('ClassStudents', { classId: item._id, className: item.name })}
     >
-      <Text style={styles.className}>{item.name}</Text>
+      <View style={styles.classContent}>
+        <Text style={styles.className}>{item.name}</Text>
+        <Text style={styles.classHint}>Tap to view enrolled students</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
     </TouchableOpacity>
   );
 
@@ -94,6 +99,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   classItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#FFFFFF',
     padding: 15,
     borderRadius: 10,
@@ -104,9 +112,19 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
+  classContent: {
+    flex: 1,
+  },
   className: {
     fontSize: 18,
-    color: '#333',
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginBottom: 4,
+  },
+  classHint: {
+    fontSize: 14,
+    color: '#7F8C8D',
+    fontStyle: 'italic',
   },
   noClassesText: {
     textAlign: 'center',

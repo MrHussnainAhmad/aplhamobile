@@ -8,9 +8,10 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { adminAPI } from '../../services/api'; // Assuming adminAPI has methods for class management
+import { adminAPI } from '../../services/api';
 
 const ClassesScreen = ({ navigation }) => {
   const [classes, setClasses] = useState([]);

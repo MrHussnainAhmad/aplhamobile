@@ -326,7 +326,7 @@ const HomeScreen = ({ navigation }) => {
 
         <TouchableOpacity 
           style={styles.menuItem}
-          onPress={() => navigation.navigate('ClassesScreen')}
+          onPress={() => navigation.navigate('ClassManagementMain')}
         >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>

@@ -1,7 +1,7 @@
 // API Configuration for different environments
 const API_CONFIG = {
   // Your computer's local IP (when backend runs locally)
-  // LOCAL_IP: 'http://192.168.100.9:5000/api',
+  // LOCAL_IP: 'http://192.168.3.1:5000/api',
   
   // For Android emulator
   // ANDROID_EMULATOR: 'http://10.0.2.2:5000/api',
@@ -14,7 +14,7 @@ const API_CONFIG = {
   
   // If backend is hosted on another device, replace with that device's IP
   // Example: REMOTE_DEVICE: 'http://192.168.100.25:5000/api',
-  // REMOTE_DEVICE: 'http://192.168.3.58:5000/api', // Your backend device IP
+  // REMOTE_DEVICE: 'http://192.168.3.51:5000/api', // Your backend device IP
   
   // Production URL (when deployed)
   PRODUCTION: 'https://superior.up.railway.app/api',
@@ -29,7 +29,7 @@ const API_CONFIG = {
 // - 'PRODUCTION' for production backend
 const CURRENT_ENV = 'PRODUCTION';
 
-export const BASE_URL = 'http://192.168.3.58:5000/api';
+export const BASE_URL = 'http://192.168.3.51:5000/api';
 
 // Helper function to get the current API URL
 export const getApiUrl = () => {

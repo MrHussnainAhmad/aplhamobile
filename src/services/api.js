@@ -139,6 +139,26 @@ export const adminAPI = {
 
   // Teacher Pay Management
   updateTeacherPay: (id, data) => api.put(`/admin/update-teacher-pay/${id}`, data),
+
+  // Enhanced Teacher and Class Management
+  // Search verified teachers with optional filters
+  searchVerifiedTeachers: (params) => api.get('/admin/search-verified-teachers', { params }),
+  
+  // Get teachers with assigned classes (for subject management)
+  getTeachersWithClasses: () => api.get('/admin/teachers-with-classes'),
+  
+  // Get class assignment stats
+  getClassStats: () => api.get('/classes/stats'),
+  
+  // Get assigned teachers for a specific class
+  getAssignedTeachers: (classId) => api.get(`/classes/${classId}/teachers`),
+  
+  // Subject Management for Teachers
+  assignSubjectToTeacher: (data) => api.post('/admin/assign-subjects', data),
+  removeSubjectFromTeacher: (data) => api.post('/admin/remove-subjects', data),
+  
+  // Get all subjects (might be useful for subject management)
+  getAllSubjects: () => api.get('/admin/subjects'),
 };
 
 // Teacher API functions
