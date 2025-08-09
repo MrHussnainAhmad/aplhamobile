@@ -51,30 +51,39 @@ const StudentProfileScreen = ({ navigation }) => {
   const fetchProfile = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
+      console.log('StudentProfileScreen: Fetched token:', token ? 'Exists' : 'Does not exist');
       if (!token) {
         Alert.alert('Error', 'Authentication token not found. Please login again.');
         navigation.replace('Login');
         return;
       }
-      const response = await fetch(`${API_BASE_URL}/profile/student`, {
+      const url = `${API_BASE_URL}/profile/student`;
+      console.log('StudentProfileScreen: Fetching from URL:', url);
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
 
+      console.log('StudentProfileScreen: Response status:', response.status);
+      console.log('StudentProfileScreen: Response OK:', response.ok);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('StudentProfileScreen: Received data:', data);
         // Include isVerified status from student data
         setProfile({
           ...data.profile,
           isVerified: data.profile.isVerified || false
         });
       } else {
-        Alert.alert('Error', 'Failed to load profile');
+        const errorData = await response.json();
+        console.error('StudentProfileScreen: Error response data:', errorData);
+        Alert.alert('Error', errorData.message || 'Failed to load profile');
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('StudentProfileScreen: Error fetching profile:', error);
       Alert.alert('Error', 'Network error occurred');
     } finally {
       setLoading(false);

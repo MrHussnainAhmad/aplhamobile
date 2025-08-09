@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
-import { adminAPI } from '../services/api';
+import { adminAPI, teacherAPI } from '../services/api';
 
 const UpdateTeacherScreen = ({ navigation, route }) => {
   const { teacher } = route.params;
@@ -29,15 +29,41 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
     whatsappNumber: teacher.whatsappNumber || '',
     joiningYear: teacher.joiningYear?.toString() || new Date().getFullYear().toString(),
     teacherId: teacher.teacherId || '',
-    subjects: teacher.subjects?.join(', ') || '',
     currentPay: teacher.currentPay?.toString() || '0',
     futurePay: teacher.futurePay?.toString() || '0',
   });
   
   const [loading, setLoading] = useState(false);
+  const [allSubjects, setAllSubjects] = useState([]);
+  const [selectedSubjects, setSelectedSubjects] = useState(teacher.subjects || []);
+  const [selectedSubject, setSelectedSubject] = useState('');
+
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      try {
+        const response = await teacherAPI.getSubjects();
+        setAllSubjects(response.data.subjects);
+      } catch (error) {
+        console.error('Failed to fetch subjects:', error);
+        Alert.alert('Error', 'Failed to fetch subjects.');
+      }
+    };
+    fetchSubjects();
+  }, []);
 
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
+  };
+
+  const handleAddSubject = () => {
+    if (selectedSubject && !selectedSubjects.includes(selectedSubject)) {
+      setSelectedSubjects([...selectedSubjects, selectedSubject]);
+      setSelectedSubject('');
+    }
+  };
+
+  const handleRemoveSubject = (subjectToRemove) => {
+    setSelectedSubjects(selectedSubjects.filter(subject => subject !== subjectToRemove));
   };
 
   const validateForm = () => {
@@ -53,8 +79,8 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
       }
     }
 
-    if (formData.cnicNumber.length !== 11) {
-      Alert.alert('Error', 'CNIC must be exactly 11 digits');
+    if (formData.cnicNumber.length !== 13) {
+      Alert.alert('Error', 'CNIC must be exactly 13 digits');
       return false;
     }
 
@@ -82,7 +108,7 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
         address: formData.address,
         whatsappNumber: formData.whatsappNumber,
         joiningYear: parseInt(formData.joiningYear),
-        subjects: formData.subjects.split(',').map(s => s.trim()).filter(s => s.length > 0),
+        subjects: selectedSubjects,
       };
 
       const payUpdateData = {
@@ -188,11 +214,11 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
             <Text style={styles.label}>CNIC Number *</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter 11-digit CNIC number"
+              placeholder="Enter 13-digit CNIC number"
               value={formData.cnicNumber}
               onChangeText={(value) => handleInputChange('cnicNumber', value)}
               keyboardType="numeric"
-              maxLength={11}
+              maxLength={13}
             />
           </View>
 
@@ -252,13 +278,36 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Subjects (comma-separated)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g., Math, Physics, Chemistry"
-              value={formData.subjects}
-              onChangeText={(value) => handleInputChange('subjects', value)}
-            />
+            <Text style={styles.label}>Subjects</Text>
+            <View style={styles.subjectsContainer}>
+              {selectedSubjects.map((subject, index) => (
+                <View key={index} style={styles.subjectTag}>
+                  <Text style={styles.subjectTagText}>{subject}</Text>
+                  <TouchableOpacity onPress={() => handleRemoveSubject(subject)}>
+                    <Ionicons name="close-circle" size={18} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+            <View style={styles.addSubjectContainer}>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={selectedSubject}
+                  onValueChange={(itemValue) => setSelectedSubject(itemValue)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select a subject" value="" />
+                  {allSubjects
+                    .filter(sub => !selectedSubjects.includes(sub))
+                    .map((subject, index) => (
+                      <Picker.Item key={index} label={subject} value={subject} />
+                    ))}
+                </Picker>
+              </View>
+              <TouchableOpacity style={styles.addButton} onPress={handleAddSubject}>
+                <Text style={styles.addButtonText}>Add</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.inputContainer}>
@@ -412,6 +461,42 @@ const styles = StyleSheet.create({
     backgroundColor: '#4A90E2',
   },
   updateButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  subjectsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 10,
+  },
+  subjectTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4A90E2',
+    borderRadius: 15,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginRight: 10,
+    marginBottom: 10,
+  },
+  subjectTagText: {
+    color: '#FFFFFF',
+    marginRight: 5,
+  },
+  addSubjectContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addButton: {
+    backgroundColor: '#4A90E2',
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginLeft: 10,
+    justifyContent: 'center',
+  },
+  addButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',

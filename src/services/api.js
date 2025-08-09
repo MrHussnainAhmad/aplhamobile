@@ -146,6 +146,9 @@ export const teacherAPI = {
   // Get all students
   getAllStudents: () => api.get('/teacher/students'),
   
+  // Get all unique subjects
+  getSubjects: () => api.get('/teacher/subjects'),
+
   // Get teacher dashboard stats
   getDashboardStats: () => api.get('/teacher/dashboard-stats'),
   
@@ -162,6 +165,7 @@ export const teacherAPI = {
   getVerifiedStudents: (params) => api.get('/teacher/verified-students', { params }),
   assignStudentClass: (data) => api.post('/teacher/assign-student-class', data),
   unassignStudentClass: (data) => api.post('/teacher/unassign-student-class', data),
+  
 };
 
 export const publicAPI = {

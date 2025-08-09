@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const AssignStudentsScreen = () => {
+const MyCoursesScreen = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Assign Students Screen</Text>
+      <Text style={styles.text}>My Courses Screen</Text>
     </View>
   );
 };
@@ -22,4 +22,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AssignStudentsScreen;
+export default MyCoursesScreen;

@@ -19,8 +19,10 @@ import CreateTeacherScreen from './src/screens/CreateTeacherScreen';
 import TeacherProfileScreen from './src/screens/teacher/TeacherProfileScreen';
 import MyClassesScreen from './src/screens/teacher/MyClassesScreen';
 import AssignStudentsScreen from './src/screens/teacher/AssignStudentsScreen';
+
 import StudentProfileScreen from './src/screens/student/StudentProfileScreen';
 import UploadFeeVoucherScreen from './src/screens/student/UploadFeeVoucherScreen';
+import MyCoursesScreen from './src/screens/student/MyCoursesScreen';
 
 import FeeVoucherDetailPage from './src/screens/admin/FeeVoucherDetailPage';
 import FeeManagementScreen from './src/screens/admin/FeeManagementScreen';
@@ -56,8 +58,10 @@ export default function App() {
         <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} />
         <Stack.Screen name="MyClasses" component={MyClassesScreen} />
         <Stack.Screen name="AssignStudents" component={AssignStudentsScreen} />
+        
         <Stack.Screen name="StudentProfile" component={StudentProfileScreen} />
         <Stack.Screen name="UploadFeeVoucher" component={UploadFeeVoucherScreen} />
+        <Stack.Screen name="MyCourses" component={MyCoursesScreen} />
         
         <Stack.Screen name="FeeVoucherDetail" component={FeeVoucherDetailPage} />
         <Stack.Screen name="FeeManagement" component={FeeManagementScreen} />
