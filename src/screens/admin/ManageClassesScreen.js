@@ -47,11 +47,8 @@ const ManageClassesScreen = ({ navigation }) => {
       return;
     }
     
-    const className = `Class ${newClassNumber} - ${newClassSection}`;
-    
     try {
       const response = await adminAPI.createClass({ 
-        name: className,
         classNumber: newClassNumber.trim(),
         section: newClassSection.trim()
       });
@@ -73,11 +70,8 @@ const ManageClassesScreen = ({ navigation }) => {
       return;
     }
     
-    const className = `Class ${editingClassNumber} - ${editingClassSection}`;
-    
     try {
       const response = await adminAPI.updateClass(editingClassId, { 
-        name: className,
         classNumber: editingClassNumber.trim(),
         section: editingClassSection.trim()
       });
@@ -123,7 +117,8 @@ const ManageClassesScreen = ({ navigation }) => {
   const handleClassPress = (item) => {
     navigation.navigate('AssignClassesWithSearch', { 
       classId: item._id, 
-      className: item.name 
+      classNumber: item.classNumber,
+      section: item.section
     });
   };
 
@@ -149,12 +144,12 @@ const ManageClassesScreen = ({ navigation }) => {
             />
           </View>
           <Text style={styles.editPreview}>
-            Preview: {editingClassNumber && editingClassSection ? `Class ${editingClassNumber} - ${editingClassSection}` : 'Class [Number] - [Section]'}
+            Preview: {editingClassNumber && editingClassSection ? `${editingClassNumber} - ${editingClassSection}` : '[Number] - [Section]'}
           </Text>
         </View>
       ) : (
         <View style={styles.classInfo}>
-          <Text style={styles.className}>{item.name}</Text>
+          <Text style={styles.className}>{item.classNumber} - {item.section}</Text>
           <Text style={styles.classHint}>Tap to assign teachers</Text>
         </View>
       )}
@@ -177,15 +172,8 @@ const ManageClassesScreen = ({ navigation }) => {
           <>
             <TouchableOpacity onPress={() => { 
               setEditingClassId(item._id);
-              // Parse existing class name to extract number and section
-              const nameParts = item.name.match(/Class (\d+) - (.+)/);
-              if (nameParts) {
-                setEditingClassNumber(nameParts[1]);
-                setEditingClassSection(nameParts[2]);
-              } else {
-                setEditingClassNumber('');
-                setEditingClassSection('');
-              }
+              setEditingClassNumber(item.classNumber);
+              setEditingClassSection(item.section);
             }} style={styles.actionButton}>
               <Ionicons name="pencil" size={20} color="#007BFF" />
             </TouchableOpacity>
@@ -241,7 +229,7 @@ const ManageClassesScreen = ({ navigation }) => {
           </View>
           
           <Text style={styles.previewText}>
-            Preview: {newClassNumber && newClassSection ? `Class ${newClassNumber} - ${newClassSection}` : 'Class [Number] - [Section]'}
+            Preview: {newClassNumber && newClassSection ? `${newClassNumber} - ${newClassSection}` : '[Number] - [Section]'}
           </Text>
           
           <TouchableOpacity onPress={handleCreateClass} style={styles.createButton}>

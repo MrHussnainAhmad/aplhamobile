@@ -37,14 +37,18 @@ const StudentProfileScreen = ({ navigation }) => {
     isVerified: false,
     currentFee: 0,
     futureFee: 0,
+    hasClassAndSectionSet: false, // New state for one-time setting
   });
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [availableClasses, setAvailableClasses] = useState([]); // New state for available classes
+  const [showClassSectionWarning, setShowClassSectionWarning] = useState(false); // New state for warning
 
   useFocusEffect(
     useCallback(() => {
       fetchProfile();
+      fetchAvailableClasses(); // Fetch available classes when screen focuses
     }, [])
   );
 
@@ -72,10 +76,10 @@ const StudentProfileScreen = ({ navigation }) => {
       if (response.ok) {
         const data = await response.json();
         console.log('StudentProfileScreen: Received data:', data);
-        // Include isVerified status from student data
         setProfile({
           ...data.profile,
-          isVerified: data.profile.isVerified || false
+          isVerified: data.profile.isVerified || false,
+          hasClassAndSectionSet: data.profile.hasClassAndSectionSet || false, // Set from backend
         });
       } else {
         const errorData = await response.json();
@@ -87,6 +91,20 @@ const StudentProfileScreen = ({ navigation }) => {
       Alert.alert('Error', 'Network error occurred');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAvailableClasses = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/classes/public`);
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableClasses(data.classes);
+      } else {
+        console.error('Failed to fetch available classes');
+      }
+    } catch (error) {
+      console.error('Error fetching available classes:', error);
     }
   };
 
@@ -141,8 +159,8 @@ const StudentProfileScreen = ({ navigation }) => {
         dateOfBirth: profile.dateOfBirth,
         gender: profile.gender,
         rollNumber: profile.rollNumber,
-        // Section is now derived from gender
-        section: profile.gender === 'male' ? 'Boys' : (profile.gender === 'female' ? 'Girls' : ''),
+        classId: profile.class, // Send class ID to backend
+        section: profile.section, // Send section to backend
       };
 
       // Only include image data if a new image was picked
@@ -171,6 +189,7 @@ const StudentProfileScreen = ({ navigation }) => {
         setShowPasswordSection(false);
         // Clear base64 data after successful upload to prevent re-upload on next save
         setProfile(prev => ({ ...prev, profileImageBase64: null, profileImageType: null }));
+        fetchProfile(); // Re-fetch profile to get updated hasClassAndSectionSet status
       } else {
         const error = await response.json();
         Alert.alert('Error', error.message || 'Failed to update profile');
@@ -224,14 +243,91 @@ const StudentProfileScreen = ({ navigation }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Academic Information</Text>
         
+        {showClassSectionWarning && (
+          <Text style={styles.warningText}>
+            Changing Class or section or For any fun making change in profile page can lead to punishment and fine.
+          </Text>
+        )}
+
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Class</Text>
-          <Text style={styles.readOnlyText}>{profile.class || 'Not assigned'}</Text>
+          {profile.hasClassAndSectionSet ? (
+            <Text style={styles.readOnlyText}>
+              {(() => {
+                const classObj = availableClasses.find(cls => cls._id === profile.class);
+                return `${classObj?.classNumber || 'Not assigned'} - ${profile.section || 'Not assigned'}`;
+              })()}
+            </Text>
+          ) : (
+            <View style={[styles.pickerContainer, !profile.hasClassAndSectionSet && styles.pickerContainerActive]}>
+              <Picker
+                selectedValue={profile.class}
+                onValueChange={(itemValue) => {
+                  if (profile.hasClassAndSectionSet) {
+                    setShowClassSectionWarning(true);
+                    Alert.alert(
+                      'Warning',
+                      'Changing Class or section or For any fun making change in profile page can lead to punishment and fine.',
+                      [{ text: 'OK', onPress: () => setShowClassSectionWarning(false) }]
+                    );
+                  } else {
+                    setProfile(prev => ({ ...prev, class: itemValue }));
+                  }
+                }}
+                style={styles.pickerInput}
+                enabled={!profile.hasClassAndSectionSet} // Disable if already set
+              >
+                <Picker.Item label="Select Class" value="" />
+                {availableClasses.map((cls) => (
+                  <Picker.Item key={cls._id} label={`${cls.classNumber} - ${cls.section}`} value={cls._id} />
+                ))}
+              </Picker>
+              <Ionicons name="chevron-down" size={24} color={profile.hasClassAndSectionSet ? "#ccc" : "#007bff"} style={styles.pickerIcon} />
+            </View>
+          )}
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Section</Text>
-          <Text style={styles.readOnlyText}>{profile.section || 'Not assigned'}</Text>
+          {profile.hasClassAndSectionSet ? (
+            <Text style={styles.readOnlyText}>
+              {(() => {
+                const sectionToProcess = (profile.section || '').trim();
+                const displayedSection = sectionToProcess === 'select' ? 'Boys' : sectionToProcess || 'Not assigned';
+                console.log('DEBUG: profile.section:', profile.section);
+                console.log('DEBUG: sectionToProcess:', sectionToProcess);
+                console.log('DEBUG: displayedSection (Section):', displayedSection);
+                return displayedSection;
+              })()}
+            </Text>
+          ) : (
+            <View style={[styles.pickerContainer, !profile.hasClassAndSectionSet && styles.pickerContainerActive]}>
+              <Picker
+                selectedValue={profile.section}
+                onValueChange={(itemValue) => {
+                  if (profile.hasClassAndSectionSet) {
+                    setShowClassSectionWarning(true);
+                    Alert.alert(
+                      'Warning',
+                      'Changing Class or section or For any fun making change in profile page can lead to punishment and fine.',
+                      [{ text: 'OK', onPress: () => setShowClassSectionWarning(false) }]
+                    );
+                  } else {
+                    setProfile(prev => ({ ...prev, section: itemValue }));
+                  }
+                }}
+                style={styles.pickerInput}
+                enabled={!profile.hasClassAndSectionSet} // Disable if already set
+              >
+                <Picker.Item label="Select Section" value="" />
+                {/* Filter sections based on selected class if needed, or list all unique sections */}
+                {availableClasses.filter(cls => cls._id === profile.class).flatMap(cls => cls.section).filter((value, index, self) => self.indexOf(value) === index).map((sec) => (
+                  <Picker.Item key={sec} label={sec} value={sec} />
+                ))}
+              </Picker>
+              <Ionicons name="chevron-down" size={24} color={profile.hasClassAndSectionSet ? "#ccc" : "#007bff"} style={styles.pickerIcon} />
+            </View>
+          )}
         </View>
 
         <View style={styles.inputGroup}>
@@ -324,7 +420,7 @@ const StudentProfileScreen = ({ navigation }) => {
               setProfile(prev => ({
                 ...prev,
                 gender: itemValue,
-                section: itemValue === 'male' ? 'Boys' : (itemValue === 'female' ? 'Girls' : ''),
+                // Section is no longer derived from gender here, it's selected from available classes
               }));
             }}
             style={styles.input}
@@ -516,6 +612,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#fff',
   },
+  readOnlyInput: {
+    backgroundColor: '#f8f9fa',
+    color: '#6c757d',
+  },
   textArea: {
     height: 80,
     textAlignVertical: 'top',
@@ -528,6 +628,48 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#dee2e6',
+  },
+  // Enhanced Picker Container Styles
+  pickerContainer: {
+    position: 'relative',
+    borderWidth: 2,
+    borderColor: '#e9ecef',
+    borderRadius: 12,
+    backgroundColor: '#f8f9fa',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  pickerContainerActive: {
+    borderColor: '#007bff',
+    backgroundColor: '#fff',
+    shadowColor: '#007bff',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  pickerInput: {
+    height: 50,
+    fontSize: 16,
+    color: '#333',
+    paddingHorizontal: 15,
+    paddingRight: 45,
+  },
+  pickerIcon: {
+    position: 'absolute',
+    right: 15,
+    top: 13,
+    zIndex: 1,
   },
   passwordToggle: {
     backgroundColor: '#007bff',
@@ -554,6 +696,13 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: '#fff',
     fontSize: 18,
+    fontWeight: 'bold',
+  },
+  warningText: {
+    color: 'red',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 10,
     fontWeight: 'bold',
   },
 });
