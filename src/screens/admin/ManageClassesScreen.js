@@ -47,6 +47,8 @@ const ManageClassesScreen = ({ navigation }) => {
       return;
     }
     
+    console.log('Attempting to create class with:', { classNumber: newClassNumber.trim(), section: newClassSection.trim() });
+    
     try {
       const response = await adminAPI.createClass({ 
         classNumber: newClassNumber.trim(),
