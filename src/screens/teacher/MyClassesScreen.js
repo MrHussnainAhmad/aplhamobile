@@ -23,9 +23,9 @@ const MyClassesScreen = ({ navigation }) => {
     setLoading(true);
     try {
       const response = await userAPI.getTeacherProfile();
-      console.log('Teacher Profile Response in MyClassesScreen:', response.data);
       if (response.data.profile && response.data.profile.classes) {
-        setTeacherClasses(response.data.profile.classes);
+        const extractedClasses = response.data.profile.classes.map(item => item);
+        setTeacherClasses(extractedClasses);
       }
     } catch (error) {
       console.error('Error fetching teacher classes:', error);
@@ -38,10 +38,10 @@ const MyClassesScreen = ({ navigation }) => {
   const renderClassItem = ({ item }) => (
     <TouchableOpacity 
       style={styles.classItem}
-      onPress={() => navigation.navigate('ClassStudents', { classId: item._id, className: item.name })}
+      onPress={() => navigation.navigate('ClassStudents', { classId: item._id, className: item.classNumber })}
     >
       <View style={styles.classContent}>
-        <Text style={styles.className}>{item.name}</Text>
+        <Text style={styles.className}>{item.classNumber}</Text>
         <Text style={styles.classHint}>Tap to view enrolled students</Text>
       </View>
       <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />

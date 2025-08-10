@@ -33,7 +33,7 @@ const ClassStudentsScreen = ({ route, navigation }) => {
         // Filter students who belong to this class
         const classStudents = response.data.students.filter(student => {
           // Check if student has a class and it matches the current classId
-          return student.class && student.class._id === classId;
+          return student.class && student.class === classId; // Changed from student.class._id
         });
         
         console.log('Students in class:', classStudents);
