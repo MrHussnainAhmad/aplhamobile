@@ -35,6 +35,11 @@ import ClassManagementMainScreen from './src/screens/admin/ClassManagementMainSc
 import ManageClassesScreen from './src/screens/admin/ManageClassesScreen';
 import ManageSubjectsScreen from './src/screens/admin/ManageSubjectsScreen';
 import AssignClassesWithSearchScreen from './src/screens/admin/AssignClassesWithSearchScreen';
+import SelectClassForGradingScreen from './src/screens/teacher/SelectClassForGradingScreen';
+import GradeNowScreen from './src/screens/teacher/GradeNowScreen';
+import StudentsListForGradingScreen from './src/screens/teacher/StudentsListForGradingScreen';
+import AddGradesScreen from './src/screens/teacher/AddGradesScreen';
+import ShowGradesRecordScreen from './src/screens/teacher/ShowGradesRecordScreen';
 
 const Stack = createStackNavigator();
 
@@ -81,6 +86,11 @@ export default function App() {
         <Stack.Screen name="ManageClasses" component={ManageClassesScreen} />
         <Stack.Screen name="ManageSubjects" component={ManageSubjectsScreen} />
         <Stack.Screen name="AssignClassesWithSearch" component={AssignClassesWithSearchScreen} />
+        <Stack.Screen name="SelectClassForGrading" component={SelectClassForGradingScreen} />
+        <Stack.Screen name="GradeNow" component={GradeNowScreen} />
+        <Stack.Screen name="StudentsListForGrading" component={StudentsListForGradingScreen} />
+        <Stack.Screen name="AddGrades" component={AddGradesScreen} />
+        <Stack.Screen name="ShowGradesRecord" component={ShowGradesRecordScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

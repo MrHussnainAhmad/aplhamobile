@@ -186,6 +186,12 @@ export const teacherAPI = {
   assignStudentClass: (data) => api.post('/teacher/assign-student-class', data),
   unassignStudentClass: (data) => api.post('/teacher/unassign-student-class', data),
   
+  // Add marks for a student
+  addMarks: (data) => api.post('/teacher/marks', data),
+  
+  // Get marks by student ID
+  getMarksByStudentId: (studentId) => api.get(`/teacher/marks/${studentId}`),
+  
 };
 
 export const publicAPI = {

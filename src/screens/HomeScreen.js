@@ -177,15 +177,31 @@ const HomeScreen = ({ navigation }) => {
 
         <TouchableOpacity 
           style={styles.menuItem}
+          onPress={() => navigation.navigate('SelectClassForGrading')}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="school-outline" size={24} color="#27AE60" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Manage Student Grades</Text>
+              <Text style={styles.menuItemSubtitle}>Grade students and view class performance</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
           onPress={() => navigation.navigate('ManageStudents')}
         >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
-              <Ionicons name="people" size={24} color="#4A90E2" />
+              <Ionicons name="people-outline" size={24} color="#8E44AD" />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuItemTitle}>Manage Students</Text>
-              <Text style={styles.menuItemSubtitle}>View and manage your students</Text>
+              <Text style={styles.menuItemSubtitle}>Add, edit, and manage student accounts</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>
@@ -213,7 +229,7 @@ const HomeScreen = ({ navigation }) => {
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuItemTitle}>My Classes</Text>
-              <Text style={styles.menuItemSubtitle}>Check student performance</Text>
+              <Text style={styles.menuItemSubtitle}>View your classes and students</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>
