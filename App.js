@@ -34,12 +34,17 @@ import AssignClassesScreen from './src/screens/admin/AssignClassesScreen';
 import ClassManagementMainScreen from './src/screens/admin/ClassManagementMainScreen';
 import ManageClassesScreen from './src/screens/admin/ManageClassesScreen';
 import ManageSubjectsScreen from './src/screens/admin/ManageSubjectsScreen';
+
 import AssignClassesWithSearchScreen from './src/screens/admin/AssignClassesWithSearchScreen';
-import SelectClassForGradingScreen from './src/screens/teacher/SelectClassForGradingScreen';
-import GradeNowScreen from './src/screens/teacher/GradeNowScreen';
-import StudentsListForGradingScreen from './src/screens/teacher/StudentsListForGradingScreen';
-import AddGradesScreen from './src/screens/teacher/AddGradesScreen';
-import ShowGradesRecordScreen from './src/screens/teacher/ShowGradesRecordScreen';
+// Admin Grades Management Screens
+import GradesManagementScreen from './src/screens/admin/grades/GradesManagementScreen';
+import SelectClassForGradingScreen from './src/screens/admin/grades/SelectClassForGradingScreen';
+import GradeNowScreen from './src/screens/admin/grades/GradeNowScreen';
+import StudentsListForGradingScreen from './src/screens/admin/grades/StudentsListForGradingScreen';
+import AddGradesScreen from './src/screens/admin/grades/AddGradesScreen';
+import ShowGradesRecordScreen from './src/screens/admin/grades/ShowGradesRecordScreen';
+import SubjectCrudScreen from './src/screens/admin/subjects/ManageSubjectsScreen';
+import GradeSettingsScreen from './src/screens/admin/GradeSettingsScreen';
 
 const Stack = createStackNavigator();
 
@@ -85,12 +90,18 @@ export default function App() {
         <Stack.Screen name="ClassManagementMain" component={ClassManagementMainScreen} />
         <Stack.Screen name="ManageClasses" component={ManageClassesScreen} />
         <Stack.Screen name="ManageSubjects" component={ManageSubjectsScreen} />
+        
         <Stack.Screen name="AssignClassesWithSearch" component={AssignClassesWithSearchScreen} />
+        
+        {/* Admin Grades Management Screens */}
+        <Stack.Screen name="GradesManagement" component={GradesManagementScreen} />
         <Stack.Screen name="SelectClassForGrading" component={SelectClassForGradingScreen} />
         <Stack.Screen name="GradeNow" component={GradeNowScreen} />
         <Stack.Screen name="StudentsListForGrading" component={StudentsListForGradingScreen} />
         <Stack.Screen name="AddGrades" component={AddGradesScreen} />
         <Stack.Screen name="ShowGradesRecord" component={ShowGradesRecordScreen} />
+        <Stack.Screen name="SubjectCrudScreen" component={SubjectCrudScreen} />
+        <Stack.Screen name="GradeSettings" component={GradeSettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

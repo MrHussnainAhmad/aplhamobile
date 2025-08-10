@@ -10,7 +10,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { userAPI } from '../../services/api';
+import { adminAPI, classesAPI } from '../../../services/api';
 
 const SelectClassForGradingScreen = ({ navigation }) => {
   const [teacherClasses, setTeacherClasses] = useState([]);
@@ -23,13 +23,14 @@ const SelectClassForGradingScreen = ({ navigation }) => {
   const fetchTeacherClasses = async () => {
     setLoading(true);
     try {
-      const response = await userAPI.getTeacherProfile();
-      if (response.data.profile && response.data.profile.classes) {
-        setTeacherClasses(response.data.profile.classes.filter(Boolean));
+      // Since this is admin panel, fetch all classes instead of teacher-specific classes
+      const response = await classesAPI.getAllClasses();
+      if (response.data && response.data.classes) {
+        setTeacherClasses(response.data.classes.filter(Boolean));
       }
     } catch (error) {
-      console.error('Error fetching teacher classes for grading:', error);
-      Alert.alert('Error', 'Failed to load your classes for grading.');
+      console.error('Error fetching classes for grading:', error);
+      Alert.alert('Error', 'Failed to load classes for grading.');
     } finally {
       setLoading(false);
     }
@@ -51,9 +52,9 @@ const SelectClassForGradingScreen = ({ navigation }) => {
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <Ionicons name="school-outline" size={80} color="#BDC3C7" />
-      <Text style={styles.emptyTitle}>No Classes Assigned</Text>
+      <Text style={styles.emptyTitle}>No Classes Available</Text>
       <Text style={styles.emptyText}>
-        You have no classes assigned. Please contact admin.
+        No classes have been created yet. Please create classes first in the Class Management section.
       </Text>
     </View>
   );

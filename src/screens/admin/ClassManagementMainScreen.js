@@ -17,6 +17,10 @@ const ClassManagementMainScreen = ({ navigation }) => {
     navigation.navigate('ManageSubjects');
   };
 
+  const handleManageSubjectsCRUD = () => {
+    navigation.navigate('SubjectCrudScreen');
+  };
+
   const handleViewClasses = () => {
     // Placeholder - will be implemented later
     // Alert.alert('Coming Soon', 'This feature will be available in the next update.');
@@ -66,11 +70,19 @@ const ClassManagementMainScreen = ({ navigation }) => {
           )}
 
           {renderMenuButton(
-            'Manage Subjects',
+            'Assign Subjects',
             'Assign subjects to teachers with assigned classes',
             'library-outline',
             '#27AE60',
             handleManageSubjects
+          )}
+
+          {renderMenuButton(
+            'Manage Subjects (CRUD)',
+            'Create, edit, and delete subjects',
+            'add-circle-outline',
+            '#E74C3C',
+            handleManageSubjectsCRUD
           )}
 
           {renderMenuButton(
@@ -90,7 +102,8 @@ const ClassManagementMainScreen = ({ navigation }) => {
           </View>
           <Text style={styles.infoText}>
             • <Text style={styles.boldText}>Manage Classes:</Text> Create new classes and assign them to verified teachers{'\n'}
-            • <Text style={styles.boldText}>Manage Subjects:</Text> Assign subjects to teachers who already have classes{'\n'}
+            • <Text style={styles.boldText}>Assign Subjects:</Text> Assign subjects to teachers who already have classes
+            • <Text style={styles.boldText}>Manage Subjects (CRUD):</Text> Create, edit, and delete subjects
             • <Text style={styles.boldText}>View Classes:</Text> Will show detailed class analytics and reports
           </Text>
         </View>

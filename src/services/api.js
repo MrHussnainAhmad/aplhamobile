@@ -156,9 +156,24 @@ export const adminAPI = {
   // Subject Management for Teachers
   assignSubjectToTeacher: (data) => api.post('/admin/assign-subjects', data),
   removeSubjectFromTeacher: (data) => api.post('/admin/remove-subjects', data),
-  
-  // Get all subjects (might be useful for subject management)
-  getAllSubjects: () => api.get('/admin/subjects'),
+
+  // Subject Management
+  getAllSubjects: () => api.get('/subjects'),
+  createSubject: (data) => api.post('/subjects', data),
+  updateSubject: (id, data) => api.put(`/subjects/${id}`, data),
+  deleteSubject: (id) => api.delete(`/subjects/${id}`),
+
+  // Grade Management
+  addGrades: (data) => api.post('/grades', data),
+  getGradesByStudentId: (studentId) => api.get(`/grades/student/${studentId}`),
+  getGradesByExamId: (examId, examDate) => {
+    const params = examDate ? `?examDate=${examDate}` : '';
+    return api.get(`/grades/exam/${examId}${params}`);
+  },
+
+  // Grade Settings
+  getGradeSettings: () => api.get('/admin/grade-settings'),
+  updateGradeSettings: (data) => api.post('/admin/grade-settings', data),
 };
 
 // Teacher API functions
@@ -166,8 +181,6 @@ export const teacherAPI = {
   // Get all students
   getAllStudents: () => api.get('/teacher/students'),
   
-  // Get all unique subjects
-  getSubjects: () => api.get('/teacher/subjects'),
 
   // Get teacher dashboard stats
   getDashboardStats: () => api.get('/teacher/dashboard-stats'),

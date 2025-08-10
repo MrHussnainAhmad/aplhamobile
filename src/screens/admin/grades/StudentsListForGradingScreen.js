@@ -11,7 +11,7 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { teacherAPI } from '../../services/api';
+import { adminAPI } from '../../../services/api';
 
 const StudentsListForGradingScreen = ({ route, navigation }) => {
   const { classId, className } = route.params;
@@ -25,8 +25,8 @@ const StudentsListForGradingScreen = ({ route, navigation }) => {
   const fetchStudentsInClass = async () => {
     setLoading(true);
     try {
-      // Using the existing API to get all students and filter by class
-      const response = await teacherAPI.getAllStudents();
+      // Using admin API to get all students and filter by class
+      const response = await adminAPI.getAllStudents();
       if (response.data.students) {
         // Filter students who belong to this class
         const classStudents = response.data.students.filter(student => {

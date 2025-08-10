@@ -21,16 +21,28 @@ const ManageSubjectsScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
-  const [newSubject, setNewSubject] = useState('');
-  const [availableSubjects] = useState([
-    'Mathematics', 'English', 'Urdu', 'Physics', 'Chemistry', 'Biology',
-    'Computer Science', 'History', 'Geography', 'Islamiat', 'Pakistan Studies',
-    'Arabic', 'French', 'Art', 'Physical Education'
-  ]);
+  const [availableSubjects, setAvailableSubjects] = useState([]);
 
   useEffect(() => {
     fetchTeachersWithClasses();
+    fetchAvailableSubjects();
   }, []);
+
+  const fetchAvailableSubjects = async () => {
+    try {
+      const response = await adminAPI.getAllSubjects();
+      if (response.data && response.data.subjects) {
+        setAvailableSubjects(response.data.subjects.map(s => s.name));
+      }
+    } catch (error) {
+      console.error('Error fetching available subjects:', error);
+      Alert.alert('Error', 'Failed to load available subjects.');
+    }
+  };
+
+  
+
+  
 
   // Add navigation focus listener to refresh data when screen comes into focus
   useEffect(() => {
@@ -121,27 +133,12 @@ const ManageSubjectsScreen = ({ navigation }) => {
   const openAssignModal = (teacher) => {
     setSelectedTeacher(teacher);
     setModalVisible(true);
-    setNewSubject('');
   };
 
   const handleQuickAssign = (subject) => {
     if (selectedTeacher && !selectedTeacher.subjects.includes(subject)) {
       handleAssignSubjects(selectedTeacher._id, subject);
       setModalVisible(false);
-    }
-  };
-
-  const handleCustomAssign = () => {
-    if (!newSubject.trim()) {
-      Alert.alert('Error', 'Please enter a subject name.');
-      return;
-    }
-    
-    if (selectedTeacher && !selectedTeacher.subjects.includes(newSubject.trim())) {
-      handleAssignSubjects(selectedTeacher._id, newSubject.trim());
-      setModalVisible(false);
-    } else {
-      Alert.alert('Error', 'This subject is already assigned to this teacher.');
     }
   };
 
@@ -238,20 +235,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
           </View>
 
           <Text style={styles.sectionTitle}>Or Add Custom Subject:</Text>
-          <View style={styles.customInputContainer}>
-            <TextInput
-              style={styles.customInput}
-              placeholder="Enter subject name"
-              value={newSubject}
-              onChangeText={setNewSubject}
-            />
-            <TouchableOpacity
-              style={styles.addCustomButton}
-              onPress={handleCustomAssign}
-            >
-              <Text style={styles.addCustomButtonText}>Add</Text>
-            </TouchableOpacity>
-          </View>
+          <Text style={styles.contactPrincipalText}>If Your Subject is still not here, please Contact Principal!</Text>
 
           <View style={styles.modalActions}>
             <TouchableOpacity
@@ -625,6 +609,13 @@ const styles = StyleSheet.create({
     color: '#7F8C8D',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  contactPrincipalText: {
+    fontSize: 14,
+    color: '#7F8C8D',
+    textAlign: 'center',
+    marginTop: 10,
+    paddingBottom: 20,
   },
 });
 

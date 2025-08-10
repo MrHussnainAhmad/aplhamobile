@@ -175,21 +175,7 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.menuItem}
-          onPress={() => navigation.navigate('SelectClassForGrading')}
-        >
-          <View style={styles.menuItemContent}>
-            <View style={styles.menuIconContainer}>
-              <Ionicons name="school-outline" size={24} color="#27AE60" />
-            </View>
-            <View style={styles.menuTextContainer}>
-              <Text style={styles.menuItemTitle}>Manage Student Grades</Text>
-              <Text style={styles.menuItemSubtitle}>Grade students and view class performance</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
-          </View>
-        </TouchableOpacity>
+        {/* Grades management moved to admin panel */}
 
         <TouchableOpacity 
           style={styles.menuItem}
@@ -335,6 +321,22 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuItemTitle}>Manage Students</Text>
               <Text style={styles.menuItemSubtitle}>Add, edit, and manage student accounts</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('GradesManagement')}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="school-outline" size={24} color="#27AE60" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Manage Student Grades</Text>
+              <Text style={styles.menuItemSubtitle}>Add, edit, and manage student grades</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>

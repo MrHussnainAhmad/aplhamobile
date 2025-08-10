@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { teacherAPI } from '../../services/api';
+import { teacherAPI } from '../../../services/api';
 
 const ShowGradesRecordScreen = ({ route, navigation }) => {
   const { studentId, studentName } = route.params;
