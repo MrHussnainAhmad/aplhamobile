@@ -114,7 +114,11 @@ const LoginScreen = ({ navigation }) => {
 
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
-    navigation.replace('Home');
+    // Reset navigation stack to prevent going back to login
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Home' }],
+    });
   };
 
   const handleErrorModalClose = () => {

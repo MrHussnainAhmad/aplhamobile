@@ -70,9 +70,17 @@ const SplashScreen = ({ navigation }) => {
       setTimeout(async () => {
         const isAuthenticated = await storage.isAuthenticated();
         if (isAuthenticated) {
-          navigation.replace('Home');
+          // Reset navigation stack to prevent going back to splash
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          });
         } else {
-          navigation.replace('Login');
+          // Reset navigation stack to prevent going back to splash
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }],
+          });
         }
       }, 3000);
     };

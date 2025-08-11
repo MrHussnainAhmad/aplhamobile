@@ -65,7 +65,14 @@ export default function App() {
           <Stack.Screen name="UserType" component={UserTypeScreen} />
           <Stack.Screen name="TeacherSignup" component={TeacherSignupScreen} />
           <Stack.Screen name="StudentSignup" component={StudentSignupScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen 
+            name="Home" 
+            component={HomeScreen}
+            options={{
+              gestureEnabled: false,
+              headerLeft: null,
+            }}
+          />
           <Stack.Screen name="ManageApp" component={ManageAppScreen} />
           <Stack.Screen name="ManageStudents" component={ManageStudentsScreen} />
           <Stack.Screen name="ManageTeachers" component={ManageTeachersScreen} />

@@ -8,6 +8,7 @@ import {
   Alert,
   Image,
   Linking,
+  BackHandler,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { storage } from '../utils/storage';
@@ -28,6 +29,41 @@ const HomeScreen = ({ navigation }) => {
 
     return unsubscribe;
   }, [navigation]);
+
+  // Prevent navigation back to login/signup screens
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      // Prevent going back to login/signup screens
+      if (e.target.includes('Login') || e.target.includes('Signup') || e.target.includes('UserType')) {
+        e.preventDefault();
+        Alert.alert(
+          'Cannot Go Back',
+          'You cannot go back to the login screen. Use the logout button instead.',
+          [{ text: 'OK' }]
+        );
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  // Handle hardware back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      // Prevent going back to login/signup screens
+      Alert.alert(
+        'Exit App',
+        'Are you sure you want to exit the app?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Exit', style: 'destructive', onPress: () => BackHandler.exitApp() },
+        ]
+      );
+      return true; // Prevent default back behavior
+    });
+
+    return () => backHandler.remove();
+  }, []);
 
   useEffect(() => {
     loadUserData();
@@ -100,7 +136,11 @@ const HomeScreen = ({ navigation }) => {
           onPress: async () => {
             try {
               await storage.clearUserData();
-              navigation.replace('Login');
+              // Reset the entire navigation stack to prevent going back
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
             } catch (error) {
               console.error('Logout error:', error);
               Alert.alert('Error', 'Failed to logout');
