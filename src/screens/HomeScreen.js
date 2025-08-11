@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { storage } from '../utils/storage';
 import { adminAPI, teacherAPI } from '../services/api';
+import { useFocusEffect } from '@react-navigation/native';
 
 const HomeScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);

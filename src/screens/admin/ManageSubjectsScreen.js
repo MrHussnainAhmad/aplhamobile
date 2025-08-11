@@ -11,6 +11,7 @@ import {
   TextInput,
   Modal,
   RefreshControl,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { adminAPI } from '../../services/api';
@@ -22,11 +23,34 @@ const ManageSubjectsScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [availableSubjects, setAvailableSubjects] = useState([]);
+  const [classes, setClasses] = useState([]);
+  
+  // Timetable assignment state
+  const [timetableModalVisible, setTimetableModalVisible] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState('');
+  const [selectedClass, setSelectedClass] = useState('');
+  const [selectedDay, setSelectedDay] = useState('');
+  const [timeSlot, setTimeSlot] = useState('');
+  const [subjectAssignments, setSubjectAssignments] = useState([]);
+
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   useEffect(() => {
     fetchTeachersWithClasses();
     fetchAvailableSubjects();
+    fetchClasses();
   }, []);
+
+  const fetchClasses = async () => {
+    try {
+      const response = await adminAPI.getAllClasses();
+      if (response.data && response.data.classes) {
+        setClasses(response.data.classes);
+      }
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+    }
+  };
 
   const fetchAvailableSubjects = async () => {
     try {
@@ -39,10 +63,6 @@ const ManageSubjectsScreen = ({ navigation }) => {
       Alert.alert('Error', 'Failed to load available subjects.');
     }
   };
-
-  
-
-  
 
   // Add navigation focus listener to refresh data when screen comes into focus
   useEffect(() => {
@@ -97,6 +117,79 @@ const ManageSubjectsScreen = ({ navigation }) => {
       console.error('Error assigning subjects:', error);
       Alert.alert('Error', error.response?.data?.message || 'Failed to assign subjects.');
     }
+  };
+
+  const handleAssignSubjectsWithTimetable = async () => {
+    if (!selectedTeacher || subjectAssignments.length === 0) {
+      Alert.alert('Error', 'Please select a teacher and add at least one subject assignment.');
+      return;
+    }
+
+    try {
+      const response = await adminAPI.assignSubjectsWithTimetable({
+        teacherId: selectedTeacher._id,
+        subjectAssignments: subjectAssignments
+      });
+      
+      if (response.data.teacher) {
+        setTeachers(teachers.map(t => 
+          t._id === selectedTeacher._id ? response.data.teacher : t
+        ));
+        Alert.alert('Success', `Subjects assigned successfully with timetable! (${response.data.timetableEntries} entries created)`);
+        setTimetableModalVisible(false);
+        resetTimetableForm();
+      }
+    } catch (error) {
+      console.error('Error assigning subjects with timetable:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to assign subjects with timetable.');
+    }
+  };
+
+  const addSubjectAssignment = () => {
+    if (!selectedSubject || !selectedClass || !selectedDay || !timeSlot) {
+      Alert.alert('Error', 'Please fill in all fields.');
+      return;
+    }
+
+    // Validate time slot format
+    const timeSlotRegex = /^\d{2}:\d{2}-\d{2}:\d{2}$/;
+    if (!timeSlotRegex.test(timeSlot)) {
+      Alert.alert('Error', 'Time slot must be in format HH:MM-HH:MM (e.g., 09:00-10:00)');
+      return;
+    }
+
+    const newAssignment = {
+      subject: selectedSubject,
+      classId: selectedClass,
+      day: selectedDay,
+      timeSlot: timeSlot
+    };
+
+    setSubjectAssignments([...subjectAssignments, newAssignment]);
+    
+    // Reset form fields
+    setSelectedSubject('');
+    setSelectedClass('');
+    setSelectedDay('');
+    setTimeSlot('');
+  };
+
+  const removeSubjectAssignment = (index) => {
+    setSubjectAssignments(subjectAssignments.filter((_, i) => i !== index));
+  };
+
+  const resetTimetableForm = () => {
+    setSelectedSubject('');
+    setSelectedClass('');
+    setSelectedDay('');
+    setTimeSlot('');
+    setSubjectAssignments([]);
+  };
+
+  const openTimetableModal = (teacher) => {
+    setSelectedTeacher(teacher);
+    setTimetableModalVisible(true);
+    resetTimetableForm();
   };
 
   const handleRemoveSubject = async (teacherId, subject) => {
@@ -188,12 +281,20 @@ const ManageSubjectsScreen = ({ navigation }) => {
             Verified • {teacher.classes?.map(cls => cls.name).join(', ') || 'No classes'}
           </Text>
         </View>
-        <TouchableOpacity
-          style={styles.assignButton}
-          onPress={() => openAssignModal(teacher)}
-        >
-          <Ionicons name="add-circle" size={24} color="#4A90E2" />
-        </TouchableOpacity>
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={styles.assignButton}
+            onPress={() => openAssignModal(teacher)}
+          >
+            <Ionicons name="add-circle" size={24} color="#4A90E2" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.timetableButton}
+            onPress={() => openTimetableModal(teacher)}
+          >
+            <Ionicons name="time" size={24} color="#27AE60" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.subjectsSection}>
@@ -243,6 +344,121 @@ const ManageSubjectsScreen = ({ navigation }) => {
               onPress={() => setModalVisible(false)}
             >
               <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const TimetableAssignmentModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={timetableModalVisible}
+      onRequestClose={() => setTimetableModalVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>
+              Assign Timetable for {selectedTeacher?.fullname}
+            </Text>
+            <TouchableOpacity onPress={() => setTimetableModalVisible(false)}>
+              <Ionicons name="close" size={24} color="#7F8C8D" />
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.sectionTitle}>Select Subject:</Text>
+          <View style={styles.subjectSelectContainer}>
+            <TextInput
+              style={styles.customInput}
+              placeholder="Subject"
+              value={selectedSubject}
+              onChangeText={setSelectedSubject}
+            />
+            <TouchableOpacity
+              style={styles.addCustomButton}
+              onPress={addSubjectAssignment}
+            >
+              <Text style={styles.addCustomButtonText}>Add Subject</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.sectionTitle}>Select Class:</Text>
+                     <ScrollView contentContainerStyle={styles.classSelectContainer}>
+             {classes.map(cls => (
+               <TouchableOpacity
+                 key={cls._id}
+                 style={[
+                   styles.classSelectButton,
+                   selectedClass === cls._id && styles.selectedClassButton
+                 ]}
+                 onPress={() => setSelectedClass(cls._id)}
+               >
+                 <Text style={styles.classSelectText}>{cls.classNumber}-{cls.section}</Text>
+               </TouchableOpacity>
+             ))}
+           </ScrollView>
+
+          <Text style={styles.sectionTitle}>Select Day:</Text>
+          <ScrollView contentContainerStyle={styles.daySelectContainer}>
+            {days.map(day => (
+              <TouchableOpacity
+                key={day}
+                style={[
+                  styles.daySelectButton,
+                  selectedDay === day && styles.selectedDayButton
+                ]}
+                onPress={() => setSelectedDay(day)}
+              >
+                <Text style={styles.daySelectText}>{day}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <Text style={styles.sectionTitle}>Select Time Slot:</Text>
+          <View style={styles.timeSlotContainer}>
+            <TextInput
+              style={styles.customInput}
+              placeholder="HH:MM-HH:MM"
+              value={timeSlot}
+              onChangeText={setTimeSlot}
+            />
+          </View>
+
+                     <View style={styles.subjectAssignmentsList}>
+             {subjectAssignments.map((assignment, index) => {
+               const classObj = classes.find(c => c._id === assignment.classId);
+               return (
+                 <View key={index} style={styles.subjectAssignmentItem}>
+                   <Text style={styles.assignmentSubject}>{assignment.subject}</Text>
+                   <Text style={styles.assignmentClass}>{classObj ? `${classObj.classNumber}-${classObj.section}` : assignment.classId}</Text>
+                   <Text style={styles.assignmentDay}>{assignment.day}</Text>
+                   <Text style={styles.assignmentTimeSlot}>{assignment.timeSlot}</Text>
+                   <TouchableOpacity
+                     onPress={() => removeSubjectAssignment(index)}
+                     style={styles.removeAssignmentButton}
+                   >
+                     <Ionicons name="close-circle" size={18} color="#E74C3C" />
+                   </TouchableOpacity>
+                 </View>
+               );
+             })}
+           </View>
+
+          <View style={styles.modalActions}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.cancelButton]}
+              onPress={() => setTimetableModalVisible(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.confirmButton]}
+              onPress={handleAssignSubjectsWithTimetable}
+            >
+              <Text style={styles.confirmButtonText}>Assign Timetable</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -331,6 +547,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
       </View>
 
       <AssignSubjectModal />
+      <TimetableAssignmentModal />
     </SafeAreaView>
   );
 };
@@ -423,7 +640,14 @@ const styles = StyleSheet.create({
     color: '#27AE60',
     fontWeight: '500',
   },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 10,
+  },
   assignButton: {
+    padding: 8,
+  },
+  timetableButton: {
     padding: 8,
   },
   subjectsSection: {
@@ -617,6 +841,107 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
     paddingBottom: 20,
+  },
+  // Timetable Assignment Modal Styles
+  subjectSelectContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  classSelectContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 20,
+  },
+  classSelectButton: {
+    backgroundColor: '#F8F9FA',
+    borderWidth: 1,
+    borderColor: '#E1E8ED',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  selectedClassButton: {
+    backgroundColor: '#4A90E2',
+    borderColor: '#4A90E2',
+  },
+  classSelectText: {
+    fontSize: 14,
+    color: '#2C3E50',
+    fontWeight: '500',
+  },
+  daySelectContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 20,
+  },
+  daySelectButton: {
+    backgroundColor: '#F8F9FA',
+    borderWidth: 1,
+    borderColor: '#E1E8ED',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  selectedDayButton: {
+    backgroundColor: '#4A90E2',
+    borderColor: '#4A90E2',
+  },
+  daySelectText: {
+    fontSize: 14,
+    color: '#2C3E50',
+    fontWeight: '500',
+  },
+  timeSlotContainer: {
+    marginBottom: 20,
+  },
+  subjectAssignmentsList: {
+    marginTop: 10,
+  },
+  subjectAssignmentItem: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#E1E8ED',
+  },
+  assignmentSubject: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    flex: 1,
+  },
+  assignmentClass: {
+    fontSize: 12,
+    color: '#7F8C8D',
+    marginLeft: 10,
+  },
+  assignmentDay: {
+    fontSize: 12,
+    color: '#7F8C8D',
+    marginLeft: 10,
+  },
+  assignmentTimeSlot: {
+    fontSize: 12,
+    color: '#7F8C8D',
+    marginLeft: 10,
+  },
+  removeAssignmentButton: {
+    marginLeft: 10,
+  },
+  confirmButton: {
+    backgroundColor: '#27AE60',
+  },
+  confirmButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

@@ -163,6 +163,16 @@ export const adminAPI = {
   updateSubject: (id, data) => api.put(`/subjects/${id}`, data),
   deleteSubject: (id) => api.delete(`/subjects/${id}`),
 
+  // Enhanced Subject Assignment with Timetable
+  assignSubjectsWithTimetable: (data) => api.post('/admin/assign-subjects-with-timetable', data),
+  
+  // Timetable Management
+  getTimetable: (classId) => api.get(`/admin/timetable/${classId}`),
+  removeTimetableEntry: (entryId) => api.delete(`/admin/timetable/${entryId}`),
+  
+  // Class Management
+  getAllClasses: () => api.get('/classes'),
+
   // Grade Management
   addGrades: (data) => api.post('/grades', data),
   getGradesByStudentId: (studentId) => api.get(`/grades/student/${studentId}`),
