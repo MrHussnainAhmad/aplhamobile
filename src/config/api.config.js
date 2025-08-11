@@ -1,7 +1,7 @@
 // API Configuration for different environments
 const API_CONFIG = {
   // Your computer's local IP (when backend runs locally)
-  // LOCAL_IP: 'http://192.168.3.1:5000/api',
+  LOCAL_IP: 'http://192.168.3.1:5000/api',
   
   // For Android emulator
   // ANDROID_EMULATOR: 'http://10.0.2.2:5000/api',
@@ -28,7 +28,7 @@ const API_CONFIG = {
 // - 'IOS_SIMULATOR' for iOS simulator
 // - 'REMOTE_DEVICE' for backend on different device
 // - 'PRODUCTION' for production backend
-const CURRENT_ENV = 'PRODUCTION';
+const CURRENT_ENV = 'LOCAL_IP';
 
 // Helper function to get the current API URL
 export const getApiUrl = () => {
