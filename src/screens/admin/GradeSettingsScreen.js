@@ -172,44 +172,61 @@ const GradeSettingsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F4F6F8', // Softer neutral tone
+    paddingTop: 33,
   },
+
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F4F6F8',
   },
   loadingText: {
-    marginTop: 10,
+    marginTop: 12,
     fontSize: 16,
-    color: '#2C3E50',
+    color: '#1F2D3D',
+    fontWeight: '500',
+    letterSpacing: 0.3,
   },
+
   header: {
     backgroundColor: '#FFFFFF',
-    paddingTop: 10,
+    paddingTop: 14,
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 18,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+
+    // Soft shadow for iOS + elevation for Android
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 3,
+
+    borderBottomWidth: 1,
+    borderBottomColor: '#E6EAF0',
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2C3E50',
+    fontWeight: '700',
+    color: '#1F2D3D',
+    letterSpacing: 0.5,
   },
   backButton: {
-    width: 24,
+    width: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    backgroundColor: '#F0F2F5',
   },
   headerRight: {
-    width: 24,
+    width: 28,
   },
+
   content: {
     flexGrow: 1,
     padding: 20,
@@ -217,18 +234,19 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 15,
-    color: '#555',
+    color: '#5D6D7E',
     textAlign: 'center',
-    marginBottom: 25,
+    marginBottom: 28,
     lineHeight: 22,
   },
+
   inputGroup: {
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 22,
   },
   label: {
     fontSize: 16,
-    color: '#2C3E50',
+    color: '#1F2D3D',
     marginBottom: 8,
     fontWeight: '600',
   },
@@ -239,36 +257,44 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: '#2C3E50',
+
+    // Subtle shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.04,
     shadowRadius: 2,
-    elevation: 2,
+    elevation: 1,
+
+    borderWidth: 1,
+    borderColor: '#E6EAF0',
   },
+
   saveButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#28A745',
     paddingVertical: 15,
-    paddingHorizontal: 30,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
     marginTop: 20,
+    flexDirection: 'row',
+
+    // Stronger shadow for button
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3.84,
-    elevation: 5,
-    flexDirection: 'row',
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
   saveButtonText: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
     marginLeft: 8,
+    letterSpacing: 0.3,
   },
   disabledButton: {
-    backgroundColor: '#95a5a6',
+    backgroundColor: '#AAB7B8',
   },
 });
 

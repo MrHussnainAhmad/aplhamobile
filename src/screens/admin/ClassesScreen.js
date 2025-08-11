@@ -185,7 +185,7 @@ const ClassesScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingTop: 33,
     backgroundColor: '#F8F9FA',
   },
   loadingContainer: {

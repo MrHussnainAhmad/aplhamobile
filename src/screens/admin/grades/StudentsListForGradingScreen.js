@@ -146,6 +146,7 @@ const StudentsListForGradingScreen = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 33,
     flex: 1,
     backgroundColor: '#F5F7FA',
   },

@@ -36,12 +36,12 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const [allSubjects, setAllSubjects] = useState([]);
   const [selectedSubjects, setSelectedSubjects] = useState(teacher.subjects || []);
-  const [selectedSubject, setSelectedSubject] = useState('');
+  
 
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const response = await teacherAPI.getSubjects();
+                const response = await adminAPI.getAllSubjects();
         setAllSubjects(response.data.subjects);
       } catch (error) {
         console.error('Failed to fetch subjects:', error);
@@ -55,12 +55,7 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleAddSubject = () => {
-    if (selectedSubject && !selectedSubjects.includes(selectedSubject)) {
-      setSelectedSubjects([...selectedSubjects, selectedSubject]);
-      setSelectedSubject('');
-    }
-  };
+  
 
   const handleRemoveSubject = (subjectToRemove) => {
     setSelectedSubjects(selectedSubjects.filter(subject => subject !== subjectToRemove));
@@ -289,25 +284,7 @@ const UpdateTeacherScreen = ({ navigation, route }) => {
                 </View>
               ))}
             </View>
-            <View style={styles.addSubjectContainer}>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={selectedSubject}
-                  onValueChange={(itemValue) => setSelectedSubject(itemValue)}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select a subject" value="" />
-                  {allSubjects
-                    .filter(sub => !selectedSubjects.includes(sub))
-                    .map((subject, index) => (
-                      <Picker.Item key={index} label={subject} value={subject} />
-                    ))}
-                </Picker>
-              </View>
-              <TouchableOpacity style={styles.addButton} onPress={handleAddSubject}>
-                <Text style={styles.addButtonText}>Add</Text>
-              </TouchableOpacity>
-            </View>
+            
           </View>
 
           <View style={styles.inputContainer}>

@@ -596,6 +596,7 @@ const AddGradesScreen = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop:33,
     flex: 1,
     backgroundColor: '#F8F9FA',
   },

@@ -1,9 +1,12 @@
+import 'react-native-gesture-handler';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
+// 1. Import SafeAreaProvider
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-// Import screens
+// Import screens (all your screen imports remain the same)
 import SplashScreen from './src/screens/SplashScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import UserTypeScreen from './src/screens/UserTypeScreen';
@@ -20,12 +23,10 @@ import TeacherProfileScreen from './src/screens/teacher/TeacherProfileScreen';
 import MyClassesScreen from './src/screens/teacher/MyClassesScreen';
 import AssignStudentsScreen from './src/screens/teacher/AssignStudentsScreen';
 import ClassStudentsScreen from './src/screens/teacher/ClassStudentsScreen';
-
 import StudentProfileScreen from './src/screens/student/StudentProfileScreen';
 import UploadFeeVoucherScreen from './src/screens/student/UploadFeeVoucherScreen';
 import MyCoursesScreen from './src/screens/student/MyCoursesScreen';
 import GradesScreen from './src/screens/student/GradesScreen';
-
 import FeeVoucherDetailPage from './src/screens/admin/FeeVoucherDetailPage';
 import FeeManagementScreen from './src/screens/admin/FeeManagementScreen';
 import SystemDetailScreen from './src/screens/admin/SystemDetailScreen';
@@ -35,9 +36,7 @@ import AssignClassesScreen from './src/screens/admin/AssignClassesScreen';
 import ClassManagementMainScreen from './src/screens/admin/ClassManagementMainScreen';
 import ManageClassesScreen from './src/screens/admin/ManageClassesScreen';
 import ManageSubjectsScreen from './src/screens/admin/ManageSubjectsScreen';
-
 import AssignClassesWithSearchScreen from './src/screens/admin/AssignClassesWithSearchScreen';
-// Admin Grades Management Screens
 import GradesManagementScreen from './src/screens/admin/grades/GradesManagementScreen';
 import SelectClassForGradingScreen from './src/screens/admin/grades/SelectClassForGradingScreen';
 import GradeNowScreen from './src/screens/admin/grades/GradeNowScreen';
@@ -51,60 +50,57 @@ const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <StatusBar style="auto" />
-      <Stack.Navigator 
-        initialRouteName="Splash"
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="Splash" component={SplashScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="UserType" component={UserTypeScreen} />
-        <Stack.Screen name="TeacherSignup" component={TeacherSignupScreen} />
-        <Stack.Screen name="StudentSignup" component={StudentSignupScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="ManageApp" component={ManageAppScreen} />
-        <Stack.Screen name="ManageStudents" component={ManageStudentsScreen} />
-        <Stack.Screen name="ManageTeachers" component={ManageTeachersScreen} />
-        <Stack.Screen name="UpdateStudent" component={UpdateStudentScreen} />
-        <Stack.Screen name="UpdateTeacherScreen" component={UpdateTeacherScreen} />
-        <Stack.Screen name="CreateTeacherScreen" component={CreateTeacherScreen} />
-        <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} />
-        <Stack.Screen name="MyClasses" component={MyClassesScreen} />
-        <Stack.Screen name="AssignStudents" component={AssignStudentsScreen} />
-        <Stack.Screen name="ClassStudents" component={ClassStudentsScreen} />
-        
-        <Stack.Screen name="StudentProfile" component={StudentProfileScreen} />
-        <Stack.Screen name="UploadFeeVoucher" component={UploadFeeVoucherScreen} />
-        <Stack.Screen name="MyCourses" component={MyCoursesScreen} />
-        <Stack.Screen name="Grades" component={GradesScreen} />
-        
-        <Stack.Screen name="FeeVoucherDetail" component={FeeVoucherDetailPage} />
-        <Stack.Screen name="FeeManagement" component={FeeManagementScreen} />
-        <Stack.Screen name="SystemDetail" component={SystemDetailScreen} />
-        <Stack.Screen name="SchoolPostsScreen" component={SchoolPostsScreen} />
-        <Stack.Screen name="ClassesScreen" component={ClassesScreen} />
-        <Stack.Screen name="AssignClasses" component={AssignClassesScreen} />
-        
-        {/* New Class Management Screens */}
-        <Stack.Screen name="ClassManagementMain" component={ClassManagementMainScreen} />
-        <Stack.Screen name="ManageClasses" component={ManageClassesScreen} />
-        <Stack.Screen name="ManageSubjects" component={ManageSubjectsScreen} />
-        
-        <Stack.Screen name="AssignClassesWithSearch" component={AssignClassesWithSearchScreen} />
-        
-        {/* Admin Grades Management Screens */}
-        <Stack.Screen name="GradesManagement" component={GradesManagementScreen} />
-        <Stack.Screen name="SelectClassForGrading" component={SelectClassForGradingScreen} />
-        <Stack.Screen name="GradeNow" component={GradeNowScreen} />
-        <Stack.Screen name="StudentsListForGrading" component={StudentsListForGradingScreen} />
-        <Stack.Screen name="AddGrades" component={AddGradesScreen} />
-        <Stack.Screen name="ShowGradesRecord" component={ShowGradesRecordScreen} />
-        <Stack.Screen name="SubjectCrudScreen" component={SubjectCrudScreen} />
-        <Stack.Screen name="GradeSettings" component={GradeSettingsScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    // 2. Wrap your NavigationContainer with SafeAreaProvider
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <StatusBar style="auto" />
+        <Stack.Navigator 
+          initialRouteName="Splash"
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          {/* All your Stack.Screen components remain the same */}
+          <Stack.Screen name="Splash" component={SplashScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="UserType" component={UserTypeScreen} />
+          <Stack.Screen name="TeacherSignup" component={TeacherSignupScreen} />
+          <Stack.Screen name="StudentSignup" component={StudentSignupScreen} />
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="ManageApp" component={ManageAppScreen} />
+          <Stack.Screen name="ManageStudents" component={ManageStudentsScreen} />
+          <Stack.Screen name="ManageTeachers" component={ManageTeachersScreen} />
+          <Stack.Screen name="UpdateStudent" component={UpdateStudentScreen} />
+          <Stack.Screen name="UpdateTeacherScreen" component={UpdateTeacherScreen} />
+          <Stack.Screen name="CreateTeacherScreen" component={CreateTeacherScreen} />
+          <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} />
+          <Stack.Screen name="MyClasses" component={MyClassesScreen} />
+          <Stack.Screen name="AssignStudents" component={AssignStudentsScreen} />
+          <Stack.Screen name="ClassStudents" component={ClassStudentsScreen} />
+          <Stack.Screen name="StudentProfile" component={StudentProfileScreen} />
+          <Stack.Screen name="UploadFeeVoucher" component={UploadFeeVoucherScreen} />
+          <Stack.Screen name="MyCourses" component={MyCoursesScreen} />
+          <Stack.Screen name="Grades" component={GradesScreen} />
+          <Stack.Screen name="FeeVoucherDetail" component={FeeVoucherDetailPage} />
+          <Stack.Screen name="FeeManagement" component={FeeManagementScreen} />
+          <Stack.Screen name="SystemDetail" component={SystemDetailScreen} />
+          <Stack.Screen name="SchoolPostsScreen" component={SchoolPostsScreen} />
+          <Stack.Screen name="ClassesScreen" component={ClassesScreen} />
+          <Stack.Screen name="AssignClasses" component={AssignClassesScreen} />
+          <Stack.Screen name="ClassManagementMain" component={ClassManagementMainScreen} />
+          <Stack.Screen name="ManageClasses" component={ManageClassesScreen} />
+          <Stack.Screen name="ManageSubjects" component={ManageSubjectsScreen} />
+          <Stack.Screen name="AssignClassesWithSearch" component={AssignClassesWithSearchScreen} />
+          <Stack.Screen name="GradesManagement" component={GradesManagementScreen} />
+          <Stack.Screen name="SelectClassForGrading" component={SelectClassForGradingScreen} />
+          <Stack.Screen name="GradeNow" component={GradeNowScreen} />
+          <Stack.Screen name="StudentsListForGrading" component={StudentsListForGradingScreen} />
+          <Stack.Screen name="AddGrades" component={AddGradesScreen} />
+          <Stack.Screen name="ShowGradesRecord" component={ShowGradesRecordScreen} />
+          <Stack.Screen name="SubjectCrudScreen" component={SubjectCrudScreen} />
+          <Stack.Screen name="GradeSettings" component={GradeSettingsScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }

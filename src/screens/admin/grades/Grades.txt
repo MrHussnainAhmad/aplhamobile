@@ -1,4 +1,0 @@
-Grade type : Monthly or Weekly or Daily or Surprise
-if monthly/weekly then show all subjects so teacher can select subjects and add there obtain and total marks
-if Daily then let teacher select multiple subject to add there obtain and total marks
-if Surprise then let teacher to select single subject to add there obtain and total marks
