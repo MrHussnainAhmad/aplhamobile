@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -28,7 +28,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
   // Enhanced subject assignment state with timetable
   const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [selectedClass, setSelectedClass] = useState('');
-  const [selectedDay, setSelectedDay] = useState('');
+  const [selectedDays, setSelectedDays] = useState([]); // Changed to array for multi-day selection
   const [subjectTimeSlots, setSubjectTimeSlots] = useState({});
   const [subjectAssignments, setSubjectAssignments] = useState([]);
 
@@ -124,8 +124,8 @@ const ManageSubjectsScreen = ({ navigation }) => {
       return;
     }
 
-    if (!selectedClass || !selectedDay) {
-      Alert.alert('Error', 'Please select class and day.');
+    if (!selectedClass || selectedDays.length === 0) {
+      Alert.alert('Error', 'Please select class and at least one day.');
       return;
     }
 
@@ -150,7 +150,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
       const subjectAssignments = selectedSubjects.map(subject => ({
         subject: subject,
         classId: selectedClass,
-        day: selectedDay,
+        days: selectedDays, // Use selectedDays array
         timeSlot: subjectTimeSlots[subject]
       }));
 
@@ -195,7 +195,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
   const resetAssignmentForm = () => {
     setSelectedSubjects([]);
     setSelectedClass('');
-    setSelectedDay('');
+    setSelectedDays([]);
     setSubjectTimeSlots({});
     setSubjectAssignments([]);
   };
@@ -242,6 +242,16 @@ const ManageSubjectsScreen = ({ navigation }) => {
       handleAssignSubjects(selectedTeacher._id, subject);
       setModalVisible(false);
     }
+  };
+
+  const toggleDaySelection = (day) => {
+    setSelectedDays(prev => {
+      if (prev.includes(day)) {
+        return prev.filter(d => d !== day);
+      } else {
+        return [...prev, day];
+      }
+    });
   };
 
   const renderSubjectChip = (subject, teacherId, canRemove = true) => (
@@ -319,7 +329,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
     </View>
   );
 
-  const AssignSubjectModal = () => (
+  const AssignSubjectModal = useCallback(() => (
     <Modal
       animationType="slide"
       transparent={true}
@@ -361,21 +371,33 @@ const ManageSubjectsScreen = ({ navigation }) => {
                   ))}
                 </ScrollView>
 
-                <Text style={styles.sectionTitle}>Select Day:</Text>
-                <ScrollView contentContainerStyle={styles.daySelectContainer}>
+                <Text style={styles.sectionTitle}>Select Days:</Text>
+                <View style={styles.daySelectContainer}>
                   {days.map(day => (
                     <TouchableOpacity
                       key={day}
                       style={[
                         styles.daySelectButton,
-                        selectedDay === day && styles.selectedDayButton
+                        selectedDays.includes(day) && styles.selectedDayButton
                       ]}
-                      onPress={() => setSelectedDay(day)}
+                      onPress={() => toggleDaySelection(day)}
                     >
-                      <Text style={styles.daySelectText}>{day}</Text>
+                      <Text style={[
+                        styles.daySelectText,
+                        selectedDays.includes(day) && styles.selectedDayText
+                      ]}>
+                        {day}
+                      </Text>
                     </TouchableOpacity>
                   ))}
-                </ScrollView>
+                </View>
+
+                {/* Show "Everyday" option when all days except Sunday are selected */}
+                {selectedDays.length === 6 && !selectedDays.includes('Sunday') && (
+                  <View style={styles.everydayContainer}>
+                    <Text style={styles.everydayText}>✓ Marked as "Everyday" (All days except Sunday)</Text>
+                  </View>
+                )}
 
                 <Text style={styles.sectionTitle}>Set Time Slots:</Text>
                 {selectedSubjects.map(subject => (
@@ -394,11 +416,14 @@ const ManageSubjectsScreen = ({ navigation }) => {
                   <Text style={styles.sectionTitle}>Preview:</Text>
                   {selectedSubjects.map(subject => {
                     const classObj = classes.find(c => c._id === selectedClass);
+                    const dayDisplay = selectedDays.length === 6 && !selectedDays.includes('Sunday') 
+                      ? 'Everyday' 
+                      : selectedDays.join(', ') || 'No days selected';
                     return (
                       <View key={subject} style={styles.previewItem}>
                         <Text style={styles.previewSubject}>{subject}</Text>
                         <Text style={styles.previewDetails}>
-                          {classObj ? `${classObj.classNumber}-${classObj.section}` : 'No class'} • {selectedDay || 'No day'} • {subjectTimeSlots[subject] || 'No time'}
+                          {classObj ? `${classObj.classNumber}-${classObj.section}` : 'No class'} • {dayDisplay} • {subjectTimeSlots[subject] || 'No time'}
                         </Text>
                       </View>
                     );
@@ -427,7 +452,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
         </View>
       </View>
     </Modal>
-  );
+  ), [modalVisible, selectedTeacher, selectedSubjects, selectedClass, selectedDays, subjectTimeSlots, classes, availableSubjects]);
 
   
 
@@ -858,6 +883,18 @@ const styles = StyleSheet.create({
     color: '#2C3E50',
     fontWeight: '500',
   },
+  everydayContainer: {
+    backgroundColor: '#E3F2FD',
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  everydayText: {
+    fontSize: 14,
+    color: '#1976D2',
+    fontWeight: '500',
+  },
   timeSlotContainer: {
     marginBottom: 20,
   },
@@ -962,6 +999,9 @@ const styles = StyleSheet.create({
   previewDetails: {
     fontSize: 14,
     color: '#7F8C8D',
+  },
+  selectedDayText: {
+    color: '#FFFFFF',
   },
 });
 
