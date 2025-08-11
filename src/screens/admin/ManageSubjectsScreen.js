@@ -329,7 +329,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
     </View>
   );
 
-  const AssignSubjectModal = () => (
+  const AssignSubjectModal = useCallback(() => (
     <Modal
       animationType="slide"
       transparent={true}
@@ -452,7 +452,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
         </View>
       </View>
     </Modal>
-  );
+  ), [modalVisible, selectedTeacher, selectedSubjects, selectedClass, selectedDays, subjectTimeSlots, classes, availableSubjects]);
 
   
 

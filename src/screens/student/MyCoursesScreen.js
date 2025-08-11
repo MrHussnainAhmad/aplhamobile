@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { storage } from '../../utils/storage';
 import { classesAPI } from '../../services/api';
 
@@ -9,58 +10,66 @@ const MyCoursesScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    console.log('MyCoursesScreen: useEffect called');
-    const fetchCourses = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const { userData } = await storage.getUserData();
-        console.log('MyCoursesScreen: userData:', userData);
-        
-        if (!userData) {
-          setError('User data not found. Please login again.');
-          return;
-        }
-        
-        if (!userData.class) {
-          setError('You are not assigned to any class yet. Please contact your administrator.');
-          setCourses([]);
-          setTimetable({});
-          return;
-        }
-        
-        const response = await classesAPI.getClassDetails(userData.class);
-        console.log('MyCoursesScreen: response:', response);
-        
-        if (response.data.class) {
-          if (response.data.class.subjects) {
-            setCourses(response.data.class.subjects);
-            console.log('MyCoursesScreen: courses:', response.data.class.subjects);
-          }
-          
-          if (response.data.class.timetable) {
-            setTimetable(response.data.class.timetable);
-            console.log('MyCoursesScreen: timetable:', response.data.class.timetable);
-          }
-        } else {
-          setCourses([]);
-          setTimetable({});
-          setError('No subjects found for your class. Please contact your administrator.');
-        }
-      } catch (error) {
-        console.error('Error fetching courses:', error);
-        setError('Failed to load courses. Please try again later.');
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const { userData } = await storage.getUserData();
+      console.log('MyCoursesScreen: userData:', userData);
+      
+      if (!userData) {
+        setError('User data not found. Please login again.');
+        return;
+      }
+      
+      if (!userData.class) {
+        setError('You are not assigned to any class yet. Please contact your administrator.');
         setCourses([]);
         setTimetable({});
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
+      
+      const response = await classesAPI.getClassDetails(userData.class);
+      console.log('MyCoursesScreen: response:', response);
+      
+      if (response.data.class) {
+        if (response.data.class.subjects) {
+          setCourses(response.data.class.subjects);
+          console.log('MyCoursesScreen: courses:', response.data.class.subjects);
+        }
+        
+        if (response.data.class.timetable) {
+          setTimetable(response.data.class.timetable);
+          console.log('MyCoursesScreen: timetable:', response.data.class.timetable);
+        }
+      } else {
+        setCourses([]);
+        setTimetable({});
+        setError('No subjects found for your class. Please contact your administrator.');
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      setError('Failed to load courses. Please try again later.');
+      setCourses([]);
+      setTimetable({});
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    console.log('MyCoursesScreen: useEffect called');
     fetchCourses();
   }, []);
+
+  // Add focus effect to refresh data when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('MyCoursesScreen: useFocusEffect called');
+      fetchCourses();
+    }, [])
+  );
 
   const renderTimetableItem = ({ item }) => (
     <View style={styles.timetableRow}>
