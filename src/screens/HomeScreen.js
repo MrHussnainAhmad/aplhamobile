@@ -47,23 +47,25 @@ const HomeScreen = ({ navigation }) => {
     return unsubscribe;
   }, [navigation]);
 
-  // Handle hardware back button
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      // Prevent going back to login/signup screens
-      Alert.alert(
-        'Exit App',
-        'Are you sure you want to exit the app?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Exit', style: 'destructive', onPress: () => BackHandler.exitApp() },
-        ]
-      );
-      return true; // Prevent default back behavior
-    });
+  // Handle hardware back button only when HomeScreen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        // Only show exit dialog when on HomeScreen
+        Alert.alert(
+          'Exit App',
+          'Are you sure you want to exit the app?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Exit', style: 'destructive', onPress: () => BackHandler.exitApp() },
+          ]
+        );
+        return true; // Prevent default back behavior
+      });
 
-    return () => backHandler.remove();
-  }, []);
+      return () => backHandler.remove();
+    }, [])
+  );
 
   useEffect(() => {
     loadUserData();
