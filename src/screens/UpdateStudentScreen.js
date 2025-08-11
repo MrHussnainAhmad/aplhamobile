@@ -214,9 +214,12 @@ const UpdateStudentScreen = ({ navigation, route }) => {
               style={styles.textInput}
             >
               <Picker.Item label="Select Class" value="" />
-              {classes.map((c) => (
-                <Picker.Item key={c._id} label={c.name} value={c._id} />
-              ))}
+              {classes.map((c) => {
+                const fullClassName = c.section ? `${c.classNumber}-${c.section}` : c.classNumber;
+                return (
+                  <Picker.Item key={c._id} label={fullClassName} value={c._id} />
+                );
+              })}
             </Picker>
             {errors.class && (
               <Text style={styles.errorText}>{errors.class}</Text>

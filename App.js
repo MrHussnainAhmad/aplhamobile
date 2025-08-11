@@ -44,6 +44,8 @@ import AddGradesScreen from './src/screens/admin/grades/AddGradesScreen';
 import ShowGradesRecordScreen from './src/screens/admin/grades/ShowGradesRecordScreen';
 import SubjectCrudScreen from './src/screens/admin/subjects/ManageSubjectsScreen';
 import GradeSettingsScreen from './src/screens/admin/GradeSettingsScreen';
+import TeacherSchoolPostsScreen from './src/screens/teacher/SchoolPostsScreen';
+import StudentSchoolPostsScreen from './src/screens/student/SchoolPostsScreen';
 
 const Stack = createStackNavigator();
 
@@ -105,6 +107,8 @@ export default function App() {
           <Stack.Screen name="ShowGradesRecord" component={ShowGradesRecordScreen} />
           <Stack.Screen name="SubjectCrudScreen" component={SubjectCrudScreen} />
           <Stack.Screen name="GradeSettings" component={GradeSettingsScreen} />
+          <Stack.Screen name="TeacherSchoolPosts" component={TeacherSchoolPostsScreen} />
+          <Stack.Screen name="StudentSchoolPosts" component={StudentSchoolPostsScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

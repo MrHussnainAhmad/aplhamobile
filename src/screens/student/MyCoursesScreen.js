@@ -17,6 +17,8 @@ const MyCoursesScreen = () => {
       
       const { userData } = await storage.getUserData();
       console.log('MyCoursesScreen: userData:', userData);
+      console.log('MyCoursesScreen: userData.class:', userData?.class);
+      console.log('MyCoursesScreen: userData type:', typeof userData?.class);
       
       if (!userData) {
         setError('User data not found. Please login again.');
@@ -32,6 +34,8 @@ const MyCoursesScreen = () => {
       
       const response = await classesAPI.getClassDetails(userData.class);
       console.log('MyCoursesScreen: response:', response);
+      console.log('MyCoursesScreen: response.data:', response.data);
+      console.log('MyCoursesScreen: response.data.class:', response.data.class);
       
       if (response.data.class) {
         if (response.data.class.subjects) {
@@ -42,6 +46,8 @@ const MyCoursesScreen = () => {
         if (response.data.class.timetable) {
           setTimetable(response.data.class.timetable);
           console.log('MyCoursesScreen: timetable:', response.data.class.timetable);
+          console.log('MyCoursesScreen: timetable keys:', Object.keys(response.data.class.timetable));
+          console.log('MyCoursesScreen: timetable values:', Object.values(response.data.class.timetable));
         }
       } else {
         setCourses([]);
@@ -50,7 +56,13 @@ const MyCoursesScreen = () => {
       }
     } catch (error) {
       console.error('Error fetching courses:', error);
-      setError('Failed to load courses. Please try again later.');
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText
+      });
+      setError(`Failed to load courses: ${error.response?.data?.message || error.message}`);
       setCourses([]);
       setTimetable({});
     } finally {
@@ -150,6 +162,14 @@ const MyCoursesScreen = () => {
 
   const hasTimetable = Object.keys(timetable).length > 0 && 
     Object.values(timetable).some(day => day && day.length > 0);
+
+  // Debug logging
+  console.log('MyCoursesScreen Debug:');
+  console.log('  - timetable keys:', Object.keys(timetable));
+  console.log('  - timetable values:', Object.values(timetable));
+  console.log('  - hasTimetable:', hasTimetable);
+  console.log('  - courses length:', courses.length);
+  console.log('  - Full timetable object:', JSON.stringify(timetable, null, 2));
 
   return (
     <ScrollView style={styles.container}>

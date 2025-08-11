@@ -74,6 +74,8 @@ export const studentAPI = {
   }),
   // Get student's fee vouchers
   getFeeVouchers: () => api.get('/fee-vouchers/my-vouchers'),
+  // Posts
+  getPosts: () => api.get('/posts/student'),
 };
 
 // Admin API functions
@@ -184,6 +186,16 @@ export const adminAPI = {
   // Grade Settings
   getGradeSettings: () => api.get('/admin/grade-settings'),
   updateGradeSettings: (data) => api.post('/admin/grade-settings', data),
+
+  // Posts Management
+  getAllPosts: () => api.get('/posts/admin/all'),
+  createPost: (formData) => api.post('/posts/create', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  deletePost: (postId) => api.delete(`/posts/admin/${postId}`),
+  getPostStats: () => api.get('/posts/stats'),
 };
 
 // Teacher API functions
@@ -212,10 +224,12 @@ export const teacherAPI = {
   // Add marks for a student
   addMarks: (data) => api.post('/teacher/marks', data),
   
-  // Get marks by student ID
+    // Get marks by student ID
   getMarksByStudentId: (studentId) => api.get(`/teacher/marks/${studentId}`),
-  
-};
+   
+  // Posts
+  getPosts: () => api.get('/posts/teacher'),
+ };
 
 export const publicAPI = {
   getClasses: () => api.get('/classes/public'),

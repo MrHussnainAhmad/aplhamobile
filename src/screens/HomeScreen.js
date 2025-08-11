@@ -19,7 +19,8 @@ const HomeScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ teachers: 0, students: 0, announcements: 0 });
+  const [stats, setStats] = useState({ teachers: 0, students: 0, posts: 0 });
+  const [studentStats, setStudentStats] = useState({ subjects: 0, done: 0, average: 0 });
   const [supportPhoneNumber, setSupportPhoneNumber] = useState('');
 
   useEffect(() => {
@@ -75,6 +76,8 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     if (userType === 'admin' || userType === 'teacher') {
       loadStats();
+    } else if (userType === 'student') {
+      loadStudentStats();
     }
   }, [userType]);
 
@@ -83,6 +86,7 @@ const HomeScreen = ({ navigation }) => {
     React.useCallback(() => {
       if (userType === 'student') {
         loadUserData();
+        loadStudentStats();
       }
     }, [userType])
   );
@@ -123,6 +127,24 @@ const HomeScreen = ({ navigation }) => {
     } catch (error) {
       console.error('Error loading stats:', error);
       // Don't show alert for stats error, just keep default values
+    }
+  };
+
+  const loadStudentStats = async () => {
+    try {
+      const { userData } = await storage.getUserData();
+      if (userData && userData.class) {
+        const response = await classesAPI.getClassDetails(userData.class);
+        if (response.data.class && response.data.class.subjects) {
+          setStudentStats({
+            subjects: response.data.class.subjects.length,
+            done: 0, // Placeholder for future implementation
+            average: 0 // Placeholder for future implementation
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading student stats:', error);
     }
   };
 
@@ -273,14 +295,17 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('TeacherSchoolPosts')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="megaphone" size={24} color="#9B59B6" />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuItemTitle}>School Posts</Text>
-              <Text style={styles.menuItemSubtitle}>Post and manage school-wide updates</Text>
+              <Text style={styles.menuItemSubtitle}>View latest updates from admin</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>
@@ -338,7 +363,7 @@ const HomeScreen = ({ navigation }) => {
         </View>
         <View style={styles.statCard}>
           <Ionicons name="megaphone" size={30} color="#9B59B6" />
-          <Text style={styles.statNumber}>{stats.announcements}</Text>
+          <Text style={styles.statNumber}>{stats.posts}</Text>
           <Text style={styles.statLabel}>Posts</Text>
         </View>
       </View>
@@ -509,17 +534,17 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Ionicons name="book-outline" size={30} color="#27AE60" />
-          <Text style={styles.statNumber}>--</Text>
+          <Text style={styles.statNumber}>{studentStats.subjects}</Text>
           <Text style={styles.statLabel}>Subjects</Text>
         </View>
         <View style={styles.statCard}>
           <Ionicons name="checkmark-done" size={30} color="#4A90E2" />
-          <Text style={styles.statNumber}>--</Text>
+          <Text style={styles.statNumber}>{studentStats.done}</Text>
           <Text style={styles.statLabel}>Done</Text>
         </View>
         <View style={styles.statCard}>
           <Ionicons name="trophy" size={30} color="#F39C12" />
-          <Text style={styles.statNumber}>--</Text>
+          <Text style={styles.statNumber}>{studentStats.average}</Text>
           <Text style={styles.statLabel}>Average</Text>
         </View>
       </View>
@@ -602,14 +627,17 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('StudentSchoolPosts')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="notifications" size={24} color="#E74C3C" />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuItemTitle}>School Posts</Text>
-              <Text style={styles.menuItemSubtitle}>View latest updates</Text>
+              <Text style={styles.menuItemSubtitle}>View latest updates from admin</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>
