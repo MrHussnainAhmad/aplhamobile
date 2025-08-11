@@ -52,8 +52,14 @@ const TeacherSignupScreen = ({ navigation }) => {
       }
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      Alert.alert('Error', 'Email format is invalid');
+      return false;
+    }
+
+    const emailRegex = /@(gmail\.com|yahoo\.com|outlook\.com)$/i;
+    if (!emailRegex.test(formData.email.trim())) {
+      Alert.alert('Error', 'Please use a valid email address from Gmail, Yahoo, or Outlook');
       return false;
     }
 

@@ -213,6 +213,7 @@ export const publicAPI = {
 
 export const classesAPI = {
   getAllClasses: () => publicAPI.getClasses(),
+  getClassDetails: (id) => api.get(`/classes/${id}/details`),
 };
 
 // User API functions

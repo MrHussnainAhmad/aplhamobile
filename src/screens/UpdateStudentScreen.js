@@ -130,10 +130,15 @@ const UpdateStudentScreen = ({ navigation, route }) => {
         ? await adminAPI.updateStudent(student._id, formData)
         : await teacherAPI.updateStudent(student._id, formData);
 
+      // Update local storage
+      const { token, user } = await storage.getUserData();
+      const updatedUser = { ...user, ...response.data.student };
+      await storage.storeUserData(token, updatedUser, userType);
+
       Alert.alert('Success', 'Student updated successfully', [
         {
           text: 'OK',
-          onPress: () => navigation.goBack(),
+          onPress: () => navigation.navigate('Home'),
         },
       ]);
     } catch (error) {

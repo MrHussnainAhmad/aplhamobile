@@ -35,6 +35,13 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
+    const emailRegex = /@(gmail\.com|yahoo\.com|outlook\.com)$/i;
+    if (!emailRegex.test(email.trim())) {
+      setModalMessage('Please use a valid email address from Gmail, Yahoo, or Outlook');
+      setShowErrorModal(true);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -88,7 +95,7 @@ const LoginScreen = ({ navigation }) => {
       const { token } = response.data;
       const userData = userType === 'admin' ? response.data.admin : 
                       userType === 'teacher' ? response.data.teacher : 
-                      response.data.student;
+                      { ...response.data.student, class: response.data.student.class };
       
       console.log("Storing user data:", userData);
       await storage.storeUserData(token, userData, userType);
