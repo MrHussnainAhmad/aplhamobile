@@ -195,6 +195,7 @@ const StudentProfileScreen = ({ navigation }) => {
         gender: profile.gender,
         rollNumber: profile.rollNumber,
         classId: profile.class, // Send the selected class ID
+        section: profile.section, // Send the section as well
       };
 
       if (profile.profileImageBase64 && profile.profileImageType) {
