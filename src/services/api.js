@@ -123,7 +123,7 @@ export const adminAPI = {
   resetAppConfig: () => api.post('/admin/app-config/reset'),
 
   // Fee Voucher Management
-  getAllFeeVouchersAdmin: (searchQuery) => api.get(`/fee-vouchers/admin/all?search=${searchQuery}`),
+  getAllFeeVouchersAdmin: (searchQuery, classId) => api.get(`/fee-vouchers/admin/all?search=${searchQuery}&classId=${classId || ''}`),
   getStudentFeeVouchersAdmin: (specialStudentId) => api.get(`/fee-vouchers/admin/${specialStudentId}`),
 
   // Class Management

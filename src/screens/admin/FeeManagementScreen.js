@@ -12,23 +12,44 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
-import { adminAPI } from '../../services/api';
+import { adminAPI, classesAPI } from '../../services/api';
 
 const FeeManagementScreen = ({ navigation }) => {
   const [feeVouchers, setFeeVouchers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClass, setSelectedClass] = useState(''); // New state for class filter
+  const [classes, setClasses] = useState([]); // State for available classes
+  const [classesLoading, setClassesLoading] = useState(true);
+
+  useEffect(() => {
+    fetchClasses();
+    fetchFeeVouchers();
+  }, []); // Initial load
 
   useEffect(() => {
     fetchFeeVouchers();
-  }, [searchQuery, selectedClass]); // Add selectedClass to dependencies
+  }, [searchQuery, selectedClass]); // Re-fetch when search or class changes
+
+  const fetchClasses = async () => {
+    setClassesLoading(true);
+    try {
+      const response = await classesAPI.getAllClasses();
+      if (response.data && response.data.classes) {
+        setClasses(response.data.classes.filter(Boolean));
+      }
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+      Alert.alert('Error', 'Failed to load classes.');
+    } finally {
+      setClassesLoading(false);
+    }
+  };
 
   const fetchFeeVouchers = async () => {
     setLoading(true);
     try {
-      // For now, class filter is non-functional, so we don't pass it to the API
-      const response = await adminAPI.getAllFeeVouchersAdmin(searchQuery);
+      const response = await adminAPI.getAllFeeVouchersAdmin(searchQuery, selectedClass);
       setFeeVouchers(response.data.feeVouchers);
     } catch (error) {
       console.error('Error fetching fee vouchers for admin:', error);
@@ -78,16 +99,19 @@ const FeeManagementScreen = ({ navigation }) => {
           onValueChange={handleClassChange}
           style={styles.picker}
           itemStyle={styles.pickerItem}
+          enabled={!classesLoading}
         >
           <Picker.Item label="All Classes" value="" />
-          <Picker.Item label="Class 9 Boys" value="Class 9 Boys" />
-          <Picker.Item label="Class 9 Girls" value="Class 9 Girls" />
-          <Picker.Item label="Class 10 Boys" value="Class 10 Boys" />
-          <Picker.Item label="Class 10 Girls" value="Class 10 Girls" />
-          <Picker.Item label="Class 11 Boys" value="Class 11 Boys" />
-          <Picker.Item label="Class 11 Girls" value="Class 11 Girls" />
-          <Picker.Item label="Class 12 Boys" value="Class 12 Boys" />
-          <Picker.Item label="Class 12 Girls" value="Class 12 Girls" />
+          {classes.map((cls) => {
+            const fullClassName = cls.section ? `${cls.classNumber}-${cls.section}` : cls.classNumber;
+            return (
+              <Picker.Item 
+                key={cls._id} 
+                label={fullClassName} 
+                value={cls._id} 
+              />
+            );
+          })}
         </Picker>
       </View>
 

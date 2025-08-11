@@ -38,23 +38,30 @@ const SelectClassForGradingScreen = ({ navigation }) => {
     }
   };
 
-  const renderClassItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.classItem}
-      onPress={() =>
-        navigation.navigate("StudentsListForGrading", {
-          classId: item._id,
-          className: item.classNumber,
-        })
-      }
-    >
-      <View style={styles.classContent}>
-        <Text style={styles.className}>{item.classNumber}</Text>
-        <Text style={styles.classHint}>Tap to view students for grading</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
-    </TouchableOpacity>
-  );
+  const renderClassItem = ({ item }) => {
+    // Create full class name with section
+    const fullClassName = item.section ? `${item.classNumber}-${item.section}` : item.classNumber;
+    
+    return (
+      <TouchableOpacity
+        style={styles.classItem}
+        onPress={() =>
+          navigation.navigate("StudentsListForGrading", {
+            classId: item._id,
+            className: fullClassName,
+            classNumber: item.classNumber,
+            section: item.section
+          })
+        }
+      >
+        <View style={styles.classContent}>
+          <Text style={styles.className}>{fullClassName}</Text>
+          <Text style={styles.classHint}>Tap to view students for grading</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+      </TouchableOpacity>
+    );
+  };
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
