@@ -38,6 +38,16 @@ export const storage = {
     }
   },
 
+  // Update stored user data (for profile updates)
+  updateUserData: async (updatedUserData) => {
+    try {
+      await AsyncStorage.setItem(StorageKeys.USER_DATA, JSON.stringify(updatedUserData));
+    } catch (error) {
+      console.error('Error updating user data:', error);
+      throw error;
+    }
+  },
+
   // Clear all user data (logout)
   clearUserData: async () => {
     try {

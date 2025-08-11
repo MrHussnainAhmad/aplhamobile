@@ -13,6 +13,7 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { adminAPI, teacherAPI } from '../services/api';
 import { storage } from '../utils/storage';
 import VerifiedBadge from '../components/VerifiedBadge';
@@ -32,6 +33,13 @@ const ManageStudentsScreen = ({ navigation }) => {
   useEffect(() => {
     filterStudents();
   }, [searchQuery, students]);
+
+  // Refresh students list when screen comes into focus (e.g., after student update)
+  useFocusEffect(
+    React.useCallback(() => {
+      loadStudents();
+    }, [])
+  );
 
   const initializeScreen = async () => {
     try {

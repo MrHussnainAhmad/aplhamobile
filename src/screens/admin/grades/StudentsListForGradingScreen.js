@@ -11,6 +11,7 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { adminAPI } from '../../../services/api';
 
 const StudentsListForGradingScreen = ({ route, navigation }) => {
@@ -21,6 +22,13 @@ const StudentsListForGradingScreen = ({ route, navigation }) => {
   useEffect(() => {
     fetchStudentsInClass();
   }, [classId]);
+
+  // Refresh students list when screen comes into focus (e.g., after student update)
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchStudentsInClass();
+    }, [classId])
+  );
 
   const fetchStudentsInClass = async () => {
     setLoading(true);

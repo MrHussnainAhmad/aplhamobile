@@ -39,6 +39,15 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [userType]);
 
+  // Refresh user data when screen comes into focus (e.g., after profile update)
+  useFocusEffect(
+    React.useCallback(() => {
+      if (userType === 'student') {
+        loadUserData();
+      }
+    }, [userType])
+  );
+
   const loadUserData = async () => {
     try {
       const { userData: storedUserData, userType: storedUserType } = await storage.getUserData();

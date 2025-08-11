@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { API_BASE_URL, userAPI } from '../../services/api';
 import VerifiedBadge from '../../components/VerifiedBadge';
+import { storage } from '../../utils/storage';
 
 const StudentProfileScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
@@ -217,11 +218,38 @@ const StudentProfileScreen = ({ navigation }) => {
       });
 
       if (response.ok) {
+        const responseData = await response.json();
         Alert.alert('Success', 'Profile updated successfully');
         setPassword('');
         setConfirmPassword('');
         setShowPasswordSection(false);
         setProfile(prev => ({ ...prev, profileImageBase64: null, profileImageType: null }));
+        
+        // Update stored user data with the new profile information
+        try {
+          const { userData: currentUserData } = await storage.getUserData();
+          const updatedUserData = {
+            ...currentUserData,
+            studentId: responseData.profile.studentId,
+            fullname: responseData.profile.name,
+            email: responseData.profile.email,
+            phoneNumber: responseData.profile.phone,
+            address: responseData.profile.address,
+            fathername: responseData.profile.fatherName,
+            mothername: responseData.profile.motherName,
+            dob: responseData.profile.dateOfBirth,
+            gender: responseData.profile.gender,
+            profilePicture: responseData.profile.profileImage,
+            class: responseData.profile.class,
+            section: responseData.profile.section,
+            rollNumber: responseData.profile.rollNumber,
+            hasClassAndSectionSet: responseData.profile.hasClassAndSectionSet
+          };
+          await storage.updateUserData(updatedUserData);
+        } catch (error) {
+          console.error('Error updating stored user data:', error);
+        }
+        
         // Re-initialize to get the latest state from the server
         const classes = await fetchAvailableClasses();
         if(classes) fetchProfile(classes);
