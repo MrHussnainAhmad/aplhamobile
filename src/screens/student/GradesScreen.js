@@ -26,7 +26,16 @@ const GradesScreen = () => {
         examDate: date.toISOString().split('T')[0],
       };
       const response = await userAPI.getMyGrades(params);
-      setGrades(response.data.grades);
+      console.log('Grades API Response:', response.data);
+      if (response.data && response.data.grades && response.data.grades.length > 0) {
+        console.log('First Grade Subjects:', response.data.grades[0].subjects);
+      }
+      if (response.data && response.data.grades) {
+        setGrades(response.data.grades);
+      } else {
+        Alert.alert('Error', 'No grades data found in the response.');
+        setGrades([]);
+      }
     } catch (error) {
       Alert.alert('Error', 'Failed to fetch grades.');
       console.error(error);

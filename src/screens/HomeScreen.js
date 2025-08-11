@@ -519,7 +519,9 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem}
+          onPress={() => navigation.navigate('Grades')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="bar-chart" size={24} color="#E67E22" />

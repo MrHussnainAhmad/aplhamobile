@@ -348,9 +348,7 @@ const StudentProfileScreen = ({ navigation }) => {
           <Text style={styles.readOnlyText}>Rs. {profile.futureFee || '0'}</Text>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Grades')}>
-          <Text style={styles.buttonText}>View Grades</Text>
-        </TouchableOpacity>
+        
       </View>
 
       <View style={styles.section}>
