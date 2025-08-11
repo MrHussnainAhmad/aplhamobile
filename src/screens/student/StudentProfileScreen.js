@@ -15,13 +15,14 @@ import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { API_BASE_URL } from '../../services/api';
+import { API_BASE_URL, userAPI } from '../../services/api';
 import VerifiedBadge from '../../components/VerifiedBadge';
 
 const StudentProfileScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState({
+    studentId: '',
     name: '',
     email: '',
     phone: '',
@@ -44,6 +45,7 @@ const StudentProfileScreen = ({ navigation }) => {
   const [showPasswordSection, setShowPasswordSection] = useState(false);
   const [availableClasses, setAvailableClasses] = useState([]);
   const [showClassSectionWarning, setShowClassSectionWarning] = useState(false);
+  const [grades, setGrades] = useState([]);
 
   // useFocusEffect ensures data is fetched every time the screen is focused
   useFocusEffect(
@@ -257,6 +259,7 @@ const StudentProfileScreen = ({ navigation }) => {
         <View style={styles.verificationContainer}>
           <VerifiedBadge isVerified={profile.isVerified} size="large" />
         </View>
+        {profile.studentId && <Text style={styles.studentIdText}>Student ID: {profile.studentId}</Text>}
         <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
           <Image 
             source={profile.profileImage ? { uri: profile.profileImage } : require('../../../assets/images/student.png')} 
@@ -344,6 +347,10 @@ const StudentProfileScreen = ({ navigation }) => {
           <Text style={styles.label}>Future Fee</Text>
           <Text style={styles.readOnlyText}>Rs. {profile.futureFee || '0'}</Text>
         </View>
+
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Grades')}>
+          <Text style={styles.buttonText}>View Grades</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
@@ -465,6 +472,12 @@ const styles = StyleSheet.create({
   verificationContainer: {
     marginBottom: 10,
   },
+  studentIdText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#007bff',
+    marginBottom: 15,
+  },
   profileImage: {
     width: 120,
     height: 120,
@@ -579,6 +592,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     marginBottom: 15,
+    fontWeight: 'bold',
+  },
+  button: {
+    backgroundColor: '#007bff',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });

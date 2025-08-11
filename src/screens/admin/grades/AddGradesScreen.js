@@ -132,6 +132,10 @@ const AddGradesScreen = ({ route, navigation }) => {
 
   // Calculate percentage and grade
   const calculateGrade = (obtained, total) => {
+    if (gradeSettingsLoading || gradeSettings.length === 0) {
+      return { grade: '...', color: '#95a5a6' }; // Return a loading state
+    }
+
     const percentage = (obtained / total) * 100;
     console.log(`Calculating grade for: Obtained=${obtained}, Total=${total}, Percentage=${percentage}`);
     console.log('Current grade settings for calculation:', gradeSettings);
@@ -160,6 +164,11 @@ const AddGradesScreen = ({ route, navigation }) => {
 
   // Validate grades input
   const validateGrades = () => {
+    if (gradeSettingsLoading) {
+      Alert.alert('Info', 'Grade settings are still loading. Please wait a moment.');
+      return false;
+    }
+
     if (!selectedGradeType) {
       Alert.alert('Error', 'Please select a grade type.');
       return false;

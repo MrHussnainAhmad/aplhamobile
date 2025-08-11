@@ -24,6 +24,7 @@ import ClassStudentsScreen from './src/screens/teacher/ClassStudentsScreen';
 import StudentProfileScreen from './src/screens/student/StudentProfileScreen';
 import UploadFeeVoucherScreen from './src/screens/student/UploadFeeVoucherScreen';
 import MyCoursesScreen from './src/screens/student/MyCoursesScreen';
+import GradesScreen from './src/screens/student/GradesScreen';
 
 import FeeVoucherDetailPage from './src/screens/admin/FeeVoucherDetailPage';
 import FeeManagementScreen from './src/screens/admin/FeeManagementScreen';
@@ -78,6 +79,7 @@ export default function App() {
         <Stack.Screen name="StudentProfile" component={StudentProfileScreen} />
         <Stack.Screen name="UploadFeeVoucher" component={UploadFeeVoucherScreen} />
         <Stack.Screen name="MyCourses" component={MyCoursesScreen} />
+        <Stack.Screen name="Grades" component={GradesScreen} />
         
         <Stack.Screen name="FeeVoucherDetail" component={FeeVoucherDetailPage} />
         <Stack.Screen name="FeeManagement" component={FeeManagementScreen} />

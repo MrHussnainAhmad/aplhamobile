@@ -1,15 +1,15 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BASE_URL, getApiUrl } from '../config/api.config';
-
-// Export API_BASE_URL for direct fetch calls
-export const API_BASE_URL = BASE_URL;
+import { getApiUrl } from '../config/api.config';
 
 // Get API URL from configuration
-getApiUrl(); // This will log the current API URL
+const API_URL = getApiUrl(); // This will log the current API URL and get the URL
+
+// Export API_BASE_URL for direct fetch calls
+export const API_BASE_URL = API_URL;
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -230,6 +230,8 @@ export const userAPI = {
   updateStudentProfile: (data) => api.put('/profile/student', data),
   // Get student's courses
   getMyCourses: () => api.get('/profile/student/my-courses'),
+  // Get student's grades
+  getMyGrades: (params) => api.get('/grades/me', { params }),
 };
 
 export default api;
