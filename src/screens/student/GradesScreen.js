@@ -44,8 +44,8 @@ const GradesScreen = () => {
     }
   };
 
-  const tableHead = ['Subject', 'Marks'];
-  const tableData = grades.flatMap(grade => grade.subjects.map(subject => [subject.subjectName, subject.marks]));
+  const tableHead = ['Subject', 'Marks Obtained', 'Total Marks', 'Percentage', 'Grade'];
+  const tableData = grades.flatMap(grade => grade.subjects.map(subject => [subject.subject, subject.marksObtained, subject.totalMarks, `${subject.percentage}%`, subject.grade]));
 
   return (
     <View style={styles.container}>
