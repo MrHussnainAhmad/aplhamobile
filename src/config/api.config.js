@@ -14,7 +14,7 @@ const API_CONFIG = {
   
   // If backend is hosted on another device, replace with that device's IP
   // Example: REMOTE_DEVICE: 'http://192.168.100.25:5000/api',
-  // REMOTE_DEVICE: 'http://192.168.3.51:5000/api', 
+  REMOTE_DEVICE: 'http://192.168.3.51:5000/api', 
   // Your backend device IP
   
   // Production URL (when deployed)
@@ -32,7 +32,7 @@ const CURRENT_ENV = 'REMOTE_DEVICE';
 
 // Helper function to get the current API URL
 export const getApiUrl = () => {
-  const url = API_CONFIG[CURRENT_ENV] || API_CONFIG.REMOTE_DEVICE;
+  const url = API_CONFIG[CURRENT_ENV] || API_CONFIG.PRODUCTION;
   console.log(`🌐 Using API URL: ${url}`);
   return url;
 };
