@@ -73,6 +73,41 @@ export const storage = {
     }
   },
 
+  // Check if user is authenticated and verified (for students)
+  getAuthenticationStatus: async () => {
+    try {
+      const token = await AsyncStorage.getItem(StorageKeys.USER_TOKEN);
+      const userData = await AsyncStorage.getItem(StorageKeys.USER_DATA);
+      const userType = await AsyncStorage.getItem(StorageKeys.USER_TYPE);
+
+      if (!token) {
+        return { isAuthenticated: false, isVerified: false, userType: null };
+      }
+
+      const parsedUserData = userData ? JSON.parse(userData) : null;
+      
+      // For students, check if they are verified
+      if (userType === 'student') {
+        const isVerified = parsedUserData ? parsedUserData.isVerified || false : false;
+        return {
+          isAuthenticated: true,
+          isVerified: isVerified,
+          userType: userType
+        };
+      }
+
+      // For admin and teachers, they don't need verification check
+      return {
+        isAuthenticated: true,
+        isVerified: true, // Always true for non-students
+        userType: userType
+      };
+    } catch (error) {
+      console.error('Error checking authentication status:', error);
+      return { isAuthenticated: false, isVerified: false, userType: null };
+    }
+  },
+
   // Store app configuration
   storeAppConfig: async (config) => {
     try {

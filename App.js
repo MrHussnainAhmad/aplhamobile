@@ -22,7 +22,7 @@ import CreateTeacherScreen from './src/screens/CreateTeacherScreen';
 import TeacherProfileScreen from './src/screens/teacher/TeacherProfileScreen';
 import MyClassesScreen from './src/screens/teacher/MyClassesScreen';
 import AssignStudentsScreen from './src/screens/teacher/AssignStudentsScreen';
-import ClassStudentsScreen from './src/screens/teacher/ClassStudentsScreen';
+import TeacherClassStudentsScreen from './src/screens/teacher/ClassStudentsScreen';
 import StudentProfileScreen from './src/screens/student/StudentProfileScreen';
 import UploadFeeVoucherScreen from './src/screens/student/UploadFeeVoucherScreen';
 import MyCoursesScreen from './src/screens/student/MyCoursesScreen';
@@ -53,6 +53,18 @@ import CreateAssignmentScreen from './src/screens/teacher/CreateAssignmentScreen
 import TeacherAssignmentsScreen from './src/screens/teacher/TeacherAssignmentsScreen';
 import StudentAssignmentsScreen from './src/screens/student/StudentAssignmentsScreen';
 import AssignmentDetailScreen from './src/screens/student/AssignmentDetailScreen';
+
+// Attendance screens
+import MainAttendanceScreen from './src/screens/admin/MainAttendanceScreen';
+import StudentAttendanceScreen from './src/screens/admin/StudentAttendanceScreen';
+import TeacherAttendanceScreen from './src/screens/admin/TeacherAttendanceScreen';
+import AttendanceRecordScreen from './src/screens/admin/AttendanceRecordScreen';
+import AttendanceDetailScreen from './src/screens/admin/AttendanceDetailScreen';
+import TeacherAttendanceRecordScreen from './src/screens/teacher/TeacherAttendanceRecordScreen';
+import StudentAttendanceRecordScreen from './src/screens/student/StudentAttendanceRecordScreen';
+import AdminClassStudentsScreen from './src/screens/admin/ClassStudentsScreen';
+import ClassStudentsListScreen from './src/screens/admin/ClassStudentsListScreen';
+import UnverifiedScreen from './src/screens/unverifiedsScreen';
 
 const Stack = createStackNavigator();
 
@@ -91,7 +103,7 @@ export default function App() {
           <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} />
           <Stack.Screen name="MyClasses" component={MyClassesScreen} />
           <Stack.Screen name="AssignStudents" component={AssignStudentsScreen} />
-          <Stack.Screen name="ClassStudents" component={ClassStudentsScreen} />
+          <Stack.Screen name="ClassStudents" component={TeacherClassStudentsScreen} />
           <Stack.Screen name="StudentProfile" component={StudentProfileScreen} />
           <Stack.Screen name="UploadFeeVoucher" component={UploadFeeVoucherScreen} />
           <Stack.Screen name="MyCourses" component={MyCoursesScreen} />
@@ -122,6 +134,25 @@ export default function App() {
           <Stack.Screen name="TeacherAssignments" component={TeacherAssignmentsScreen} />
           <Stack.Screen name="StudentAssignments" component={StudentAssignmentsScreen} />
           <Stack.Screen name="AssignmentDetail" component={AssignmentDetailScreen} />
+          
+          {/* Attendance screens */}
+          <Stack.Screen name="MainAttendance" component={MainAttendanceScreen} />
+          <Stack.Screen name="StudentAttendance" component={StudentAttendanceScreen} />
+          <Stack.Screen name="TeacherAttendance" component={TeacherAttendanceScreen} />
+          <Stack.Screen name="AttendanceRecord" component={AttendanceRecordScreen} />
+          <Stack.Screen name="AttendanceDetail" component={AttendanceDetailScreen} />
+          <Stack.Screen name="TeacherAttendanceRecord" component={TeacherAttendanceRecordScreen} />
+          <Stack.Screen name="StudentAttendanceRecord" component={StudentAttendanceRecordScreen} />
+          <Stack.Screen name="AdminClassStudents" component={AdminClassStudentsScreen} />
+          <Stack.Screen name="ClassStudentsList" component={ClassStudentsListScreen} />
+          <Stack.Screen 
+            name="Unverified" 
+            component={UnverifiedScreen}
+            options={{
+              gestureEnabled: false,
+              headerLeft: null,
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

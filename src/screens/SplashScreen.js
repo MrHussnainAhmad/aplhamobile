@@ -68,18 +68,25 @@ const SplashScreen = ({ navigation }) => {
 
       // Show splash for 3 seconds total before navigating
       setTimeout(async () => {
-        const isAuthenticated = await storage.isAuthenticated();
-        if (isAuthenticated) {
-          // Reset navigation stack to prevent going back to splash
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],
-          });
-        } else {
-          // Reset navigation stack to prevent going back to splash
+        const authStatus = await storage.getAuthenticationStatus();
+        
+        if (!authStatus.isAuthenticated) {
+          // User is not authenticated, go to login
           navigation.reset({
             index: 0,
             routes: [{ name: 'Login' }],
+          });
+        } else if (authStatus.userType === 'student' && !authStatus.isVerified) {
+          // Student is authenticated but not verified, show unverified screen
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Unverified' }],
+          });
+        } else {
+          // User is authenticated and verified (or not a student), go to home
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
           });
         }
       }, 3000);

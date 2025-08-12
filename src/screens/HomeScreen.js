@@ -98,6 +98,17 @@ const HomeScreen = ({ navigation }) => {
     try {
       const { userData: storedUserData, userType: storedUserType } = await storage.getUserData();
       console.log('HomeScreen: User data loaded from storage:', storedUserData);
+      
+      // Check if student is unverified and redirect to UnverifiedScreen
+      if (storedUserType === 'student' && storedUserData && !storedUserData.isVerified) {
+        console.log('HomeScreen: Student is unverified, redirecting to UnverifiedScreen');
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Unverified' }],
+        });
+        return;
+      }
+      
       setUserData(storedUserData);
       setUserType(storedUserType);
     } catch (error) {
@@ -347,6 +358,22 @@ const HomeScreen = ({ navigation }) => {
 
         <TouchableOpacity 
           style={styles.menuItem}
+          onPress={() => navigation.navigate('TeacherAttendanceRecord')}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="calendar" size={24} color="#E67E22" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Attendance Record</Text>
+              <Text style={styles.menuItemSubtitle}>View your monthly attendance</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
           onPress={() => navigation.navigate('TeacherSchoolPosts')}
         >
           <View style={styles.menuItemContent}>
@@ -496,6 +523,22 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuItemTitle}>School Posts</Text>
               <Text style={styles.menuItemSubtitle}>Post and manage school-wide updates</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('MainAttendance')}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="calendar" size={24} color="#E67E22" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Main Attendance</Text>
+              <Text style={styles.menuItemSubtitle}>Manage student and teacher attendance</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>
@@ -676,6 +719,22 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuItemTitle}>Upload Fee Vouchers</Text>
               <Text style={styles.menuItemSubtitle}>Submit and track fee payments</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('StudentAttendanceRecord')}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="calendar" size={24} color="#E67E22" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Attendance Record</Text>
+              <Text style={styles.menuItemSubtitle}>View your monthly attendance</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>

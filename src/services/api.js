@@ -285,4 +285,22 @@ export const userAPI = {
   getAssignmentDetails: (id) => api.get(`/assignments/${id}`),
 };
 
+// Attendance API functions
+export const attendanceAPI = {
+  // Admin functions
+  markStudentAttendance: (data) => api.post('/attendance/mark-student', data),
+  markTeacherAttendance: (data) => api.post('/attendance/mark-teacher', data),
+  updateAttendance: (id, data) => api.put(`/attendance/update/${id}`, data),
+  getStudentsForClass: (classId) => api.get(`/attendance/students/${classId}`),
+  getStudentsForRecords: (classId) => api.get(`/attendance/students-records/${classId}`),
+  getVerifiedTeachers: () => api.get('/attendance/teachers'),
+  getAttendanceRecord: (type, id, month) => api.get(`/attendance/record/${type}/${id}/${month}`),
+  
+  // Teacher functions
+  getMyAttendanceRecord: (month) => api.get(`/attendance/my-record/${month}`),
+  
+  // Student functions
+  getMyStudentAttendanceRecord: (month) => api.get(`/attendance/student/my-record/${month}`),
+};
+
 export default api;
