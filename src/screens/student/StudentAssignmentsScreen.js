@@ -39,7 +39,7 @@ const StudentAssignmentsScreen = ({ navigation }) => {
   const loadAssignments = async () => {
     try {
       setLoading(true);
-      const response = await studentAPI.getClassAssignments(userData?.class);
+      const response = await studentAPI.getMyAssignments();
       setAssignments(response.data.assignments);
     } catch (error) {
       console.error('Error loading assignments:', error);
@@ -87,6 +87,7 @@ const StudentAssignmentsScreen = ({ navigation }) => {
   };
 
   const isAssignmentExpired = (dueDate) => {
+    if (!dueDate) return false;
     return new Date(dueDate) < new Date();
   };
 
@@ -123,7 +124,7 @@ const StudentAssignmentsScreen = ({ navigation }) => {
           <View style={styles.detailItem}>
             <Ionicons name="calendar-outline" size={16} color="#7F8C8D" />
             <Text style={[styles.detailText, expired && styles.expiredText]}>
-              Due: {formatDate(item.dueDate)}
+              {item.dueDate ? `Due: ${formatDate(item.dueDate)}` : 'No due date'}
             </Text>
           </View>
           <View style={styles.detailItem}>
@@ -221,6 +222,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8F9FA',
+    paddingTop: 33,
   },
   header: {
     flexDirection: 'row',

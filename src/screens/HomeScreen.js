@@ -582,17 +582,18 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.statCard}>
           <Ionicons name="book-outline" size={30} color="#27AE60" />
           <Text style={styles.statNumber}>{studentStats.subjects}</Text>
-          <Text style={styles.statLabel}>Subjects</Text>
+          <Text style={styles.statLabel}>Classes</Text>
+          <Text style={styles.subtitle}>Per Week</Text>
         </View>
         <View style={styles.statCard}>
           <Ionicons name="checkmark-done" size={30} color="#4A90E2" />
           <Text style={styles.statNumber}>{studentStats.done}</Text>
-          <Text style={styles.statLabel}>Done</Text>
+          <Text style={styles.statLabel}>Vouchers</Text>
         </View>
         <View style={styles.statCard}>
           <Ionicons name="trophy" size={30} color="#F39C12" />
           <Text style={styles.statNumber}>{studentStats.average}</Text>
-          <Text style={styles.statLabel}>Average</Text>
+          <Text style={styles.statLabel}>Tasks</Text>
         </View>
       </View>
 
@@ -828,6 +829,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#7F8C8D',
     textAlign: 'center',
+  },
+  subtitle:{
+    fontSize: 10,
   },
   menuContainer: {
     padding: 20,

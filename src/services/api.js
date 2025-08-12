@@ -76,6 +76,10 @@ export const studentAPI = {
   getFeeVouchers: () => api.get('/fee-vouchers/my-vouchers'),
   // Posts
   getPosts: () => api.get('/posts/student'),
+  // Assignment Management
+  getMyAssignments: () => api.get('/assignments/student/assignments'),
+  getClassAssignments: (classId) => api.get(`/assignments/class/${classId}`),
+  getAssignmentDetails: (id) => api.get(`/assignments/${id}`),
 };
 
 // Admin API functions
@@ -232,6 +236,7 @@ export const teacherAPI = {
   
   // Assignment Management
   getTeacherClasses: () => api.get('/teacher/classes'),
+  getTeacherSubjects: (classId) => api.get(`/assignments/teacher/subjects/${classId}`),
   createAssignment: (formData) => api.post('/assignments/create', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',

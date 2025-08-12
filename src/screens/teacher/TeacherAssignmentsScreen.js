@@ -157,7 +157,7 @@ const TeacherAssignmentsScreen = ({ navigation }) => {
       <View style={styles.assignmentDetails}>
         <View style={styles.detailItem}>
           <Ionicons name="calendar-outline" size={16} color="#7F8C8D" />
-          <Text style={styles.detailText}>Due: {formatDate(item.dueDate)}</Text>
+          <Text style={styles.detailText}>{item.dueDate ? `Due: ${formatDate(item.dueDate)}` : 'No due date'}</Text>
         </View>
         <View style={styles.detailItem}>
           <Ionicons name="people-outline" size={16} color="#7F8C8D" />

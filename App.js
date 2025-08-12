@@ -50,6 +50,7 @@ import SelectClassForAssignmentScreen from './src/screens/teacher/SelectClassFor
 import CreateAssignmentScreen from './src/screens/teacher/CreateAssignmentScreen';
 import TeacherAssignmentsScreen from './src/screens/teacher/TeacherAssignmentsScreen';
 import StudentAssignmentsScreen from './src/screens/student/StudentAssignmentsScreen';
+import AssignmentDetailScreen from './src/screens/student/AssignmentDetailScreen';
 
 const Stack = createStackNavigator();
 
@@ -117,6 +118,7 @@ export default function App() {
           <Stack.Screen name="CreateAssignment" component={CreateAssignmentScreen} />
           <Stack.Screen name="TeacherAssignments" component={TeacherAssignmentsScreen} />
           <Stack.Screen name="StudentAssignments" component={StudentAssignmentsScreen} />
+          <Stack.Screen name="AssignmentDetail" component={AssignmentDetailScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

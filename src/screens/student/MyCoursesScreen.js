@@ -215,13 +215,15 @@ const MyCoursesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingTop: 40,
+    padding:10,
     backgroundColor: '#f0f0f0',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'center',
   },
   table: {
     borderWidth: 1,
@@ -329,13 +331,15 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
   },
   simpleContainer: {
-    marginTop: 20,
+    marginTop: 10,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
     color: '#333',
+    textAlign: 'center',
+
   },
   timetableView: {
     marginTop: 20,

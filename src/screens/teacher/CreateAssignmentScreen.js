@@ -15,7 +15,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { teacherAPI } from '../../services/api';
 import { storage } from '../../utils/storage';
@@ -31,6 +30,7 @@ const CreateAssignmentScreen = ({ navigation, route }) => {
       return;
     }
   }, [selectedClass, navigation]);
+  
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   
@@ -38,20 +38,16 @@ const CreateAssignmentScreen = ({ navigation, route }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [subject, setSubject] = useState('');
-  const [dueDate, setDueDate] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)); // 7 days from now
   const [priority, setPriority] = useState('medium');
-  const [showDatePicker, setShowDatePicker] = useState(false);
   
   // File uploads
   const [images, setImages] = useState([]);
   const [attachments, setAttachments] = useState([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
 
-  // Available subjects (you can make this dynamic by fetching from API)
-  const subjects = [
-    'Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 
-    'History', 'Geography', 'Computer Science', 'Economics', 'Literature'
-  ];
+  // Available subjects - will be fetched from API
+  const [subjects, setSubjects] = useState([]);
+  const [subjectsLoading, setSubjectsLoading] = useState(false);
 
   const priorities = [
     { label: 'Low', value: 'low' },
@@ -62,6 +58,7 @@ const CreateAssignmentScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     loadUserData();
+    loadTeacherSubjects();
   }, []);
 
   const loadUserData = async () => {
@@ -70,6 +67,21 @@ const CreateAssignmentScreen = ({ navigation, route }) => {
       setUserData(data);
     } catch (error) {
       console.error('Error loading user data:', error);
+    }
+  };
+
+  const loadTeacherSubjects = async () => {
+    try {
+      setSubjectsLoading(true);
+      const response = await teacherAPI.getTeacherSubjects(selectedClass.id);
+      if (response.data && response.data.subjects) {
+        setSubjects(response.data.subjects);
+      }
+    } catch (error) {
+      console.error('Error loading teacher subjects:', error);
+      Alert.alert('Error', 'Failed to load subjects. Please try again.');
+    } finally {
+      setSubjectsLoading(false);
     }
   };
 
@@ -129,13 +141,6 @@ const CreateAssignmentScreen = ({ navigation, route }) => {
     setAttachments(attachments.filter((_, i) => i !== index));
   };
 
-  const onDateChange = (event, selectedDate) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
-      setDueDate(selectedDate);
-    }
-  };
-
   const validateForm = () => {
     if (!title.trim()) {
       Alert.alert('Error', 'Please enter assignment title');
@@ -145,12 +150,12 @@ const CreateAssignmentScreen = ({ navigation, route }) => {
       Alert.alert('Error', 'Please enter assignment description');
       return false;
     }
-    if (!subject) {
-      Alert.alert('Error', 'Please select a subject');
+    if (subjects.length === 0) {
+      Alert.alert('Error', 'No subjects are assigned to you for this class. Please contact admin.');
       return false;
     }
-    if (dueDate <= new Date()) {
-      Alert.alert('Error', 'Due date must be in the future');
+    if (!subject) {
+      Alert.alert('Error', 'Please select a subject');
       return false;
     }
     return true;
@@ -167,7 +172,6 @@ const CreateAssignmentScreen = ({ navigation, route }) => {
       formData.append('description', description.trim());
       formData.append('subject', subject);
       formData.append('classId', selectedClass.id);
-      formData.append('dueDate', dueDate.toISOString());
       formData.append('priority', priority);
 
       // Add images
@@ -268,26 +272,17 @@ const CreateAssignmentScreen = ({ navigation, route }) => {
                 selectedValue={subject}
                 onValueChange={setSubject}
                 style={styles.picker}
+                enabled={!subjectsLoading}
               >
-                <Picker.Item label="Select a subject" value="" />
+                <Picker.Item label={subjectsLoading ? "Loading subjects..." : "Select a subject"} value="" />
                 {subjects.map((sub) => (
                   <Picker.Item key={sub} label={sub} value={sub} />
                 ))}
               </Picker>
             </View>
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Due Date *</Text>
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text style={styles.dateButtonText}>
-                {dueDate.toLocaleDateString()} at {dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </Text>
-              <Ionicons name="calendar-outline" size={20} color="#4A90E2" />
-            </TouchableOpacity>
+            {subjects.length === 0 && !subjectsLoading && (
+              <Text style={styles.errorText}>No subjects assigned to you for this class. Please contact admin.</Text>
+            )}
           </View>
 
           <View style={styles.inputContainer}>
@@ -308,6 +303,7 @@ const CreateAssignmentScreen = ({ navigation, route }) => {
 
         <View style={styles.formSection}>
           <Text style={styles.sectionTitle}>Attachments</Text>
+          <Text style={styles.sectionSubtitle}>Use Only When Important, Else Don't waste Server's Storage! Max Size 5Mb</Text>
           
           <View style={styles.uploadButtons}>
             <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
@@ -366,12 +362,14 @@ const CreateAssignmentScreen = ({ navigation, route }) => {
 
       <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.createButton, loading && styles.disabledButton]}
+          style={[styles.createButton, (loading || subjects.length === 0) && styles.disabledButton]}
           onPress={createAssignment}
-          disabled={loading}
+          disabled={loading || subjects.length === 0}
         >
           {loading ? (
             <ActivityIndicator color="#FFFFFF" />
+          ) : subjects.length === 0 ? (
+            <Text style={styles.createButtonText}>No Subjects Available</Text>
           ) : (
             <>
               <Ionicons name="create-outline" size={20} color="#FFFFFF" />
@@ -380,18 +378,6 @@ const CreateAssignmentScreen = ({ navigation, route }) => {
           )}
         </TouchableOpacity>
       </View>
-
-      {showDatePicker && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={dueDate}
-          mode="datetime"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={onDateChange}
-          minimumDate={new Date()}
-          style={Platform.OS === 'ios' ? { backgroundColor: 'white' } : {}}
-        />
-      )}
     </SafeAreaView>
   );
 };
@@ -456,7 +442,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#2C3E50',
+    marginBottom: 8,
+  },
+  sectionSubtitle: {
+    fontSize: 12,
+    color: '#7F8C8D',
     marginBottom: 20,
+    fontStyle: 'italic',
   },
   inputContainer: {
     marginBottom: 20,
@@ -487,20 +479,6 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 50,
-  },
-  dateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: '#E9ECEF',
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#FFFFFF',
-  },
-  dateButtonText: {
-    fontSize: 16,
-    color: '#2C3E50',
   },
   uploadButtons: {
     flexDirection: 'row',
@@ -587,6 +565,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
     marginLeft: 8,
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#E74C3C',
+    marginTop: 5,
+    fontStyle: 'italic',
   },
 });
 

@@ -181,7 +181,7 @@ const s = StyleSheet.create({
   scroll: { paddingBottom: 16 },
   container: {
     flexGrow: 1,
-    paddingTop: 33,
+    paddingTop: 35,
     paddingHorizontal: 16,
     backgroundColor: "#FFF",
   },
