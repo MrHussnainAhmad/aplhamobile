@@ -46,6 +46,10 @@ import SubjectCrudScreen from './src/screens/admin/subjects/ManageSubjectsScreen
 import GradeSettingsScreen from './src/screens/admin/GradeSettingsScreen';
 import TeacherSchoolPostsScreen from './src/screens/teacher/SchoolPostsScreen';
 import StudentSchoolPostsScreen from './src/screens/student/SchoolPostsScreen';
+import SelectClassForAssignmentScreen from './src/screens/teacher/SelectClassForAssignmentScreen';
+import CreateAssignmentScreen from './src/screens/teacher/CreateAssignmentScreen';
+import TeacherAssignmentsScreen from './src/screens/teacher/TeacherAssignmentsScreen';
+import StudentAssignmentsScreen from './src/screens/student/StudentAssignmentsScreen';
 
 const Stack = createStackNavigator();
 
@@ -109,6 +113,10 @@ export default function App() {
           <Stack.Screen name="GradeSettings" component={GradeSettingsScreen} />
           <Stack.Screen name="TeacherSchoolPosts" component={TeacherSchoolPostsScreen} />
           <Stack.Screen name="StudentSchoolPosts" component={StudentSchoolPostsScreen} />
+          <Stack.Screen name="SelectClassForAssignment" component={SelectClassForAssignmentScreen} />
+          <Stack.Screen name="CreateAssignment" component={CreateAssignmentScreen} />
+          <Stack.Screen name="TeacherAssignments" component={TeacherAssignmentsScreen} />
+          <Stack.Screen name="StudentAssignments" component={StudentAssignmentsScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

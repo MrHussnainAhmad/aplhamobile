@@ -19,20 +19,41 @@ const MyCoursesScreen = () => {
       console.log('MyCoursesScreen: userData:', userData);
       console.log('MyCoursesScreen: userData.class:', userData?.class);
       console.log('MyCoursesScreen: userData type:', typeof userData?.class);
+      console.log('MyCoursesScreen: userData.className:', userData?.className);
+      console.log('MyCoursesScreen: Full userData object:', JSON.stringify(userData, null, 2));
       
       if (!userData) {
         setError('User data not found. Please login again.');
         return;
       }
       
-      if (!userData.class) {
+      // Handle different possible formats of class field
+      let classId = userData.class;
+      
+      // If class is an object, extract the ID
+      if (userData.class && typeof userData.class === 'object' && userData.class._id) {
+        classId = userData.class._id;
+      }
+      
+      // If class is still not available, try to construct it from className
+      if (!classId && userData.className) {
+        // This is a fallback - we'll need to find the class by name
+        console.log('No class ID found, trying to find class by name:', userData.className);
+        // For now, we'll show an error, but you could implement a lookup here
+        setError('Class information is incomplete. Please contact your administrator.');
+        setCourses([]);
+        setTimetable({});
+        return;
+      }
+      
+      if (!classId) {
         setError('You are not assigned to any class yet. Please contact your administrator.');
         setCourses([]);
         setTimetable({});
         return;
       }
       
-      const response = await classesAPI.getClassDetails(userData.class);
+      const response = await classesAPI.getClassDetails(classId);
       console.log('MyCoursesScreen: response:', response);
       console.log('MyCoursesScreen: response.data:', response.data);
       console.log('MyCoursesScreen: response.data.class:', response.data.class);

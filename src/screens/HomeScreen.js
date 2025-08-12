@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { storage } from '../utils/storage';
-import { adminAPI, teacherAPI } from '../services/api';
+import { adminAPI, teacherAPI, classesAPI } from '../services/api';
 import { useFocusEffect } from '@react-navigation/native';
 
 const HomeScreen = ({ navigation }) => {
@@ -133,18 +133,46 @@ const HomeScreen = ({ navigation }) => {
   const loadStudentStats = async () => {
     try {
       const { userData } = await storage.getUserData();
-      if (userData && userData.class) {
-        const response = await classesAPI.getClassDetails(userData.class);
+      console.log('HomeScreen loadStudentStats: userData:', userData);
+      console.log('HomeScreen loadStudentStats: userData.class:', userData?.class);
+      console.log('HomeScreen loadStudentStats: userData.className:', userData?.className);
+      
+      // Handle different possible formats of class field
+      let classId = userData?.class;
+      
+      // If class is an object, extract the ID
+      if (userData?.class && typeof userData.class === 'object' && userData.class._id) {
+        classId = userData.class._id;
+      }
+      
+      if (userData && classId) {
+        console.log('HomeScreen loadStudentStats: Calling getClassDetails with class ID:', classId);
+        const response = await classesAPI.getClassDetails(classId);
+        console.log('HomeScreen loadStudentStats: API response:', response.data);
+        
         if (response.data.class && response.data.class.subjects) {
+          console.log('HomeScreen loadStudentStats: Setting subjects count to:', response.data.class.subjects.length);
           setStudentStats({
             subjects: response.data.class.subjects.length,
             done: 0, // Placeholder for future implementation
             average: 0 // Placeholder for future implementation
           });
         }
+      } else {
+        console.log('HomeScreen loadStudentStats: No class found in userData');
+        setStudentStats({
+          subjects: 0,
+          done: 0,
+          average: 0
+        });
       }
     } catch (error) {
       console.error('Error loading student stats:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
     }
   };
 
@@ -267,7 +295,10 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('SelectClassForAssignment')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="create" size={24} color="#27AE60" />
@@ -290,6 +321,22 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuItemTitle}>My Classes</Text>
               <Text style={styles.menuItemSubtitle}>View your classes and students</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('TeacherAssignments')}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="document-text-outline" size={24} color="#8E44AD" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>My Assignments</Text>
+              <Text style={styles.menuItemSubtitle}>View and manage your assignments</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>
@@ -583,7 +630,10 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('StudentAssignments')}
+        >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="document-text" size={24} color="#4A90E2" />

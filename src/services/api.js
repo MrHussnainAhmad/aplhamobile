@@ -229,6 +229,23 @@ export const teacherAPI = {
    
   // Posts
   getPosts: () => api.get('/posts/teacher'),
+  
+  // Assignment Management
+  getTeacherClasses: () => api.get('/teacher/classes'),
+  createAssignment: (formData) => api.post('/assignments/create', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  getTeacherAssignments: (params) => api.get('/assignments/teacher', { params }),
+  getAssignmentStats: () => api.get('/assignments/teacher/stats'),
+  updateAssignment: (id, formData) => api.put(`/assignments/${id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  deleteAssignment: (id) => api.delete(`/assignments/${id}`),
+  getAssignmentDetails: (id) => api.get(`/assignments/${id}`),
  };
 
 export const publicAPI = {
@@ -257,6 +274,10 @@ export const userAPI = {
   getMyCourses: () => api.get('/profile/student/my-courses'),
   // Get student's grades
   getMyGrades: (params) => api.get('/grades/me', { params }),
+  
+  // Assignment Management
+  getClassAssignments: (classId) => api.get(`/assignments/class/${classId}`),
+  getAssignmentDetails: (id) => api.get(`/assignments/${id}`),
 };
 
 export default api;
