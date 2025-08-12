@@ -202,7 +202,7 @@ const CreateAssignmentScreen = ({ navigation, route }) => {
         [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('TeacherAssignments')
+            onPress: () => navigation.replace('TeacherAssignments')
           }
         ]
       );
@@ -386,6 +386,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8F9FA',
+    paddingTop: 60,
   },
   header: {
     flexDirection: 'row',
@@ -408,6 +409,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
+    paddingTop: 20,
   },
   classInfo: {
     flexDirection: 'row',
@@ -415,7 +417,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E3F2FD',
     padding: 15,
     borderRadius: 8,
-    marginTop: 20,
+    marginTop: 30,
     marginBottom: 20,
   },
   classText: {

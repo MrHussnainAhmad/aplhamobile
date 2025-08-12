@@ -156,8 +156,8 @@ const ManageStudentsScreen = ({ navigation }) => {
         <View style={styles.studentMainInfo}>
           <View style={styles.avatarSection}>
             <View style={styles.avatarContainer}>
-              {student.img ? (
-                <Image key={student.img} source={{ uri: student.img }} style={styles.avatar} />
+              {student.profilePicture ? (
+                <Image key={student.profilePicture} source={{ uri: student.profilePicture }} style={styles.avatar} />
               ) : (
                 <Ionicons name="person" size={40} color="#4A90E2" />
               )}

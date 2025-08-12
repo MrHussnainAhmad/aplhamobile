@@ -247,15 +247,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#25D366",
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 50,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 60,
   },
   ctaButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
-    marginLeft: 8,
+    marginLeft: 0,
+    marginRight: 0,
   },
 });
 

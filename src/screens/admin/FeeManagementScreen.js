@@ -204,6 +204,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
     marginHorizontal: 20,
+    marginVertical: 15,
     marginTop: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden', // Ensures the picker content stays within bounds
   },
   picker: {
-    height: 45,
+    height: 55,
     width: '100%',
     color: '#2C3E50',
   },

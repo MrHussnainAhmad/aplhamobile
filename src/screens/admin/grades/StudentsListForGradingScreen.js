@@ -35,12 +35,18 @@ const StudentsListForGradingScreen = ({ route, navigation }) => {
     try {
       // Using admin API to get all students and filter by class
       const response = await adminAPI.getAllStudents();
+      console.log('Admin - All students fetched:', response.data.students?.length || 0);
+      console.log('Admin - Looking for classId:', classId);
+      
       if (response.data.students) {
         // Filter students who belong to this class
         const classStudents = response.data.students.filter(student => {
-          return student.class && student.class === classId;
+          const matches = student.class && student.class._id === classId;
+          console.log(`Admin - Student ${student.fullname}: class._id=${student.class?._id}, matches=${matches}`);
+          return matches;
         });
 
+        console.log('Admin - Students in class:', classStudents.length);
         setStudents(classStudents);
       }
     } catch (error) {

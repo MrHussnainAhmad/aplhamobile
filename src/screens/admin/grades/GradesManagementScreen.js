@@ -18,6 +18,7 @@ const GradesManagementScreen = ({ navigation }) => {
       description: "Add, edit, and manage student grades across all classes",
       icon: "school",
       color: "#3498db",
+      enabled: true,
       onPress: () => navigation.navigate("SelectClassForGrading"),
     },
     {
@@ -26,6 +27,7 @@ const GradesManagementScreen = ({ navigation }) => {
       description: "View and generate comprehensive grade reports",
       icon: "assessment",
       color: "#2ecc71",
+      enabled: false,
       onPress: () => {
         // Navigate to reports screen when implemented
         console.log("Navigate to Grade Reports");
@@ -37,6 +39,7 @@ const GradesManagementScreen = ({ navigation }) => {
       description: "Configure grading scales and assessment criteria",
       icon: "settings",
       color: "#f39c12",
+      enabled: true,
       onPress: () => navigation.navigate("GradeSettings"),
     },
     {
@@ -45,6 +48,7 @@ const GradesManagementScreen = ({ navigation }) => {
       description: "Import/export grades and perform bulk actions",
       icon: "storage",
       color: "#e74c3c",
+      enabled: false,
       onPress: () => {
         // Navigate to bulk operations when implemented
         console.log("Navigate to Bulk Operations");
@@ -76,27 +80,45 @@ const GradesManagementScreen = ({ navigation }) => {
             {managementOptions.map((option) => (
               <TouchableOpacity
                 key={option.id}
-                style={[styles.optionCard, { borderLeftColor: option.color }]}
-                onPress={option.onPress}
+                style={[
+                  styles.optionCard, 
+                  { borderLeftColor: option.color },
+                  !option.enabled && styles.disabledCard
+                ]}
+                onPress={option.enabled ? option.onPress : null}
+                disabled={!option.enabled}
               >
                 <View
                   style={[
                     styles.iconContainer,
                     { backgroundColor: option.color },
+                    !option.enabled && styles.disabledIconContainer
                   ]}
                 >
                   <MaterialIcons name={option.icon} size={28} color="#FFFFFF" />
                 </View>
 
                 <View style={styles.optionContent}>
-                  <Text style={styles.optionTitle}>{option.title}</Text>
-                  <Text style={styles.optionDescription}>
+                  <Text style={[
+                    styles.optionTitle,
+                    !option.enabled && styles.disabledText
+                  ]}>
+                    {option.title}
+                  </Text>
+                  <Text style={[
+                    styles.optionDescription,
+                    !option.enabled && styles.disabledText
+                  ]}>
                     {option.description}
                   </Text>
                 </View>
 
                 <View style={styles.arrowContainer}>
-                  <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+                  <Ionicons 
+                    name="chevron-forward" 
+                    size={20} 
+                    color={option.enabled ? "#BDC3C7" : "#D5D8DC"} 
+                  />
                 </View>
               </TouchableOpacity>
             ))}
@@ -215,6 +237,18 @@ const styles = StyleSheet.create({
   },
   arrowContainer: {
     marginLeft: 8,
+  },
+
+  // Disabled styles
+  disabledCard: {
+    opacity: 0.5,
+    backgroundColor: "#F8F9FA",
+  },
+  disabledIconContainer: {
+    opacity: 0.6,
+  },
+  disabledText: {
+    color: "#95A5A6",
   },
 
   infoBox: {

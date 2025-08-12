@@ -96,7 +96,7 @@ const AssignmentDetailScreen = ({ navigation, route }) => {
           <View style={styles.teacherInfo}>
             <View style={styles.teacherAvatar}>
               {assignment.teacher?.img ? (
-                <Image source={{ uri: assignment.teacher.img }} style={styles.avatarImage} />
+                <Image source={{ uri: `${assignment.teacher.img}?t=${new Date().getTime()}` }} style={styles.avatarImage} />
               ) : (
                 <Ionicons name="person" size={24} color="#7F8C8D" />
               )}

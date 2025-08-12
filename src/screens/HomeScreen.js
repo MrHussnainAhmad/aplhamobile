@@ -87,6 +87,9 @@ const HomeScreen = ({ navigation }) => {
       if (userType === 'student') {
         loadUserData();
         loadStudentStats();
+      } else if (userType === 'teacher') {
+        loadUserData();
+        loadStats();
       }
     }, [userType])
   );
@@ -557,8 +560,8 @@ const HomeScreen = ({ navigation }) => {
             style={styles.avatarContainer}
             onPress={() => navigation.navigate('StudentProfile')}
           >
-            {userData?.img ? (
-              <Image source={{ uri: userData.img }} style={styles.avatar} />
+            {userData?.profilePicture ? (
+              <Image source={{ uri: userData.profilePicture }} style={styles.avatar} />
             ) : (
               <View style={styles.avatarPlaceholder}>
                 <Ionicons name="person" size={40} color="#27AE60" />

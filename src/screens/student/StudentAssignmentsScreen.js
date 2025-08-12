@@ -13,6 +13,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { studentAPI } from '../../services/api';
 import { storage } from '../../utils/storage';
 
@@ -26,6 +27,13 @@ const StudentAssignmentsScreen = ({ navigation }) => {
     loadUserData();
     loadAssignments();
   }, []);
+
+  // Refresh assignments when screen comes into focus (e.g., after teacher profile update)
+  useFocusEffect(
+    React.useCallback(() => {
+      loadAssignments();
+    }, [])
+  );
 
   const loadUserData = async () => {
     try {

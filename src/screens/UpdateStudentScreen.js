@@ -188,8 +188,8 @@ const UpdateStudentScreen = ({ navigation, route }) => {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.studentInfo}>
           <View style={styles.avatarContainer}>
-            {student.img ? (
-              <Image source={{ uri: student.img }} style={styles.avatar} />
+            {student.profilePicture ? (
+              <Image source={{ uri: student.profilePicture }} style={styles.avatar} />
             ) : (
               <Ionicons name="person" size={40} color="#4A90E2" />
             )}

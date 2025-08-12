@@ -23,8 +23,7 @@ const ClassManagementMainScreen = ({ navigation }) => {
   };
 
   const handleViewClasses = () => {
-    // Placeholder - will be implemented later
-    // Alert.alert('Coming Soon', 'This feature will be available in the next update.');
+    navigation.navigate('ViewClasses');
   };
 
   const renderMenuButton = (
@@ -100,11 +99,11 @@ const ClassManagementMainScreen = ({ navigation }) => {
 
             {renderMenuButton(
               "View Classes",
-              "View comprehensive class information (Coming Soon)",
+              "View comprehensive class information and statistics",
               "eye-outline",
-              "#95A5A6",
+              "#9B59B6",
               handleViewClasses,
-              false
+              true
             )}
           </View>
 
@@ -113,16 +112,16 @@ const ClassManagementMainScreen = ({ navigation }) => {
               <Ionicons name="information-circle" size={24} color="#F39C12" />
               <Text style={styles.infoTitle}>Quick Guide</Text>
             </View>
-            <Text style={styles.infoText}>
-              • <Text style={styles.boldText}>Manage Classes:</Text> Create new
-              classes and assign them to verified teachers{"\n"}•{" "}
-              <Text style={styles.boldText}>Assign Subjects:</Text> Assign
-              subjects to teachers who already have classes •{" "}
-              <Text style={styles.boldText}>Manage Subjects (CRUD):</Text>{" "}
-              Create, edit, and delete subjects •{" "}
-              <Text style={styles.boldText}>View Classes:</Text> Will show
-              detailed class analytics and reports
-            </Text>
+                          <Text style={styles.infoText}>
+                • <Text style={styles.boldText}>Manage Classes:</Text> Create new
+                classes and assign them to verified teachers{"\n"}•{" "}
+                <Text style={styles.boldText}>Assign Subjects:</Text> Assign
+                subjects to teachers who already have classes •{" "}
+                <Text style={styles.boldText}>Manage Subjects (CRUD):</Text>{" "}
+                Create, edit, and delete subjects •{" "}
+                <Text style={styles.boldText}>View Classes:</Text> View
+                comprehensive class information and statistics
+              </Text>
           </View>
         </View>
       </ScrollView>
