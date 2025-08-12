@@ -14,7 +14,7 @@ const API_CONFIG = {
   
   // If backend is hosted on another device, replace with that device's IP
   // Example: REMOTE_DEVICE: 'http://192.168.100.25:5000/api',
-  REMOTE_DEVICE: 'http://192.168.3.51:5000/api', 
+  // REMOTE_DEVICE: 'http://192.168.3.51:5000/api', 
   // Your backend device IP
   
   // Production URL (when deployed)
