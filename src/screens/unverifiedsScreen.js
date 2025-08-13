@@ -20,9 +20,11 @@ const UnverifiedScreen = ({ navigation }) => {
     logoUrl: ''
   });
 
-  // Animation references
+  // Main fade & scale for content
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  // Floating icons
   const bookAnim1 = useRef(new Animated.Value(-50)).current;
   const bookAnim2 = useRef(new Animated.Value(width + 50)).current;
   const bookAnim3 = useRef(new Animated.Value(-100)).current;
@@ -30,17 +32,24 @@ const UnverifiedScreen = ({ navigation }) => {
   const graduationCapAnim = useRef(new Animated.Value(-100)).current;
   const bulbAnim = useRef(new Animated.Value(width + 100)).current;
 
+  // Gradient animation
+  const gradientShift = useRef(new Animated.Value(0)).current;
+
+  // Particles (positions)
+  const particles = Array.from({ length: 12 }, () => ({
+    x: Math.random() * width,
+    y: new Animated.Value(Math.random() * height),
+    size: 2 + Math.random() * 3,
+    opacity: 0.1 + Math.random() * 0.2,
+    speed: 15000 + Math.random() * 5000
+  }));
+
   useEffect(() => {
-    // Load app config
     const loadAppConfig = async () => {
       const storedConfig = await storage.getAppConfig();
-      if (storedConfig) {
-        setAppConfig(storedConfig);
-      }
+      if (storedConfig) setAppConfig(storedConfig);
     };
     loadAppConfig();
-
-    // Start animations
     startAnimations();
   }, []);
 
@@ -56,10 +65,7 @@ const UnverifiedScreen = ({ navigation }) => {
           onPress: async () => {
             try {
               await storage.clearUserData();
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Login' }],
-              });
+              navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
             } catch (error) {
               console.error('Logout error:', error);
               Alert.alert('Error', 'Failed to logout');
@@ -71,170 +77,125 @@ const UnverifiedScreen = ({ navigation }) => {
   };
 
   const startAnimations = () => {
-    // Main content animation
+    // Content fade & scale
     Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, friction: 5, useNativeDriver: true }),
     ]).start();
 
-    // Educational elements floating animations
-    const createFloatingAnimation = (animValue, startValue, endValue, duration) => {
-      return Animated.loop(
+    // Floating icons with parallax
+    const float = (animValue, start, end, duration) =>
+      Animated.loop(
         Animated.sequence([
-          Animated.timing(animValue, {
-            toValue: endValue,
-            duration: duration,
-            useNativeDriver: true,
-          }),
-          Animated.timing(animValue, {
-            toValue: startValue,
-            duration: duration,
-            useNativeDriver: true,
-          }),
+          Animated.timing(animValue, { toValue: end, duration, useNativeDriver: true }),
+          Animated.timing(animValue, { toValue: start, duration, useNativeDriver: true }),
         ])
       );
-    };
 
-    // Start floating animations with delays
-    setTimeout(() => {
-      createFloatingAnimation(bookAnim1, -50, width + 50, 8000).start();
-    }, 1000);
+    setTimeout(() => float(bookAnim1, -50, width + 50, 8000).start(), 1000);
+    setTimeout(() => float(bookAnim2, width + 50, -100, 10000).start(), 2000);
+    setTimeout(() => float(bookAnim3, -100, width + 100, 12000).start(), 3000);
+    setTimeout(() => float(pencilAnim, height + 50, -100, 9000).start(), 1500);
+    setTimeout(() => float(graduationCapAnim, -100, width + 100, 11000).start(), 2500);
+    setTimeout(() => float(bulbAnim, width + 100, -100, 13000).start(), 4000);
 
-    setTimeout(() => {
-      createFloatingAnimation(bookAnim2, width + 50, -100, 10000).start();
-    }, 2000);
+    // Gradient shift animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(gradientShift, { toValue: 1, duration: 8000, useNativeDriver: false }),
+        Animated.timing(gradientShift, { toValue: 0, duration: 8000, useNativeDriver: false }),
+      ])
+    ).start();
 
-    setTimeout(() => {
-      createFloatingAnimation(bookAnim3, -100, width + 100, 12000).start();
-    }, 3000);
-
-    setTimeout(() => {
-      createFloatingAnimation(pencilAnim, height + 50, -100, 9000).start();
-    }, 1500);
-
-    setTimeout(() => {
-      createFloatingAnimation(graduationCapAnim, -100, width + 100, 11000).start();
-    }, 2500);
-
-    setTimeout(() => {
-      createFloatingAnimation(bulbAnim, width + 100, -100, 13000).start();
-    }, 4000);
+    // Particle movement
+    particles.forEach(p => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(p.y, { toValue: -50, duration: p.speed, useNativeDriver: true }),
+          Animated.timing(p.y, { toValue: height + 50, duration: 0, useNativeDriver: true }),
+        ])
+      ).start();
+    });
   };
+
+  // Interpolated gradient colors
+  const bgColor1 = gradientShift.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#1E3A8A', '#6366F1'],
+  });
+  const bgColor2 = gradientShift.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#6366F1', '#8B5CF6'],
+  });
 
   return (
     <View style={styles.container}>
-      {/* Gradient Overlay Effects */}
-      <View style={styles.gradientOverlay} />
-      <View style={styles.gradientOverlayBottom} />
-      
-      {/* Header with Logout Button */}
+      {/* Animated Gradient Background */}
+      <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: bgColor1 }]} />
+      <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: bgColor2, opacity: 0.6 }]} />
+
+      {/* Particle Layer */}
+      {particles.map((p, i) => (
+        <Animated.View
+          key={i}
+          style={{
+            position: 'absolute',
+            width: p.size,
+            height: p.size,
+            borderRadius: p.size / 2,
+            backgroundColor: '#FFF',
+            opacity: p.opacity,
+            left: p.x,
+            transform: [{ translateY: p.y }],
+          }}
+        />
+      ))}
+
+      {/* Logout Button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <Ionicons name="log-out-outline" size={24} color="#F8FAFC" />
         </TouchableOpacity>
       </View>
-      
-      {/* Animated Educational Background Elements */}
-      <Animated.View style={[styles.floatingIcon, {
-        top: height * 0.15,
-        transform: [{ translateX: bookAnim1 }]
-      }]}>
-        <Ionicons name="book" size={32} color="#6366F1" />
-      </Animated.View>
 
-      <Animated.View style={[styles.floatingIcon, {
-        top: height * 0.25,
-        transform: [{ translateX: bookAnim2 }]
-      }]}>
-        <Ionicons name="library" size={28} color="#8B5CF6" />
+      {/* Floating Icons */}
+      <Animated.View style={[styles.floatingIcon, { top: height * 0.15, transform: [{ translateX: bookAnim1 }] }]}>
+        <Ionicons name="book" size={32} color="#FFF" />
       </Animated.View>
-
-      <Animated.View style={[styles.floatingIcon, {
-        top: height * 0.35,
-        transform: [{ translateX: bookAnim3 }]
-      }]}>
-        <Ionicons name="school" size={36} color="#6366F1" />
+      <Animated.View style={[styles.floatingIcon, { top: height * 0.25, transform: [{ translateX: bookAnim2 }] }]}>
+        <Ionicons name="library" size={28} color="#FFF" />
       </Animated.View>
-
-      <Animated.View style={[styles.floatingIcon, {
-        right: width * 0.1,
-        transform: [{ translateY: pencilAnim }]
-      }]}>
-        <Ionicons name="pencil" size={30} color="#8B5CF6" />
+      <Animated.View style={[styles.floatingIcon, { top: height * 0.35, transform: [{ translateX: bookAnim3 }] }]}>
+        <Ionicons name="school" size={36} color="#FFF" />
       </Animated.View>
-
-      <Animated.View style={[styles.floatingIcon, {
-        top: height * 0.45,
-        transform: [{ translateX: graduationCapAnim }]
-      }]}>
-        <Ionicons name="school-outline" size={34} color="#6366F1" />
+      <Animated.View style={[styles.floatingIcon, { right: width * 0.1, transform: [{ translateY: pencilAnim }] }]}>
+        <Ionicons name="pencil" size={30} color="#FFF" />
       </Animated.View>
-
-      <Animated.View style={[styles.floatingIcon, {
-        top: height * 0.55,
-        transform: [{ translateX: bulbAnim }]
-      }]}>
-        <Ionicons name="bulb" size={28} color="#8B5CF6" />
+      <Animated.View style={[styles.floatingIcon, { top: height * 0.45, transform: [{ translateX: graduationCapAnim }] }]}>
+        <Ionicons name="school-outline" size={34} color="#FFF" />
+      </Animated.View>
+      <Animated.View style={[styles.floatingIcon, { top: height * 0.55, transform: [{ translateX: bulbAnim }] }]}>
+        <Ionicons name="bulb" size={28} color="#FFF" />
       </Animated.View>
 
       {/* Main Content */}
-      <Animated.View style={[
-        styles.contentContainer,
-        {
-          opacity: fadeAnim,
-          transform: [{ scale: scaleAnim }]
-        }
-      ]}>
-        {/* Logo Section */}
+      <Animated.View style={[styles.contentContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
         <View style={styles.logoSection}>
           {appConfig.logoUrl ? (
-            <Image 
-              source={{ uri: appConfig.logoUrl }} 
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
+            <Image source={{ uri: appConfig.logoUrl }} style={styles.logoImage} resizeMode="contain" />
           ) : (
             <View style={styles.logoPlaceholder}>
               <Ionicons name="school" size={80} color="#FFFFFF" />
             </View>
           )}
         </View>
-
-        {/* Message Section */}
         <View style={styles.messageContainer}>
           <View style={styles.messageBox}>
-            <Ionicons 
-              name="warning-outline" 
-              size={40} 
-              color="#FF6B6B" 
-              style={styles.warningIcon} 
-            />
-            
-            <Text style={styles.mainMessage}>
-              Oh, You are Unverified!
-            </Text>
-            
-            <Text style={styles.subMessage}>
-              Contact Admin/Principal to Verify you!
-            </Text>
-            
-            <Text style={styles.thanksMessage}>
-              Thanks for understanding!!!
-            </Text>
-            
-            {/* Contact Info */}
-            <View style={styles.contactContainer}>
-              <Ionicons name="call" size={20} color="rgba(255, 255, 255, 0.8)" />
-              <Text style={styles.contactText}>Contact Admin</Text>
-            </View>
+            <Ionicons name="warning-outline" size={40} color="#FF6B6B" style={styles.warningIcon} />
+            <Text style={styles.mainMessage}>Oh, You are Unverified!</Text>
+            <Text style={styles.subMessage}>Contact Admin/Principal to Verify you!</Text>
+            <Text style={styles.thanksMessage}>We Know You Verified Your Account, But Admin Needs To Verify You Again!</Text>
+            <Text style={styles.thanksMessage}>Thanks for understanding!!!</Text>
           </View>
         </View>
       </Animated.View>
@@ -243,205 +204,45 @@ const UnverifiedScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0F172A', // Modern dark background
-    position: 'relative',
-  },
-  gradientOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: height * 0.5,
-    backgroundColor: '#6366F1',
-    opacity: 0.05,
-    zIndex: 0,
-  },
-  gradientOverlayBottom: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: height * 0.3,
-    backgroundColor: '#8B5CF6',
-    opacity: 0.03,
-    zIndex: 0,
-  },
-  header: {
-    position: 'absolute',
-    top: 60,
-    right: 24,
-    zIndex: 100,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  container: { flex: 1, backgroundColor: '#0F172A', position: 'relative' },
+  header: { position: 'absolute', top: 60, right: 24, zIndex: 100 },
   logoutButton: {
     paddingHorizontal: 18,
     paddingVertical: 12,
-    backgroundColor: 'rgba(239, 68, 68, 0.1)', // Modern red tint
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: 'rgba(239, 68, 68, 0.3)',
-    flexDirection: 'row',
-    alignItems: 'center',
-    backdropFilter: 'blur(10px)',
-    // Modern shadow
-    shadowColor: '#EF4444',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
   },
-  floatingIcon: {
-    position: 'absolute',
-    zIndex: 1,
-    opacity: 0.15,
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    zIndex: 50,
-  },
-  logoSection: {
-    alignItems: 'center',
-    marginBottom: 48,
-  },
+  floatingIcon: { position: 'absolute', zIndex: 1, opacity: 0.15 },
+  contentContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24, zIndex: 50 },
+  logoSection: { alignItems: 'center', marginBottom: 48 },
   logoImage: {
-    width: 140,
-    height: 140,
-    borderRadius: 32,
-    backgroundColor: 'rgba(99, 102, 241, 0.1)', // Modern indigo
-    borderWidth: 2,
-    borderColor: 'rgba(99, 102, 241, 0.3)',
-    // Premium shadow effect
-    shadowColor: '#6366F1',
-    shadowOffset: {
-      width: 0,
-      height: 20,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 40,
-    elevation: 20,
+    width: 140, height: 140, borderRadius: 32, backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    borderWidth: 2, borderColor: 'rgba(99, 102, 241, 0.3)',
   },
   logoPlaceholder: {
-    width: 140,
-    height: 140,
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(99, 102, 241, 0.3)',
-    // Glass effect
-    backdropFilter: 'blur(20px)',
-    // Premium shadow
-    shadowColor: '#6366F1',
-    shadowOffset: {
-      width: 0,
-      height: 20,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 40,
-    elevation: 20,
+    width: 140, height: 140, backgroundColor: 'rgba(99, 102, 241, 0.15)', borderRadius: 32,
+    justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: 'rgba(99, 102, 241, 0.3)',
   },
-  messageContainer: {
-    width: '100%',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
+  messageContainer: { width: '100%', alignItems: 'center', paddingHorizontal: 20 },
   messageBox: {
-    backgroundColor: 'rgba(30, 41, 59, 0.6)', // Modern dark glass
-    borderRadius: 32,
-    padding: 40,
-    alignItems: 'center',
-    width: '100%',
-    maxWidth: 400,
-    // Glass morphism effect
-    backdropFilter: 'blur(20px)',
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.1)',
-    // Premium shadow
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 20,
-    },
-    shadowOpacity: 0.5,
-    shadowRadius: 40,
-    elevation: 30,
+    backgroundColor: 'rgba(30, 41, 59, 0.6)', borderRadius: 32, padding: 40, alignItems: 'center',
+    width: '100%', maxWidth: 400, borderWidth: 1, borderColor: 'rgba(148, 163, 184, 0.1)',
   },
   warningIcon: {
-    marginBottom: 24,
-    padding: 16,
-    backgroundColor: 'rgba(251, 146, 60, 0.1)', // Modern orange
-    borderRadius: 24,
-    borderWidth: 1.5,
-    borderColor: 'rgba(251, 146, 60, 0.2)',
+    marginBottom: 24, padding: 16, backgroundColor: 'rgba(251, 146, 60, 0.1)',
+    borderRadius: 24, borderWidth: 1.5, borderColor: 'rgba(251, 146, 60, 0.2)',
   },
-  mainMessage: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#F8FAFC',
-    textAlign: 'center',
-    marginBottom: 12,
-    letterSpacing: -0.5,
-    // Modern text shadow
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-  },
-  subMessage: {
-    fontSize: 17,
-    color: '#CBD5E1',
-    textAlign: 'center',
-    lineHeight: 26,
-    marginBottom: 20,
-    fontWeight: '400',
-    letterSpacing: 0.3,
-  },
-  thanksMessage: {
-    fontSize: 15,
-    color: '#94A3B8',
-    textAlign: 'center',
-    fontStyle: 'normal',
-    marginBottom: 32,
-    lineHeight: 22,
-    fontWeight: '300',
-    letterSpacing: 0.5,
-  },
+  mainMessage: { fontSize: 28, fontWeight: '800', color: '#F8FAFC', textAlign: 'center', marginBottom: 12 },
+  subMessage: { fontSize: 17, color: '#CBD5E1', textAlign: 'center', lineHeight: 26, marginBottom: 20 },
+  thanksMessage: { fontSize: 15, color: '#94A3B8', textAlign: 'center', marginBottom: 32 },
   contactContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(99, 102, 241, 0.15)', // Modern indigo accent
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 20,
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(99, 102, 241, 0.3)',
-    // Button shadow
-    shadowColor: '#6366F1',
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 10,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    paddingHorizontal: 24, paddingVertical: 14, borderRadius: 20, marginTop: 12,
+    borderWidth: 1, borderColor: 'rgba(99, 102, 241, 0.3)',
   },
-  contactText: {
-    fontSize: 16,
-    color: '#E0E7FF',
-    marginLeft: 10,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
+  contactText: { fontSize: 16, color: '#E0E7FF', marginLeft: 10, fontWeight: '600' },
 });
 
 export default UnverifiedScreen;

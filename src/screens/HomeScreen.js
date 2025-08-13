@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { storage } from '../utils/storage';
 import { adminAPI, teacherAPI, classesAPI } from '../services/api';
 import { useFocusEffect } from '@react-navigation/native';
+import notificationService from '../services/notificationService';
 
 const HomeScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
@@ -90,6 +91,9 @@ const HomeScreen = ({ navigation }) => {
       } else if (userType === 'teacher') {
         loadUserData();
         loadStats();
+      } else if (userType === 'admin') {
+        // Refresh admin stats when returning to home screen
+        loadStats();
       }
     }, [userType])
   );
@@ -111,6 +115,11 @@ const HomeScreen = ({ navigation }) => {
       
       setUserData(storedUserData);
       setUserType(storedUserType);
+      
+      // Initialize push notifications for non-admin users
+      if (storedUserType && storedUserData && storedUserData._id) {
+        notificationService.initialize(storedUserData._id, storedUserType);
+      }
     } catch (error) {
       console.error('Error loading user data:', error);
       Alert.alert('Error', 'Failed to load user data');
@@ -381,7 +390,7 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="megaphone" size={24} color="#9B59B6" />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuItemTitle}>School Posts</Text>
+              <Text style={styles.menuItemTitle}>College Posts</Text>
               <Text style={styles.menuItemSubtitle}>View latest updates from admin</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
@@ -521,7 +530,7 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="megaphone" size={24} color="#9B59B6" />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuItemTitle}>School Posts</Text>
+              <Text style={styles.menuItemTitle}>College Posts</Text>
               <Text style={styles.menuItemSubtitle}>Post and manage school-wide updates</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
@@ -749,7 +758,7 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="notifications" size={24} color="#E74C3C" />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuItemTitle}>School Posts</Text>
+              <Text style={styles.menuItemTitle}>College Posts</Text>
               <Text style={styles.menuItemSubtitle}>View latest updates from admin</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />

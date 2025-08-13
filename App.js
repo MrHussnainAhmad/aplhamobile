@@ -65,6 +65,9 @@ import StudentAttendanceRecordScreen from './src/screens/student/StudentAttendan
 import AdminClassStudentsScreen from './src/screens/admin/ClassStudentsScreen';
 import ClassStudentsListScreen from './src/screens/admin/ClassStudentsListScreen';
 import UnverifiedScreen from './src/screens/unverifiedsScreen';
+import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
+import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
+import NotificationsScreen from './src/screens/NotificationsScreen';
 
 const Stack = createStackNavigator();
 
@@ -153,6 +156,9 @@ export default function App() {
               headerLeft: null,
             }}
           />
+                  <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+        <Stack.Screen name="Notifications" component={NotificationsScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

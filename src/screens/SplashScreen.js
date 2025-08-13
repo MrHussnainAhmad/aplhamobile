@@ -76,8 +76,8 @@ const SplashScreen = ({ navigation }) => {
             index: 0,
             routes: [{ name: 'Login' }],
           });
-        } else if (authStatus.userType === 'student' && !authStatus.isVerified) {
-          // Student is authenticated but not verified, show unverified screen
+        } else if ((authStatus.userType === 'student' || authStatus.userType === 'teacher') && !authStatus.isVerified) {
+          // Student or Teacher is authenticated but not verified, show unverified screen
           navigation.reset({
             index: 0,
             routes: [{ name: 'Unverified' }],

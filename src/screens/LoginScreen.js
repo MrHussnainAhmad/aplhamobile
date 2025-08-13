@@ -91,17 +91,45 @@ const LoginScreen = ({ navigation }) => {
         throw lastError || new Error('Invalid credentials');
       }
 
-      // Store user data
+      // Get user data from response
       const { token } = response.data;
       const userData = userType === 'admin' ? response.data.admin : 
                       userType === 'teacher' ? response.data.teacher : 
                       { ...response.data.student, class: response.data.student.class };
       
-      console.log("Storing user data:", userData);
-      await storage.storeUserData(token, userData, userType);
+      console.log("User data from login:", userData);
 
-      setModalMessage(`Welcome ${userData.fullname}!`);
-      setShowSuccessModal(true);
+      // Check verification status immediately
+      const isVerified = userData.isVerified || false;
+      
+      // For admin, always allow access
+      if (userType === 'admin') {
+        await storage.storeUserData(token, userData, userType);
+        setModalMessage(`Welcome ${userData.fullname}!`);
+        setShowSuccessModal(true);
+        return;
+      }
+
+      // For students and teachers, check verification status
+      if (userType === 'student' || userType === 'teacher') {
+        if (isVerified) {
+          // User is verified, store data and show success
+          await storage.storeUserData(token, userData, userType);
+          setModalMessage(`Welcome ${userData.fullname}!`);
+          setShowSuccessModal(true);
+        } else {
+          // User is not verified, store data and navigate directly to unverified screen
+          await storage.storeUserData(token, userData, userType);
+          // Keep loading state for smooth transition
+          setTimeout(() => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Unverified' }],
+            });
+          }, 500); // Brief delay for smooth transition
+          return; // Don't show success modal for unverified users
+        }
+      }
 
     } catch (error) {
       console.error('Login error:', error);
@@ -114,7 +142,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
-    // Reset navigation stack to prevent going back to login
+    // Navigate to home (only verified users reach this point)
     navigation.reset({
       index: 0,
       routes: [{ name: 'Home' }],
@@ -185,6 +213,14 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.loginButtonText}>
                 {loading ? 'Signing In...' : 'Sign In'}
               </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.forgotPasswordButton}
+              onPress={() => navigation.navigate('ForgotPassword')}
+              disabled={loading}
+            >
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
             <View style={styles.signupContainer}>
@@ -300,6 +336,16 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  forgotPasswordButton: {
+    alignItems: 'center',
+    marginTop: 15,
+    paddingVertical: 10,
+  },
+  forgotPasswordText: {
+    color: '#4A90E2',
     fontSize: 16,
     fontWeight: '600',
   },

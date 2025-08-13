@@ -96,10 +96,29 @@ export const storage = {
         };
       }
 
-      // For admin and teachers, they don't need verification check
+      // For admin, they don't need verification check
+      if (userType === 'admin') {
+        return {
+          isAuthenticated: true,
+          isVerified: true, // Always true for admin
+          userType: userType
+        };
+      }
+
+      // For teachers, check if they are verified
+      if (userType === 'teacher') {
+        const isVerified = parsedUserData ? parsedUserData.isVerified || false : false;
+        return {
+          isAuthenticated: true,
+          isVerified: isVerified,
+          userType: userType
+        };
+      }
+
+      // Default case
       return {
         isAuthenticated: true,
-        isVerified: true, // Always true for non-students
+        isVerified: true,
         userType: userType
       };
     } catch (error) {
