@@ -75,26 +75,43 @@ class NotificationService {
   // Send push token to backend
   async sendTokenToBackend(token, userId, userType) {
     try {
+      // Generate a unique device ID if not exists
+      let deviceId = await AsyncStorage.getItem('deviceId');
+      if (!deviceId) {
+        deviceId = `${Platform.OS}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        await AsyncStorage.setItem('deviceId', deviceId);
+      }
+
       const response = await adminAPI.savePushToken({
         token,
-        userId,
-        userType,
-        platform: Platform.OS
+        deviceId
       });
       console.log('Token saved to backend:', response.data);
     } catch (error) {
       console.error('Error saving token to backend:', error);
+      console.error('Full error details:', error.response?.data || error.message);
     }
   }
 
   // Initialize notification listeners
   async initialize(userId, userType) {
+    console.log('🔔 NotificationService.initialize called with:', { userId, userType });
+    
     // Register for push notifications
     const token = await this.registerForPushNotificationsAsync();
+    console.log('📱 Token received from registerForPushNotificationsAsync:', token ? token.substring(0, 20) + '...' : 'null');
     
     if (token && userId) {
+      console.log('📤 Sending token to backend...');
       // Send token to backend
       await this.sendTokenToBackend(token, userId, userType);
+    } else {
+      console.log('⚠️ Cannot send token to backend:', { 
+        hasToken: !!token, 
+        hasUserId: !!userId,
+        token: token ? token.substring(0, 20) + '...' : 'null',
+        userId 
+      });
     }
 
     // Listen for notifications when app is in foreground

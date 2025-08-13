@@ -22,18 +22,6 @@ const GradesManagementScreen = ({ navigation }) => {
       onPress: () => navigation.navigate("SelectClassForGrading"),
     },
     {
-      id: "view_reports",
-      title: "Grade Reports",
-      description: "View and generate comprehensive grade reports",
-      icon: "assessment",
-      color: "#2ecc71",
-      enabled: false,
-      onPress: () => {
-        // Navigate to reports screen when implemented
-        console.log("Navigate to Grade Reports");
-      },
-    },
-    {
       id: "grade_settings",
       title: "Grade Settings",
       description: "Configure grading scales and assessment criteria",
@@ -41,18 +29,6 @@ const GradesManagementScreen = ({ navigation }) => {
       color: "#f39c12",
       enabled: true,
       onPress: () => navigation.navigate("GradeSettings"),
-    },
-    {
-      id: "bulk_operations",
-      title: "Bulk Operations",
-      description: "Import/export grades and perform bulk actions",
-      icon: "storage",
-      color: "#e74c3c",
-      enabled: false,
-      onPress: () => {
-        // Navigate to bulk operations when implemented
-        console.log("Navigate to Bulk Operations");
-      },
     },
   ];
 

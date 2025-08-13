@@ -127,7 +127,7 @@ export const adminAPI = {
   getAppConfig: () => api.get('/app-config'),
   updateAppConfig: (data) => api.put('/admin/app-config', data),
   resetAppConfig: () => api.post('/admin/app-config/reset'),
-  savePushToken: (data) => api.post('/push-token', data),
+  savePushToken: (data) => api.post('/notifications/push-token', data),
 
   // Fee Voucher Management
   getAllFeeVouchersAdmin: (searchQuery, classId) => api.get(`/fee-vouchers/admin/all?search=${searchQuery}&classId=${classId || ''}`),
