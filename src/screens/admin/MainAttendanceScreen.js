@@ -80,6 +80,22 @@ const MainAttendanceScreen = () => {
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>
         </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('TeacherAttendanceRecord')}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="person" size={28} color="#E67E22" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Teacher Attendance Records</Text>
+              <Text style={styles.menuItemSubtitle}>View and manage teacher attendance records</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.infoContainer}>

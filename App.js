@@ -60,7 +60,8 @@ import StudentAttendanceScreen from './src/screens/admin/StudentAttendanceScreen
 import TeacherAttendanceScreen from './src/screens/admin/TeacherAttendanceScreen';
 import AttendanceRecordScreen from './src/screens/admin/AttendanceRecordScreen';
 import AttendanceDetailScreen from './src/screens/admin/AttendanceDetailScreen';
-import TeacherAttendanceRecordScreen from './src/screens/teacher/TeacherAttendanceRecordScreen';
+import TeacherAttendanceRecordScreen from './src/screens/admin/TeacherAttendanceRecordScreen';
+
 import StudentAttendanceRecordScreen from './src/screens/student/StudentAttendanceRecordScreen';
 import AdminClassStudentsScreen from './src/screens/admin/ClassStudentsScreen';
 import ClassStudentsListScreen from './src/screens/admin/ClassStudentsListScreen';

@@ -11,7 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 
 const APP_NAME = "SSC";
-const APP_VERSION = "0.9.0";
+const APP_VERSION = "1.0.0";
 const DEVELOPER_NAME = "Hussnain Ahmad";
 const DEVELOPER_PORTFOLIO = "https://hussnainahmad.vercel.app/";
 const DEVELOPER_WHATSAPP =
