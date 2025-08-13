@@ -82,7 +82,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
       const response = await adminAPI.getTeachersWithClasses();
       if (response.data.teachers) {
         setTeachers(response.data.teachers);
-        console.log('Fetched teachers with classes:', response.data.teachers.length);
+        console.log('Fetched teachers with classes:', response.data.teachers);
       }
     } catch (error) {
       console.error('Error fetching teachers with classes:', error);
@@ -258,12 +258,12 @@ const ManageSubjectsScreen = ({ navigation }) => {
     });
   };
 
-  const renderSubjectChip = (subject, teacherId, canRemove = true) => (
-    <View key={subject} style={styles.subjectChip}>
-      <Text style={styles.subjectText}>{subject}</Text>
+  const renderSubjectChip = (assignment, teacherId, canRemove = true) => (
+    <View key={`${assignment.subject}-${assignment.classId}-${assignment.day}-${assignment.timeSlot}`} style={styles.subjectChip}>
+      <Text style={styles.subjectText}>{assignment.subject} - {assignment.class}</Text>
       {canRemove && (
         <TouchableOpacity 
-          onPress={() => handleRemoveSubject(teacherId, subject)}
+          onPress={() => handleRemoveSubject(teacherId, assignment.subject)}
           style={styles.removeButton}
         >
           <Ionicons name="close-circle" size={18} color="#E74C3C" />
@@ -320,10 +320,11 @@ const ManageSubjectsScreen = ({ navigation }) => {
 
       <View style={styles.subjectsSection}>
         <Text style={styles.subjectsLabel}>Assigned Subjects:</Text>
-        {teacher.subjects && teacher.subjects.length > 0 ? (
+        {console.log('teacher.assignedSubjectsWithClasses:', teacher.assignedSubjectsWithClasses)}
+        {teacher.assignedSubjectsWithClasses && teacher.assignedSubjectsWithClasses.length > 0 ? (
           <View style={styles.subjectsContainer}>
-            {teacher.subjects.map(subject => 
-              renderSubjectChip(subject, teacher._id)
+            {teacher.assignedSubjectsWithClasses.map(assignment => 
+              renderSubjectChip(assignment, teacher._id)
             )}
           </View>
         ) : (
@@ -422,7 +423,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Select Subjects:</Text>
               <View style={styles.quickAssignContainer}>
                 {availableSubjects.map(subject => {
-                  const isAlreadyAssigned = selectedTeacher.subjects?.includes(subject);
+                  const isAlreadyAssigned = selectedTeacher.assignedSubjectsWithClasses?.some(assignment => assignment.subject === subject && assignment.classId === localSelectedClass);
                   const isSelected = localSelectedSubjects.includes(subject);
                   
                   return (
