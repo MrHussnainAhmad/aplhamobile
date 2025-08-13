@@ -18,7 +18,7 @@ const API_CONFIG = {
   // Your backend device IP
   
   // Production URL (when deployed)
-  PRODUCTION: 'https://superior.up.railway.app/api',
+  PRODUCTION: 'https://superiorcollege.up.railway.app/api',
 };
 
 // Choose which configuration to use
