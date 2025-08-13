@@ -465,6 +465,8 @@ const AddGradesScreen = ({ route, navigation }) => {
             {selectedSubjects.length > 0 && (
               <View style={styles.marksSection}>
                 <Text style={styles.sectionTitle}>Enter Marks</Text>
+                
+                {/* Individual Subject Marks */}
                 {selectedSubjects.map((subject) => (
                   <View key={subject} style={styles.subjectMarksCard}>
                     <Text style={styles.subjectMarksTitle}>{subject}</Text>
@@ -504,6 +506,52 @@ const AddGradesScreen = ({ route, navigation }) => {
                     </View>
                   </View>
                 ))}
+
+                {/* Total Row */}
+                {(() => {
+                  const totalObtained = selectedSubjects.reduce((sum, subject) => {
+                    const obtained = parseFloat(subjectGrades[subject]?.obtained) || 0;
+                    return sum + obtained;
+                  }, 0);
+                  
+                  const totalMarks = selectedSubjects.reduce((sum, subject) => {
+                    const total = parseFloat(subjectGrades[subject]?.total) || 0;
+                    return sum + total;
+                  }, 0);
+                  
+                  const overallPercentage = totalMarks > 0 ? (totalObtained / totalMarks) * 100 : 0;
+                  const overallGrade = totalMarks > 0 ? calculateGrade(totalObtained, totalMarks) : { grade: '...', color: '#95a5a6' };
+                  
+                  return (
+                    <View style={styles.totalRowCard}>
+                      <Text style={styles.totalRowTitle}>Total</Text>
+                      <View style={styles.marksRow}>
+                        <View style={[styles.inputGroup, { flex: 1, marginRight: 10 }]}>
+                          <Text style={styles.label}>Obtained</Text>
+                          <View style={styles.totalInput}>
+                            <Text style={styles.totalInputText}>{totalObtained}</Text>
+                          </View>
+                        </View>
+                        <View style={[styles.inputGroup, { flex: 1, marginLeft: 10 }]}>
+                          <Text style={styles.label}>Total</Text>
+                          <View style={styles.totalInput}>
+                            <Text style={styles.totalInputText}>{totalMarks}</Text>
+                          </View>
+                        </View>
+                        <View style={styles.gradeIndicator}>
+                          <View style={[
+                            styles.totalGradeBadge,
+                            { backgroundColor: overallGrade.color }
+                          ]}>
+                            <Text style={styles.totalGradeBadgeText}>
+                              {overallGrade.grade} ({overallPercentage.toFixed(1)}%)
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })()}
               </View>
             )}
           </View>
@@ -807,6 +855,51 @@ const styles = StyleSheet.create({
   miniGradeBadgeText: {
     color: '#FFFFFF',
     fontSize: 12,
+    fontWeight: 'bold',
+  },
+  
+  // Total row styles
+  totalRowCard: {
+    backgroundColor: '#2C3E50',
+    borderRadius: 10,
+    padding: 15,
+    marginTop: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  totalRowTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  totalInput: {
+    backgroundColor: '#34495E',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  totalInputText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  totalGradeBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  totalGradeBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 14,
     fontWeight: 'bold',
   },
   

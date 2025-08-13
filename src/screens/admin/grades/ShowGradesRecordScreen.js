@@ -11,6 +11,7 @@ import {
   Button,
   Platform,
   StatusBar,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
@@ -98,15 +99,39 @@ const ShowGradesRecordScreen = ({ route, navigation }) => {
     "Percentage",
     "Grade",
   ];
-  const tableData = grades.flatMap((grade) =>
-    grade.subjects.map((subject) => [
+  // Create separate tables for each grade submission (show all submissions for the day)
+  const gradeTables = grades.map((grade, index) => {
+    const subjectRows = grade.subjects.map((subject) => [
       subject.subject,
       subject.marksObtained,
       subject.totalMarks,
       `${subject.percentage}%`,
       subject.grade,
-    ])
-  );
+    ]);
+    
+    // Calculate totals for this grade submission
+    const totalObtained = grade.subjects.reduce((sum, subject) => sum + parseFloat(subject.marksObtained), 0);
+    const totalMarks = grade.subjects.reduce((sum, subject) => sum + parseFloat(subject.totalMarks), 0);
+    const overallPercentage = totalMarks > 0 ? ((totalObtained / totalMarks) * 100).toFixed(1) : 0;
+    
+    // Add total row
+    const totalRow = [
+      'TOTAL',
+      totalObtained,
+      totalMarks,
+      `${overallPercentage}%`,
+      '---', // Grade will be calculated based on percentage
+    ];
+    
+    return {
+      examId: grade.examId || grade._id,
+      examDate: grade.examDate,
+      gradeType: grade.gradeType,
+      tableData: [...subjectRows, totalRow],
+      comments: grade.comments,
+      submissionNumber: index + 1
+    };
+  });
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
@@ -151,7 +176,7 @@ const ShowGradesRecordScreen = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.content}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.studentNameText}>Student: {studentName}</Text>
 
         {showFilters && (
@@ -207,20 +232,54 @@ const ShowGradesRecordScreen = ({ route, navigation }) => {
         )}
 
         {grades.length > 0 ? (
-          <View style={styles.tableContainer}>
-            <Table borderStyle={{ borderWidth: 2, borderColor: "#c8e1ff" }}>
-              <Row
-                data={tableHead}
-                style={styles.tableHead}
-                textStyle={styles.tableHeadText}
-              />
-              <Rows data={tableData} textStyle={styles.tableText} />
-            </Table>
+          <View style={styles.tablesContainer}>
+            <Text style={styles.resultsHeader}>
+              Found {gradeTables.length} submission{gradeTables.length > 1 ? 's' : ''} for {new Date(date).toLocaleDateString()}
+            </Text>
+            {gradeTables.map((gradeTable, tableIndex) => (
+              <View key={`${gradeTable.examId}-${tableIndex}`} style={styles.tableContainer}>
+                {/* Grade submission header */}
+                <View style={styles.tableHeader}>
+                  <Text style={styles.tableHeaderText}>
+                    Submission #{gradeTable.submissionNumber} - {new Date(gradeTable.examDate).toLocaleDateString()}
+                  </Text>
+                  {gradeTable.comments && (
+                    <Text style={styles.commentsText}>
+                      Comments: {gradeTable.comments}
+                    </Text>
+                  )}
+                </View>
+                
+                <Table borderStyle={{ borderWidth: 2, borderColor: "#c8e1ff" }}>
+                  <Row
+                    data={tableHead}
+                    style={styles.tableHead}
+                    textStyle={styles.tableHeadText}
+                  />
+                  {gradeTable.tableData.map((row, index) => {
+                    const isTotalRow = row[0] === 'TOTAL';
+                    return (
+                      <Row
+                        key={index}
+                        data={row}
+                        style={isTotalRow ? styles.totalRow : styles.tableRow}
+                        textStyle={isTotalRow ? styles.totalRowText : styles.tableText}
+                      />
+                    );
+                  })}
+                </Table>
+                
+                {/* Separator line between tables */}
+                {tableIndex < gradeTables.length - 1 && (
+                  <View style={styles.tableSeparator} />
+                )}
+              </View>
+            ))}
           </View>
         ) : (
           renderEmptyState()
         )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -294,11 +353,13 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   picker: {
-    height: 44,
+    height: 52,
     width: "100%",
     marginBottom: 8,
     backgroundColor: "#FAFBFD",
     borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
 
   dateContainer: {
@@ -340,12 +401,49 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
+  tablesContainer: {
+    gap: 25,
+    paddingBottom: 20,
+  },
+  resultsHeader: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#2C3E50",
+    textAlign: "center",
+    marginBottom: 15,
+    paddingVertical: 10,
+    backgroundColor: "#E8F4FD",
+    borderRadius: 8,
+  },
   tableContainer: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 10,
     borderWidth: 1,
     borderColor: "#E6EEF8",
+  },
+  tableHeader: {
+    marginBottom: 10,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E6EEF8",
+  },
+  tableHeaderText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#2C3E50",
+    marginBottom: 4,
+  },
+  commentsText: {
+    fontSize: 12,
+    color: "#7F8C8D",
+    fontStyle: "italic",
+  },
+  tableSeparator: {
+    height: 2,
+    backgroundColor: "#E6EEF8",
+    marginVertical: 10,
+    borderRadius: 1,
   },
   tableHead: {
     height: 48,
@@ -365,6 +463,20 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingVertical: 8,
     color: "#2C3E50",
+  },
+  tableRow: {
+    height: 40,
+  },
+  totalRow: {
+    height: 45,
+    backgroundColor: "#2C3E50",
+  },
+  totalRowText: {
+    fontSize: 14,
+    textAlign: "center",
+    paddingVertical: 8,
+    color: "#FFFFFF",
+    fontWeight: "bold",
   },
 
   emptyContainer: {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -118,7 +118,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
     }
   };
 
-  const handleAssignSubjectsWithTimetable = async () => {
+  const handleAssignSubjectsWithTimetable = useCallback(async () => {
     if (!selectedTeacher || selectedSubjects.length === 0) {
       Alert.alert('Error', 'Please select at least one subject.');
       return;
@@ -160,7 +160,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
       });
       
       if (response.data.teacher) {
-        setTeachers(teachers.map(t => 
+        setTeachers(prevTeachers => prevTeachers.map(t => 
           t._id === selectedTeacher._id ? response.data.teacher : t
         ));
         Alert.alert('Success', `Subjects assigned successfully with timetable! (${response.data.timetableEntries} entries created)`);
@@ -171,34 +171,38 @@ const ManageSubjectsScreen = ({ navigation }) => {
       console.error('Error assigning subjects with timetable:', error);
       Alert.alert('Error', error.response?.data?.message || 'Failed to assign subjects with timetable.');
     }
-  };
+  }, [selectedTeacher, selectedSubjects, selectedClass, selectedDays, subjectTimeSlots, resetAssignmentForm]);
 
-  const toggleSubjectSelection = (subject) => {
-    if (selectedSubjects.includes(subject)) {
-      setSelectedSubjects(selectedSubjects.filter(s => s !== subject));
-      // Remove time slot for this subject
-      const newTimeSlots = { ...subjectTimeSlots };
-      delete newTimeSlots[subject];
-      setSubjectTimeSlots(newTimeSlots);
-    } else {
-      setSelectedSubjects([...selectedSubjects, subject]);
-    }
-  };
-
-  const updateSubjectTimeSlot = (subject, timeSlot) => {
-    setSubjectTimeSlots({
-      ...subjectTimeSlots,
-      [subject]: timeSlot
+  const toggleSubjectSelection = useCallback((subject) => {
+    setSelectedSubjects(prev => {
+      if (prev.includes(subject)) {
+        // Remove subject and its time slot
+        setSubjectTimeSlots(prevSlots => {
+          const newTimeSlots = { ...prevSlots };
+          delete newTimeSlots[subject];
+          return newTimeSlots;
+        });
+        return prev.filter(s => s !== subject);
+      } else {
+        return [...prev, subject];
+      }
     });
-  };
+  }, []);
 
-  const resetAssignmentForm = () => {
+  const updateSubjectTimeSlot = useCallback((subject, timeSlot) => {
+    setSubjectTimeSlots(prev => ({
+      ...prev,
+      [subject]: timeSlot
+    }));
+  }, []);
+
+  const resetAssignmentForm = useCallback(() => {
     setSelectedSubjects([]);
     setSelectedClass('');
     setSelectedDays([]);
     setSubjectTimeSlots({});
     setSubjectAssignments([]);
-  };
+  }, []);
 
   const handleRemoveSubject = async (teacherId, subject) => {
     Alert.alert(
@@ -329,130 +333,229 @@ const ManageSubjectsScreen = ({ navigation }) => {
     </View>
   );
 
-  const AssignSubjectModal = useCallback(() => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={() => setModalVisible(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>
-              Assign Subjects with Timetable to {selectedTeacher?.fullname}
-            </Text>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Ionicons name="close" size={24} color="#7F8C8D" />
-            </TouchableOpacity>
-          </View>
+  // Optimized modal component to prevent re-renders
+  const AssignSubjectModal = () => {
+    // Local state to prevent re-renders during interactions
+    const [localSelectedSubjects, setLocalSelectedSubjects] = useState([]);
+    const [localSelectedClass, setLocalSelectedClass] = useState('');
+    const [localSelectedDays, setLocalSelectedDays] = useState([]);
+    const [localSubjectTimeSlots, setLocalSubjectTimeSlots] = useState({});
 
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <Text style={styles.sectionTitle}>Select Subjects:</Text>
-            <View style={styles.quickAssignContainer}>
-              {availableSubjects.map(subject => renderSubjectButton(subject))}
+    // Sync local state with parent state when modal opens
+    useEffect(() => {
+      if (modalVisible && selectedTeacher) {
+        setLocalSelectedSubjects(selectedSubjects);
+        setLocalSelectedClass(selectedClass);
+        setLocalSelectedDays(selectedDays);
+        setLocalSubjectTimeSlots(subjectTimeSlots);
+      }
+    }, [modalVisible, selectedTeacher]);
+
+    // Local handlers that don't trigger parent re-renders
+    const handleLocalSubjectToggle = (subject) => {
+      setLocalSelectedSubjects(prev => {
+        if (prev.includes(subject)) {
+          return prev.filter(s => s !== subject);
+        } else {
+          return [...prev, subject];
+        }
+      });
+    };
+
+    const handleLocalDayToggle = (day) => {
+      setLocalSelectedDays(prev => {
+        if (prev.includes(day)) {
+          return prev.filter(d => d !== day);
+        } else {
+          return [...prev, day];
+        }
+      });
+    };
+
+    const handleLocalTimeSlotUpdate = (subject, text) => {
+      setLocalSubjectTimeSlots(prev => ({
+        ...prev,
+        [subject]: text
+      }));
+    };
+
+    const handleConfirm = () => {
+      // Sync local state back to parent state
+      setSelectedSubjects(localSelectedSubjects);
+      setSelectedClass(localSelectedClass);
+      setSelectedDays(localSelectedDays);
+      setSubjectTimeSlots(localSubjectTimeSlots);
+      
+      // Call the original handler
+      handleAssignSubjectsWithTimetable();
+    };
+
+    if (!modalVisible || !selectedTeacher) return null;
+    
+    return (
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+        statusBarTranslucent={true}
+        hardwareAccelerated={true}
+        presentationStyle="overFullScreen"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                Assign Subjects with Timetable to {selectedTeacher.fullname}
+              </Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#7F8C8D" />
+              </TouchableOpacity>
             </View>
 
-            {selectedSubjects.length > 0 && (
-              <>
-                <Text style={styles.sectionTitle}>Select Class:</Text>
-                <ScrollView contentContainerStyle={styles.classSelectContainer}>
-                  {classes.map(cls => (
+            <ScrollView 
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              removeClippedSubviews={true}
+              nestedScrollEnabled={true}
+            >
+              <Text style={styles.sectionTitle}>Select Subjects:</Text>
+              <View style={styles.quickAssignContainer}>
+                {availableSubjects.map(subject => {
+                  const isAlreadyAssigned = selectedTeacher.subjects?.includes(subject);
+                  const isSelected = localSelectedSubjects.includes(subject);
+                  
+                  return (
                     <TouchableOpacity
-                      key={cls._id}
+                      key={subject}
                       style={[
-                        styles.classSelectButton,
-                        selectedClass === cls._id && styles.selectedClassButton
+                        styles.quickAssignButton,
+                        isAlreadyAssigned && styles.disabledButton,
+                        isSelected && styles.selectedSubjectButton
                       ]}
-                      onPress={() => setSelectedClass(cls._id)}
-                    >
-                      <Text style={styles.classSelectText}>{cls.classNumber}-{cls.section}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-
-                <Text style={styles.sectionTitle}>Select Days:</Text>
-                <View style={styles.daySelectContainer}>
-                  {days.map(day => (
-                    <TouchableOpacity
-                      key={day}
-                      style={[
-                        styles.daySelectButton,
-                        selectedDays.includes(day) && styles.selectedDayButton
-                      ]}
-                      onPress={() => toggleDaySelection(day)}
+                      onPress={() => !isAlreadyAssigned && handleLocalSubjectToggle(subject)}
+                      disabled={isAlreadyAssigned}
+                      activeOpacity={0.8}
                     >
                       <Text style={[
-                        styles.daySelectText,
-                        selectedDays.includes(day) && styles.selectedDayText
+                        styles.quickAssignText,
+                        isAlreadyAssigned && styles.disabledText,
+                        isSelected && styles.selectedSubjectText
                       ]}>
-                        {day}
+                        {subject} {isAlreadyAssigned && '✓'} {isSelected && '✓'}
                       </Text>
                     </TouchableOpacity>
-                  ))}
-                </View>
+                  );
+                })}
+              </View>
 
-                {/* Show "Everyday" option when all days except Sunday are selected */}
-                {selectedDays.length === 6 && !selectedDays.includes('Sunday') && (
-                  <View style={styles.everydayContainer}>
-                    <Text style={styles.everydayText}>✓ Marked as "Everyday" (All days except Sunday)</Text>
-                  </View>
-                )}
+              {localSelectedSubjects.length > 0 && (
+                <>
+                  <Text style={styles.sectionTitle}>Select Class:</Text>
+                  <ScrollView contentContainerStyle={styles.classSelectContainer}>
+                    {classes.map(cls => (
+                      <TouchableOpacity
+                        key={cls._id}
+                        style={[
+                          styles.classSelectButton,
+                          localSelectedClass === cls._id && styles.selectedClassButton
+                        ]}
+                        onPress={() => setLocalSelectedClass(cls._id)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={styles.classSelectText}>{cls.classNumber}-{cls.section}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
 
-                <Text style={styles.sectionTitle}>Set Time Slots:</Text>
-                {selectedSubjects.map(subject => (
-                  <View key={subject} style={styles.timeSlotRow}>
-                    <Text style={styles.subjectLabel}>{subject}:</Text>
-                    <TextInput
-                      style={styles.timeSlotInput}
-                      placeholder="HH:MM-HH:MM"
-                      value={subjectTimeSlots[subject] || ''}
-                      onChangeText={(text) => updateSubjectTimeSlot(subject, text)}
-                    />
-                  </View>
-                ))}
-
-                <View style={styles.selectedSubjectsPreview}>
-                  <Text style={styles.sectionTitle}>Preview:</Text>
-                  {selectedSubjects.map(subject => {
-                    const classObj = classes.find(c => c._id === selectedClass);
-                    const dayDisplay = selectedDays.length === 6 && !selectedDays.includes('Sunday') 
-                      ? 'Everyday' 
-                      : selectedDays.join(', ') || 'No days selected';
-                    return (
-                      <View key={subject} style={styles.previewItem}>
-                        <Text style={styles.previewSubject}>{subject}</Text>
-                        <Text style={styles.previewDetails}>
-                          {classObj ? `${classObj.classNumber}-${classObj.section}` : 'No class'} • {dayDisplay} • {subjectTimeSlots[subject] || 'No time'}
+                  <Text style={styles.sectionTitle}>Select Days:</Text>
+                  <View style={styles.daySelectContainer}>
+                    {days.map(day => (
+                      <TouchableOpacity
+                        key={day}
+                        style={[
+                          styles.daySelectButton,
+                          localSelectedDays.includes(day) && styles.selectedDayButton
+                        ]}
+                        onPress={() => handleLocalDayToggle(day)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[
+                          styles.daySelectText,
+                          localSelectedDays.includes(day) && styles.selectedDayText
+                        ]}>
+                          {day}
                         </Text>
-                      </View>
-                    );
-                  })}
-                </View>
-              </>
-            )}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
 
-            <Text style={styles.contactPrincipalText}>If Your Subject is still not here, please Contact Principal!</Text>
-          </ScrollView>
+                  {/* Show "Everyday" option when all days except Sunday are selected */}
+                  {localSelectedDays.length === 6 && !localSelectedDays.includes('Sunday') && (
+                    <View style={styles.everydayContainer}>
+                      <Text style={styles.everydayText}>✓ Marked as "Everyday" (All days except Sunday)</Text>
+                    </View>
+                  )}
 
-          <View style={styles.modalActions}>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.confirmButton]}
-              onPress={handleAssignSubjectsWithTimetable}
-            >
-              <Text style={styles.confirmButtonText}>OK</Text>
-            </TouchableOpacity>
+                  <Text style={styles.sectionTitle}>Set Time Slots:</Text>
+                  {localSelectedSubjects.map(subject => (
+                    <View key={subject} style={styles.timeSlotRow}>
+                      <Text style={styles.subjectLabel}>{subject}:</Text>
+                      <TextInput
+                        style={styles.timeSlotInput}
+                        placeholder="HH:MM-HH:MM"
+                        value={localSubjectTimeSlots[subject] || ''}
+                        onChangeText={(text) => handleLocalTimeSlotUpdate(subject, text)}
+                        autoCorrect={false}
+                        autoCapitalize="none"
+                      />
+                    </View>
+                  ))}
+
+                  <View style={styles.selectedSubjectsPreview}>
+                    <Text style={styles.sectionTitle}>Preview:</Text>
+                    {localSelectedSubjects.map(subject => {
+                      const classObj = classes.find(c => c._id === localSelectedClass);
+                      const dayDisplay = localSelectedDays.length === 6 && !localSelectedDays.includes('Sunday') 
+                        ? 'Everyday' 
+                        : localSelectedDays.join(', ') || 'No days selected';
+                      return (
+                        <View key={subject} style={styles.previewItem}>
+                          <Text style={styles.previewSubject}>{subject}</Text>
+                          <Text style={styles.previewDetails}>
+                            {classObj ? `${classObj.classNumber}-${classObj.section}` : 'No class'} • {dayDisplay} • {localSubjectTimeSlots[subject] || 'No time'}
+                          </Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </>
+              )}
+
+              <Text style={styles.contactPrincipalText}>If Your Subject is still not here, please Contact Principal!</Text>
+            </ScrollView>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setModalVisible(false)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
+                onPress={handleConfirm}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.confirmButtonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </Modal>
-  ), [modalVisible, selectedTeacher, selectedSubjects, selectedClass, selectedDays, subjectTimeSlots, classes, availableSubjects]);
+      </Modal>
+    );
+  };
 
   
 
@@ -766,8 +869,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E1E8ED',
     borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   disabledButton: {
     backgroundColor: '#ECF0F1',
@@ -812,9 +915,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalButton: {
-    paddingHorizontal: 30,
-    paddingVertical: 12,
+    paddingHorizontal: 35,
+    paddingVertical: 15,
     borderRadius: 8,
+    marginHorizontal: 10,
   },
   cancelButton: {
     backgroundColor: '#ECF0F1',
@@ -848,8 +952,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E1E8ED',
     borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   selectedClassButton: {
     backgroundColor: '#4A90E2',
@@ -871,8 +975,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E1E8ED',
     borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   selectedDayButton: {
     backgroundColor: '#4A90E2',

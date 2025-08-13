@@ -68,16 +68,40 @@ const GradesScreen = () => {
   };
 
   // Build table data once
-  const tableData = useMemo(() => {
-    return grades.flatMap((g) =>
-      g.subjects.map((s) => [
+  const gradeTables = useMemo(() => {
+    // Create separate tables for each grade submission (show all submissions for the day)
+    return grades.map((grade, index) => {
+      const subjectRows = grade.subjects.map((s) => [
         s.subject,
         s.marksObtained,
         s.totalMarks,
         `${s.percentage}%`,
         s.grade,
-      ])
-    );
+      ]);
+      
+      // Calculate totals for this grade submission
+      const totalObtained = grade.subjects.reduce((sum, subject) => sum + parseFloat(subject.marksObtained), 0);
+      const totalMarks = grade.subjects.reduce((sum, subject) => sum + parseFloat(subject.totalMarks), 0);
+      const overallPercentage = totalMarks > 0 ? ((totalObtained / totalMarks) * 100).toFixed(1) : 0;
+      
+      // Add total row
+      const totalRow = [
+        'TOTAL',
+        totalObtained,
+        totalMarks,
+        `${overallPercentage}%`,
+        '---', // Grade will be calculated based on percentage
+      ];
+      
+      return {
+        examId: grade.examId || grade._id,
+        examDate: grade.examDate,
+        gradeType: grade.gradeType,
+        tableData: [...subjectRows, totalRow],
+        comments: grade.comments,
+        submissionNumber: index + 1
+      };
+    });
   }, [grades]);
 
   const tableHead = ["Subject", "Obtained", "Total", "Percent", "Grade"];
@@ -147,25 +171,52 @@ const GradesScreen = () => {
 
         {/* Grades Table */}
         {!error && !loading && grades.length > 0 && (
-          <View style={s.tableWrap}>
-            <Table>
-              <Row
-                data={tableHead}
-                style={s.head}
-                textStyle={s.headText}
-              />
-              {tableData.map((row, i) => (
-                <Row
-                  key={i}
-                  data={row}
-                  style={[
-                    s.row,
-                    i % 2 && s.rowAlt,
-                  ]}
-                  textStyle={s.rowText}
-                />
-              ))}
-            </Table>
+          <View style={s.tablesContainer}>
+            <Text style={s.resultsHeader}>
+              Found {gradeTables.length} submission{gradeTables.length > 1 ? 's' : ''} for {new Date(date).toLocaleDateString()}
+            </Text>
+            {gradeTables.map((gradeTable, tableIndex) => (
+              <View key={`${gradeTable.examId}-${tableIndex}`} style={s.tableWrap}>
+                {/* Grade submission header */}
+                <View style={s.tableHeader}>
+                  <Text style={s.tableHeaderText}>
+                    Submission #{gradeTable.submissionNumber} - {new Date(gradeTable.examDate).toLocaleDateString()}
+                  </Text>
+                  {gradeTable.comments && (
+                    <Text style={s.commentsText}>
+                      Comments: {gradeTable.comments}
+                    </Text>
+                  )}
+                </View>
+                
+                <Table>
+                  <Row
+                    data={tableHead}
+                    style={s.head}
+                    textStyle={s.headText}
+                  />
+                  {gradeTable.tableData.map((row, i) => {
+                    const isTotalRow = row[0] === 'TOTAL';
+                    return (
+                      <Row
+                        key={i}
+                        data={row}
+                        style={[
+                          isTotalRow ? s.totalRow : s.row,
+                          !isTotalRow && i % 2 && s.rowAlt,
+                        ]}
+                        textStyle={isTotalRow ? s.totalRowText : s.rowText}
+                      />
+                    );
+                  })}
+                </Table>
+                
+                {/* Separator line between tables */}
+                {tableIndex < gradeTables.length - 1 && (
+                  <View style={s.tableSeparator} />
+                )}
+              </View>
+            ))}
           </View>
         )}
       </ScrollView>
@@ -198,7 +249,7 @@ const s = StyleSheet.create({
     overflow: "hidden",
     marginBottom: 18,
   },
-  picker: { height: 48, width: "100%" },
+  picker: { height: 52, width: "100%" },
   dateRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -236,12 +287,49 @@ const s = StyleSheet.create({
     color: "#B00020",
     marginVertical: 20,
   },
+  tablesContainer: {
+    gap: 25,
+    paddingBottom: 20,
+  },
+  resultsHeader: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#495057",
+    textAlign: "center",
+    marginBottom: 15,
+    paddingVertical: 10,
+    backgroundColor: "#E8F4FD",
+    borderRadius: 8,
+  },
   tableWrap: {
     borderWidth: 1,
     borderColor: "#CCC",
     borderRadius: 6,
     overflow: "hidden",
     marginBottom: 20,
+  },
+  tableHeader: {
+    padding: 10,
+    backgroundColor: "#F8F9FA",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E9ECEF",
+  },
+  tableHeaderText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#495057",
+    marginBottom: 4,
+  },
+  commentsText: {
+    fontSize: 12,
+    color: "#6C757D",
+    fontStyle: "italic",
+  },
+  tableSeparator: {
+    height: 2,
+    backgroundColor: "#E9ECEF",
+    marginVertical: 10,
+    borderRadius: 1,
   },
   head: {
     height: 40,
@@ -255,5 +343,14 @@ const s = StyleSheet.create({
   rowAlt: { backgroundColor: "#FAFBFC" },
   rowText: {
     textAlign: "center",
+  },
+  totalRow: { 
+    height: 40,
+    backgroundColor: "#2C3E50",
+  },
+  totalRowText: {
+    textAlign: "center",
+    color: "#FFFFFF",
+    fontWeight: "bold",
   },
 });
