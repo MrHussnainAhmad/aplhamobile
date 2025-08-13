@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { storage } from '../utils/storage';
-import { adminAPI, teacherAPI, classesAPI } from '../services/api';
+import { adminAPI, teacherAPI, classesAPI, studentAPI } from '../services/api';
 import { useFocusEffect } from '@react-navigation/native';
 import notificationService from '../services/notificationService';
 
@@ -160,7 +160,12 @@ const HomeScreen = ({ navigation }) => {
       console.log('HomeScreen loadStudentStats: userData.class:', userData?.class);
       console.log('HomeScreen loadStudentStats: userData.className:', userData?.className);
       
-      // Handle different possible formats of class field
+      // Initialize stats
+      let subjectCount = 0;
+      let voucherCount = 0;
+      let taskCount = 0;
+      
+      // Get class subjects count
       let classId = userData?.class;
       
       // If class is an object, extract the ID
@@ -170,31 +175,67 @@ const HomeScreen = ({ navigation }) => {
       
       if (userData && classId) {
         console.log('HomeScreen loadStudentStats: Calling getClassDetails with class ID:', classId);
-        const response = await classesAPI.getClassDetails(classId);
-        console.log('HomeScreen loadStudentStats: API response:', response.data);
-        
-        if (response.data.class && response.data.class.subjects) {
-          console.log('HomeScreen loadStudentStats: Setting subjects count to:', response.data.class.subjects.length);
-          setStudentStats({
-            subjects: response.data.class.subjects.length,
-            done: 0, // Placeholder for future implementation
-            average: 0 // Placeholder for future implementation
-          });
+        try {
+          const response = await classesAPI.getClassDetails(classId);
+          console.log('HomeScreen loadStudentStats: API response:', response.data);
+          
+          if (response.data.class && response.data.class.subjects) {
+            subjectCount = response.data.class.subjects.length;
+            console.log('HomeScreen loadStudentStats: Setting subjects count to:', subjectCount);
+          }
+        } catch (error) {
+          console.error('Error loading class details:', error);
         }
-      } else {
-        console.log('HomeScreen loadStudentStats: No class found in userData');
-        setStudentStats({
-          subjects: 0,
-          done: 0,
-          average: 0
-        });
       }
+      
+      // Get fee vouchers count
+      try {
+        const vouchersResponse = await studentAPI.getFeeVouchers();
+        console.log('HomeScreen loadStudentStats: Vouchers API response:', vouchersResponse.data);
+        if (vouchersResponse.data && vouchersResponse.data.feeVouchers) {
+          voucherCount = vouchersResponse.data.feeVouchers.length;
+          console.log('HomeScreen loadStudentStats: Setting vouchers count to:', voucherCount);
+        } else {
+          console.log('HomeScreen loadStudentStats: No feeVouchers found in response');
+        }
+      } catch (error) {
+        console.error('Error loading fee vouchers:', error);
+        console.error('Error response:', error.response?.data);
+        // Don't fail the whole function if vouchers can't be loaded
+      }
+      
+      // Get assignments count (tasks)
+      try {
+        const assignmentsResponse = await studentAPI.getMyAssignments();
+        if (assignmentsResponse.data && assignmentsResponse.data.assignments) {
+          taskCount = assignmentsResponse.data.assignments.length;
+          console.log('HomeScreen loadStudentStats: Setting tasks count to:', taskCount);
+        }
+      } catch (error) {
+        console.error('Error loading assignments:', error);
+        // Don't fail the whole function if assignments can't be loaded
+      }
+      
+      // Update the stats
+      setStudentStats({
+        subjects: subjectCount,
+        done: voucherCount, // Fee vouchers count
+        average: taskCount // Assignments count
+      });
+      
     } catch (error) {
       console.error('Error loading student stats:', error);
       console.error('Error details:', {
         message: error.message,
         response: error.response?.data,
         status: error.response?.status
+      });
+      
+      // Set default values on error
+      setStudentStats({
+        subjects: 0,
+        done: 0,
+        average: 0
       });
     }
   };
