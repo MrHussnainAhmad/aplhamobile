@@ -14,11 +14,11 @@ const API_CONFIG = {
   
   // If backend is hosted on another device, replace with that device's IP
   // Example: REMOTE_DEVICE: 'http://192.168.100.25:5000/api',
-  REMOTE_DEVICE: 'http://192.168.3.51:5000/api', 
+  // REMOTE_DEVICE: 'http://192.168.3.51:5000/api', 
   // Your backend device IP
   
   // Production URL (when deployed)
-  PRODUCTION: 'https://superior.up.railway.app/api',
+  PRODUCTION: 'https://superiorcollege.up.railway.app/api',
 };
 
 // Choose which configuration to use
@@ -28,7 +28,7 @@ const API_CONFIG = {
 // - 'IOS_SIMULATOR' for iOS simulator
 // - 'REMOTE_DEVICE' for backend on different device
 // - 'PRODUCTION' for production backend
-const CURRENT_ENV = 'REMOTE_DEVICE';
+const CURRENT_ENV = 'PRODUCTION';
 
 // Helper function to get the current API URL
 export const getApiUrl = () => {
