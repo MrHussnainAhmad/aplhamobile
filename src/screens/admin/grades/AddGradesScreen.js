@@ -361,9 +361,6 @@ const AddGradesScreen = ({ route, navigation }) => {
             <View style={styles.inputGroup}>
               <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                 <Text style={styles.label}>Subject</Text>
-                <TouchableOpacity onPress={() => setModalVisible(true)}>
-                  <Ionicons name="add-circle-outline" size={24} color="#007BFF" />
-                </TouchableOpacity>
               </View>
               <View style={styles.subjectsGrid}>
                 {subjects.map((subject) => (
@@ -435,9 +432,6 @@ const AddGradesScreen = ({ route, navigation }) => {
               <Text style={styles.sectionTitle}>
                 Select Subjects {selectedGradeType === 'monthly' || selectedGradeType === 'weekly' ? '(All Subjects Available)' : '(Multiple Allowed)'}
               </Text>
-              <TouchableOpacity onPress={() => setModalVisible(true)}>
-                <Ionicons name="add-circle-outline" size={24} color="#007BFF" />
-              </TouchableOpacity>
             </View>
             
             <View style={styles.subjectsGrid}>
