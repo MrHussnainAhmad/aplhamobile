@@ -48,10 +48,26 @@ const StudentAssignmentsScreen = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await studentAPI.getMyAssignments();
-      setAssignments(response.data.assignments);
+      console.log('Assignments response:', response.data);
+      
+      if (response.data && response.data.assignments) {
+        setAssignments(response.data.assignments);
+      } else {
+        setAssignments([]);
+        console.log('No assignments found or empty response');
+      }
     } catch (error) {
       console.error('Error loading assignments:', error);
-      Alert.alert('Error', 'Failed to load assignments');
+      console.error('Error response:', error.response?.data);
+      
+      // Handle specific error cases
+      if (error.response?.status === 404) {
+        setAssignments([]);
+        console.log('Student not assigned to any class yet');
+      } else {
+        Alert.alert('Error', 'Failed to load assignments');
+        setAssignments([]);
+      }
     } finally {
       setLoading(false);
     }

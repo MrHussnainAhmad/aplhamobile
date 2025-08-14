@@ -306,13 +306,20 @@ const HomeScreen = ({ navigation }) => {
       // Get assignments count (tasks)
       try {
         const assignmentsResponse = await studentAPI.getMyAssignments();
+        console.log('Assignments response:', assignmentsResponse.data);
+        
         if (assignmentsResponse.data && assignmentsResponse.data.assignments) {
           taskCount = assignmentsResponse.data.assignments.length;
           console.log('HomeScreen loadStudentStats: Setting tasks count to:', taskCount);
+        } else {
+          console.log('HomeScreen loadStudentStats: No assignments found or empty response');
+          taskCount = 0;
         }
       } catch (error) {
         console.error('Error loading assignments:', error);
-        // Don't fail the whole function if assignments can't be loaded
+        console.error('Error response:', error.response?.data);
+        // Set task count to 0 on error instead of failing
+        taskCount = 0;
       }
       
       // Update the stats
