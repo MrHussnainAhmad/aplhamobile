@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { storage } from '../utils/storage';
 import { adminAPI, teacherAPI, classesAPI, studentAPI } from '../services/api';
 import { useFocusEffect } from '@react-navigation/native';
-import notificationService from '../services/notificationService';
+
 
 const HomeScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
@@ -172,10 +172,7 @@ const HomeScreen = ({ navigation }) => {
       setUserData(storedUserData);
       setUserType(storedUserType);
       
-      // Initialize push notifications for non-admin users
-      if (storedUserType && storedUserData && storedUserData._id) {
-        notificationService.initialize(storedUserData._id, storedUserType);
-      }
+
     } catch (error) {
       console.error('Error loading user data:', error);
       Alert.alert('Error', 'Failed to load user data');
@@ -927,7 +924,7 @@ const HomeScreen = ({ navigation }) => {
         >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
-              <Ionicons name="notifications" size={24} color="#E74C3C" />
+              <Ionicons name="newspaper" size={24} color="#E74C3C" />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuItemTitle}>College Posts</Text>

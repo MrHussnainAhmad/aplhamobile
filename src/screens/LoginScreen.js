@@ -50,16 +50,14 @@ const LoginScreen = ({ navigation }) => {
       let userType = null;
       let lastError = null;
 
-      // Check if this looks like admin email first
-      if (email.trim().toLowerCase() === 'admin@gmail.com') {
-        try {
-          console.log('Trying admin login for admin email');
-          response = await authAPI.adminLogin({ email: email.trim(), password });
-          userType = 'admin';
-        } catch (adminError) {
-          console.log('Admin login failed:', adminError.response?.data?.message || adminError.message);
-          lastError = adminError;
-        }
+      // Try admin login first for all emails
+      try {
+        console.log('Trying admin login');
+        response = await authAPI.adminLogin({ email: email.trim(), password });
+        userType = 'admin';
+      } catch (adminError) {
+        console.log('Admin login failed:', adminError.response?.data?.message || adminError.message);
+        lastError = adminError;
       }
 
       // If not admin or admin login failed, try teacher login

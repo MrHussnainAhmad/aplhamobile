@@ -170,7 +170,7 @@ export const adminAPI = {
   getAppConfig: () => api.get('/app-config'),
   updateAppConfig: (data) => api.put('/admin/app-config', data),
   resetAppConfig: () => api.post('/admin/app-config/reset'),
-  savePushToken: (data) => api.post('/notifications/push-token', data),
+
 
   // Fee Voucher Management
   getAllFeeVouchersAdmin: (searchQuery, classId) => api.get(`/fee-vouchers/admin/all?search=${searchQuery}&classId=${classId || ''}`),
@@ -358,22 +358,6 @@ export const passwordResetAPI = {
   resetPassword: (token, email, newPassword) => api.post('/password-reset/reset-password', { token, email, newPassword })
 };
 
-export const notificationAPI = {
-  // Get user's notifications
-  getMyNotifications: (page = 1, limit = 20, unreadOnly = false) => 
-    api.get(`/notifications/my-notifications?page=${page}&limit=${limit}&unreadOnly=${unreadOnly}`),
 
-  // Mark notification as read
-  markAsRead: (notificationId) => api.post(`/notifications/${notificationId}/read`),
-
-  // Mark all notifications as read
-  markAllAsRead: () => api.post('/notifications/mark-all-read'),
-
-  // Get unread count
-  getUnreadCount: () => api.get('/notifications/unread-count'),
-
-  // Delete notification
-  deleteNotification: (notificationId) => api.delete(`/notifications/${notificationId}`)
-};
 
 export default api;

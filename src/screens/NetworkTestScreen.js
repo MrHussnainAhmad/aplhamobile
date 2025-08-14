@@ -96,7 +96,7 @@ const NetworkTestScreen = () => {
         <Text style={styles.infoTitle}>Troubleshooting Tips:</Text>
         <Text style={styles.infoText}>• Make sure your device is on the same WiFi network as the server</Text>
         <Text style={styles.infoText}>• Check if the server is running on port 5000</Text>
-        <Text style={styles.infoText}>• Verify the IP address is correct: 192.168.3.58</Text>
+        <Text style={styles.infoText}>• Verify the IP address is correct: 192.168.3.51</Text>
         <Text style={styles.infoText}>• Try restarting the mobile app</Text>
       </View>
     </ScrollView>
