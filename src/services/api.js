@@ -20,26 +20,43 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     try {
+      console.log(`🌐 Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
       const token = await AsyncStorage.getItem('userToken');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        console.log('🔑 Token attached to request');
+      } else {
+        console.log('⚠️ No token found for request');
       }
     } catch (error) {
-      console.log('Error getting token:', error);
+      console.log('❌ Error getting token:', error);
     }
     return config;
   },
   (error) => {
+    console.log('❌ Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
 
 // Response interceptor to handle errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url} - Status: ${response.status}`);
+    return response;
+  },
   async (error) => {
+    console.log(`❌ API Error: ${error.config?.method?.toUpperCase()} ${error.config?.url}`);
+    console.log(`❌ Error details:`, {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      code: error.code
+    });
+    
     if (error.response?.status === 401) {
       // Token expired or invalid
+      console.log('🔑 Token expired, clearing storage');
       await AsyncStorage.removeItem('userToken');
       await AsyncStorage.removeItem('userData');
       // You might want to redirect to login screen here
@@ -47,6 +64,29 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Network test function
+export const testNetworkConnectivity = async () => {
+  try {
+    console.log('🧪 Testing network connectivity...');
+    console.log('🌐 API URL:', API_URL);
+    
+    const response = await axios.get(`${API_URL}/app-config`, {
+      timeout: 5000
+    });
+    
+    console.log('✅ Network test successful:', response.data);
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.log('❌ Network test failed:', {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      data: error.response?.data
+    });
+    return { success: false, error: error.message };
+  }
+};
 
 // Auth API functions
 export const authAPI = {
