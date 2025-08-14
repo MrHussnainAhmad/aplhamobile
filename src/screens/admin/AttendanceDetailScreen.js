@@ -71,7 +71,6 @@ const AttendanceDetailScreen = () => {
       'Edit Attendance',
       `Change attendance for ${new Date(attendanceItem.date).toLocaleDateString()}?`,
       [
-        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Present',
           onPress: () => updateAttendance(attendanceItem._id, 'P'),
@@ -80,6 +79,11 @@ const AttendanceDetailScreen = () => {
           text: 'Absent',
           onPress: () => updateAttendance(attendanceItem._id, 'A'),
         },
+        {
+          text: 'Holiday',
+          onPress: () => updateAttendance(attendanceItem._id, 'H'),
+        },
+        { text: 'Cancel', style: 'cancel' },
       ]
     );
   };
@@ -119,15 +123,17 @@ const AttendanceDetailScreen = () => {
       </View>
       <View style={[
         styles.statusBadge,
-        item.status === 'P' ? styles.presentBadge : styles.absentBadge
+        item.status === 'P' ? styles.presentBadge :
+        item.status === 'A' ? styles.absentBadge :
+        styles.holidayBadge
       ]}>
         <Ionicons 
-          name={item.status === 'P' ? 'checkmark' : 'close'} 
+          name={item.status === 'P' ? 'checkmark' : item.status === 'A' ? 'close' : 'calendar'} 
           size={16} 
           color="#FFFFFF" 
         />
         <Text style={styles.statusText}>
-          {item.status === 'P' ? 'Present' : 'Absent'}
+          {item.status === 'P' ? 'Present' : item.status === 'A' ? 'Absent' : 'Holiday'}
         </Text>
       </View>
       <Ionicons name="chevron-forward" size={16} color="#BDC3C7" />
@@ -385,6 +391,9 @@ const styles = StyleSheet.create({
   },
   absentBadge: {
     backgroundColor: '#E74C3C',
+  },
+  holidayBadge: {
+    backgroundColor: '#F39C12',
   },
   statusText: {
     color: '#FFFFFF',

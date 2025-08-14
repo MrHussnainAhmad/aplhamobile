@@ -65,6 +65,7 @@ import TeacherAttendanceRecordScreen from './src/screens/admin/TeacherAttendance
 import StudentAttendanceRecordScreen from './src/screens/student/StudentAttendanceRecordScreen';
 import AdminClassStudentsScreen from './src/screens/admin/ClassStudentsScreen';
 import ClassStudentsListScreen from './src/screens/admin/ClassStudentsListScreen';
+import MyAttendanceRecordScreen from './src/screens/teacher/MyAttendanceRecordScreen';
 import UnverifiedScreen from './src/screens/unverifiedsScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
@@ -147,6 +148,7 @@ export default function App() {
           <Stack.Screen name="AttendanceDetail" component={AttendanceDetailScreen} />
           <Stack.Screen name="TeacherAttendanceRecord" component={TeacherAttendanceRecordScreen} />
           <Stack.Screen name="StudentAttendanceRecord" component={StudentAttendanceRecordScreen} />
+          <Stack.Screen name="MyAttendanceRecord" component={MyAttendanceRecordScreen} />
           <Stack.Screen name="AdminClassStudents" component={AdminClassStudentsScreen} />
           <Stack.Screen name="ClassStudentsList" component={ClassStudentsListScreen} />
           <Stack.Screen 

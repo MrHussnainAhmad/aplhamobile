@@ -47,7 +47,7 @@ const TeacherAttendanceScreen = () => {
   const handleMarkAttendance = (teacher, status) => {
     Alert.alert(
       'Mark Attendance',
-      `Mark ${teacher.fullname} as ${status === 'P' ? 'Present' : 'Absent'}?`,
+      `Mark ${teacher.fullname} as ${status === 'P' ? 'Present' : status === 'A' ? 'Absent' : 'Holiday'}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -106,6 +106,13 @@ const TeacherAttendanceScreen = () => {
         >
           <Ionicons name="close" size={20} color="#FFFFFF" />
           <Text style={styles.buttonText}>Absent</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.attendanceButton, styles.holidayButton]}
+          onPress={() => handleMarkAttendance(item, 'H')}
+        >
+          <Ionicons name="calendar" size={20} color="#FFFFFF" />
+          <Text style={styles.buttonText}>Holiday</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -300,6 +307,9 @@ const styles = StyleSheet.create({
   },
   absentButton: {
     backgroundColor: '#E74C3C',
+  },
+  holidayButton: {
+    backgroundColor: '#F39C12',
   },
   buttonText: {
     color: '#FFFFFF',

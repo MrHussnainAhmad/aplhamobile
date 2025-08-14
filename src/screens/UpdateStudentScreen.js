@@ -130,15 +130,21 @@ const UpdateStudentScreen = ({ navigation, route }) => {
         ? await adminAPI.updateStudent(student._id, formData)
         : await teacherAPI.updateStudent(student._id, formData);
 
-      // Update local storage
-      const { token, user } = await storage.getUserData();
-      const updatedUser = { ...user, ...response.data.student };
-      await storage.storeUserData(token, updatedUser, userType);
+      console.log('Update response:', response.data);
+      console.log('Updated student data:', response.data.student);
+
+      // Only update local storage if the user is updating their own profile
+      if (userType === 'student') {
+        const { token, user } = await storage.getUserData();
+        const updatedUser = { ...user, ...response.data.student };
+        console.log('Updated user data for storage:', updatedUser);
+        await storage.storeUserData(token, updatedUser, userType);
+      }
 
       Alert.alert('Success', 'Student updated successfully', [
         {
           text: 'OK',
-          onPress: () => navigation.navigate('Home'),
+          onPress: () => navigation.goBack(),
         },
       ]);
     } catch (error) {

@@ -10,11 +10,15 @@ import {
   FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { attendanceAPI } from '../../services/api';
 
-const StudentAttendanceRecordScreen = () => {
+const MyAttendanceRecordScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  // For teacher's own record, we don't need type, id, name, classId, className from route params
+  // We will get teacherId from the authenticated user context on the backend
+
   const [attendance, setAttendance] = useState([]);
   const [statistics, setStatistics] = useState({});
   const [loading, setLoading] = useState(true);
@@ -27,12 +31,13 @@ const StudentAttendanceRecordScreen = () => {
   const loadAttendanceRecord = async () => {
     try {
       setLoading(true);
-      const response = await attendanceAPI.getMyStudentAttendanceRecord(currentMonth);
+      // Call the teacher's own attendance API
+      const response = await attendanceAPI.getMyAttendanceRecord(currentMonth);
       setAttendance(response.data.attendance || []);
       setStatistics(response.data.statistics || {});
     } catch (error) {
-      console.error('Error loading attendance record:', error);
-      Alert.alert('Error', 'Failed to load attendance record');
+      console.error(`Error loading teacher's own attendance record:`, error);
+      Alert.alert('Error', 'Failed to load your attendance record');
     } finally {
       setLoading(false);
     }
@@ -63,6 +68,15 @@ const StudentAttendanceRecordScreen = () => {
     setCurrentMonth(newMonthString);
   };
 
+  const handleEditAttendance = (attendanceItem) => {
+    // Teachers cannot edit their own attendance records directly from this screen
+    // This functionality is typically for admins
+    Alert.alert(
+      'Info',
+      'You cannot edit attendance records from this screen. Please contact an administrator if you believe there is an error.'
+    );
+  };
+
   const getMonthName = (monthString) => {
     const [year, month] = monthString.split('-').map(Number);
     const date = new Date(year, month - 1);
@@ -75,7 +89,10 @@ const StudentAttendanceRecordScreen = () => {
   };
 
   const renderAttendanceItem = ({ item }) => (
-    <View style={styles.attendanceItem}>
+    <TouchableOpacity
+      style={styles.attendanceItem}
+      onPress={() => handleEditAttendance(item)} // Keep for consistency, but will show info alert
+    >
       <View style={styles.attendanceDate}>
         <Text style={styles.dayName}>{getDayName(item.date)}</Text>
         <Text style={styles.dateText}>
@@ -97,14 +114,15 @@ const StudentAttendanceRecordScreen = () => {
           {item.status === 'P' ? 'Present' : item.status === 'A' ? 'Absent' : 'Holiday'}
         </Text>
       </View>
-    </View>
+      <Ionicons name="chevron-forward" size={16} color="#BDC3C7" />
+    </TouchableOpacity>
   );
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4A90E2" />
-        <Text style={styles.loadingText}>Loading attendance record...</Text>
+        <Text style={styles.loadingText}>Loading your attendance record...</Text>
       </View>
     );
   }
@@ -118,17 +136,14 @@ const StudentAttendanceRecordScreen = () => {
         >
           <Ionicons name="arrow-back" size={24} color="#2C3E50" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Attendance</Text>
+        <Text style={styles.headerTitle}>My Attendance Record</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content}>
         <View style={styles.infoCard}>
-          <Ionicons name="school" size={48} color="#27AE60" />
-          <Text style={styles.infoTitle}>Student Attendance Record</Text>
-          <Text style={styles.infoText}>
-            View your monthly attendance record and statistics
-          </Text>
+          <Text style={styles.nameText}>Your Attendance</Text>
+          <Text style={styles.classText}>View your monthly attendance summary and details.</Text>
         </View>
 
         <View style={styles.statsContainer}>
@@ -185,9 +200,6 @@ const StudentAttendanceRecordScreen = () => {
             <View style={styles.emptyContainer}>
               <Ionicons name="calendar-outline" size={48} color="#BDC3C7" />
               <Text style={styles.emptyText}>No attendance records for this month</Text>
-              <Text style={styles.emptySubtext}>
-                Your attendance will appear here once marked by admin
-              </Text>
             </View>
           )}
         </View>
@@ -234,25 +246,26 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 20,
     borderRadius: 12,
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 3,
   },
-  infoTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+  nameText: {
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#2C3E50',
-    marginTop: 12,
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  infoText: {
+  classText: {
+    fontSize: 16,
+    color: '#7F8C8D',
+    marginBottom: 2,
+  },
+  typeText: {
     fontSize: 14,
     color: '#7F8C8D',
-    textAlign: 'center',
-    lineHeight: 20,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -272,14 +285,14 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   statNumber: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#2C3E50',
     marginTop: 8,
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 10,
     color: '#7F8C8D',
     textAlign: 'center',
   },
@@ -347,6 +360,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
+    marginRight: 12,
     gap: 4,
   },
   presentBadge: {
@@ -383,16 +397,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#7F8C8D',
     textAlign: 'center',
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#BDC3C7',
-    textAlign: 'center',
-    paddingHorizontal: 20,
   },
 });
 
-export default StudentAttendanceRecordScreen;
-
-
+export default MyAttendanceRecordScreen;

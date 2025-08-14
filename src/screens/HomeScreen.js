@@ -92,7 +92,8 @@ const HomeScreen = ({ navigation }) => {
         loadUserData();
         loadStats();
       } else if (userType === 'admin') {
-        // Refresh admin stats when returning to home screen
+        // Refresh admin stats and user data when returning to home screen
+        refreshAdminData();
         loadStats();
       }
     }, [userType])
@@ -113,6 +114,61 @@ const HomeScreen = ({ navigation }) => {
         return;
       }
       
+      // Check if admin data is corrupted (has student-like properties)
+      if (storedUserType === 'admin' && storedUserData) {
+        const isCorrupted = storedUserData.studentId || storedUserData.class || storedUserData.className;
+        if (isCorrupted) {
+          console.log('HomeScreen: Detected corrupted admin data, clearing and refreshing...');
+          // Clear the corrupted data immediately
+          await storage.clearUserData();
+          // Force a fresh start
+          Alert.alert(
+            'Data Corrupted',
+            'Admin data was corrupted and has been cleared. Please login again.',
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Login' }],
+                  });
+                },
+              },
+            ]
+          );
+          return;
+        }
+        
+        // Also check if the admin name looks like a student name (has common student patterns)
+        const studentNamePatterns = ['ahmad', 'ali', 'fatima', 'hassan', 'ayesha', 'muhammad', 'sara'];
+        const fullname = storedUserData.fullname?.toLowerCase() || '';
+        const looksLikeStudentName = studentNamePatterns.some(pattern => fullname.includes(pattern));
+        
+        if (looksLikeStudentName && storedUserData.fullname !== 'System Administrator') {
+          console.log('HomeScreen: Detected student-like admin name, clearing corrupted data...');
+          // Clear the corrupted data immediately
+          await storage.clearUserData();
+          // Force a fresh start
+          Alert.alert(
+            'Data Corrupted',
+            'Admin data was corrupted and has been cleared. Please login again.',
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Login' }],
+                  });
+                },
+              },
+            ]
+          );
+          return;
+        }
+      }
+      
       setUserData(storedUserData);
       setUserType(storedUserType);
       
@@ -125,6 +181,49 @@ const HomeScreen = ({ navigation }) => {
       Alert.alert('Error', 'Failed to load user data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshAdminData = async () => {
+    try {
+      const response = await adminAPI.getAdminProfile();
+      const adminData = response.data.admin;
+      
+      // Update local storage with fresh admin data
+      const { token } = await storage.getUserData();
+      await storage.storeUserData(token, adminData, 'admin');
+      
+      // Update state
+      setUserData(adminData);
+      console.log('Admin data refreshed from server:', adminData);
+    } catch (error) {
+      console.error('Error refreshing admin data:', error);
+    }
+  };
+
+  const forceRefreshAdminData = async () => {
+    try {
+      // Clear the corrupted data
+      await storage.clearUserData();
+      
+      // Show alert and redirect to login
+      Alert.alert(
+        'Data Refreshed',
+        'Admin data has been refreshed. Please login again.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error('Error force refreshing admin data:', error);
     }
   };
 
@@ -408,7 +507,7 @@ const HomeScreen = ({ navigation }) => {
 
         <TouchableOpacity 
           style={styles.menuItem}
-          onPress={() => navigation.navigate('TeacherAttendanceRecord')}
+          onPress={() => navigation.navigate('MyAttendanceRecord')}
         >
           <View style={styles.menuItemContent}>
             <View style={styles.menuIconContainer}>
@@ -472,9 +571,18 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.userInfo}>Administrator | {userData?.email}</Text>
           </View>
         </View>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Ionicons name="log-out-outline" size={24} color="#E74C3C" />
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity 
+            onPress={refreshAdminData} 
+            onLongPress={forceRefreshAdminData}
+            style={styles.refreshButton}
+          >
+            <Ionicons name="refresh" size={24} color="#3498DB" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <Ionicons name="log-out-outline" size={24} color="#E74C3C" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.statsContainer}>
@@ -641,6 +749,22 @@ const HomeScreen = ({ navigation }) => {
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>
         </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={forceRefreshAdminData}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="refresh-circle" size={24} color="#E74C3C" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Clear Corrupted Data</Text>
+              <Text style={styles.menuItemSubtitle}>Reset admin data if corrupted</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -665,7 +789,7 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.welcomeText}>Welcome back,</Text>
             <Text style={styles.userName}>{userData?.fullname || 'Student'}</Text>
             <Text style={styles.userInfo}>
-              {userData?.class?.name} | Student ID: {userData?.studentId}
+              {userData?.className} | Student ID: {userData?.studentId}
             </Text>
           </View>
         </View>
@@ -990,6 +1114,16 @@ const styles = StyleSheet.create({
   menuItemSubtitle: {
     fontSize: 14,
     color: '#7F8C8D',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  refreshButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: '#F8F9FA',
   },
 });
 

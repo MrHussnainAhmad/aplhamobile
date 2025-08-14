@@ -90,6 +90,9 @@ export const adminAPI = {
   // Get all students
   getAllStudents: () => api.get('/admin/students'),
   
+  // Get admin profile
+  getAdminProfile: () => api.get('/admin/profile'),
+  
   // Update teacher
   updateTeacher: (id, data) => api.put(`/admin/update-teacher/${id}`, data),
   
