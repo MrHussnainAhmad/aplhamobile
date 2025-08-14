@@ -35,10 +35,9 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
-    // Allow any valid email format
-    const emailRegex = /\S+@\S+\.\S+/;
+    const emailRegex = /@(gmail\.com|yahoo\.com|outlook\.com)$/i;
     if (!emailRegex.test(email.trim())) {
-      setModalMessage('Please enter a valid email address');
+      setModalMessage('Please use a valid email address from Gmail, Yahoo, or Outlook');
       setShowErrorModal(true);
       return;
     }
@@ -51,17 +50,19 @@ const LoginScreen = ({ navigation }) => {
       let userType = null;
       let lastError = null;
 
-      // Always try admin first
-      try {
-        console.log('Trying admin login');
-        response = await authAPI.adminLogin({ email: email.trim(), password });
-        userType = 'admin';
-      } catch (adminError) {
-        console.log('Admin login failed:', adminError.response?.data?.message || adminError.message);
-        lastError = adminError;
+      // Check if this looks like admin email first
+      if (email.trim().toLowerCase() === 'admin@gmail.com') {
+        try {
+          console.log('Trying admin login for admin email');
+          response = await authAPI.adminLogin({ email: email.trim(), password });
+          userType = 'admin';
+        } catch (adminError) {
+          console.log('Admin login failed:', adminError.response?.data?.message || adminError.message);
+          lastError = adminError;
+        }
       }
 
-      // If admin login failed, try teacher login
+      // If not admin or admin login failed, try teacher login
       if (!response) {
         try {
           console.log('Trying teacher login');
