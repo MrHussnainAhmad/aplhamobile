@@ -31,7 +31,7 @@ const UpdateStudentScreen = ({ navigation, route }) => {
     section: student.section || '',
     studentId: student.studentId || '',
     rollNumber: student.rollNumber || '',
-    gender: student.gender || '', // Add gender to formData
+    gender: student.gender || '',
     currentFee: student.currentFee || 0,
     futureFee: student.futureFee || 0,
   });
@@ -75,12 +75,19 @@ const UpdateStudentScreen = ({ navigation, route }) => {
       newErrors.email = 'Email format is invalid';
     }
 
-    if (!formData.class) {
-      newErrors.class = 'Class is required';
+    // Only validate class and section for admin users
+    if (userType === 'admin') {
+      if (!formData.class) {
+        newErrors.class = 'Class is required';
+      }
+
+      if (!formData.section.trim()) {
+        newErrors.section = 'Section is required';
+      }
     }
 
-    if (!formData.section.trim()) {
-      newErrors.section = 'Section is required';
+    if (!formData.gender) {
+      newErrors.gender = 'Gender is required';
     }
 
     if (formData.phoneNumber && !/^\d{10,15}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
@@ -212,25 +219,43 @@ const UpdateStudentScreen = ({ navigation, route }) => {
           {renderInput('email', 'Email *', 'Enter email address', 'email-address')}
           {renderInput('phoneNumber', 'Phone Number', 'Enter phone number', 'phone-pad')}
           
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Class *</Text>
-            <Picker
-              selectedValue={formData.class}
-              onValueChange={(itemValue) => handleInputChange('class', itemValue)}
-              style={styles.textInput}
-            >
-              <Picker.Item label="Select Class" value="" />
-              {classes.map((c) => {
-                const fullClassName = c.section ? `${c.classNumber}-${c.section}` : c.classNumber;
-                return (
-                  <Picker.Item key={c._id} label={fullClassName} value={c._id} />
-                );
-              })}
-            </Picker>
-            {errors.class && (
-              <Text style={styles.errorText}>{errors.class}</Text>
-            )}
-          </View>
+          {/* Only show class and section fields for admin users */}
+          {userType === 'admin' && (
+            <>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Class *</Text>
+                <Picker
+                  selectedValue={formData.class}
+                  onValueChange={(itemValue) => handleInputChange('class', itemValue)}
+                  style={styles.textInput}
+                >
+                  <Picker.Item label="Select Class" value="" />
+                  {classes.map((cls) => (
+                    <Picker.Item 
+                      key={cls._id} 
+                      label={`${cls.classNumber} - ${cls.section}`} 
+                      value={cls._id} 
+                    />
+                  ))}
+                </Picker>
+                {errors.class && <Text style={styles.errorText}>{errors.class}</Text>}
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Section *</Text>
+                <Picker
+                  selectedValue={formData.section}
+                  onValueChange={(itemValue) => handleInputChange('section', itemValue)}
+                  style={styles.textInput}
+                >
+                  <Picker.Item label="Select Section" value="" />
+                  <Picker.Item label="Boys" value="Boys" />
+                  <Picker.Item label="Girls" value="Girls" />
+                </Picker>
+                {errors.section && <Text style={styles.errorText}>{errors.section}</Text>}
+              </View>
+            </>
+          )}
           
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Gender *</Text>
@@ -248,20 +273,19 @@ const UpdateStudentScreen = ({ navigation, route }) => {
               <Text style={styles.errorText}>{errors.gender}</Text>
             )}
           </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Section *</Text>
-            <TextInput
-              style={[styles.textInput, styles.readOnlyInput]}
-              value={formData.section}
-              editable={false} // Make it non-editable
-            />
-            {errors.section && (
-              <Text style={styles.errorText}>{errors.section}</Text>
-            )}
-          </View>
           
-          {renderInput('rollNumber', 'Roll Number', 'Enter roll number', 'numeric')}
+          {renderInput('studentId', 'Student ID', 'Enter student ID')}
+          {renderInput('rollNumber', 'Roll Number', 'Enter roll number')}
+
+          {/* Show note for teachers about class restrictions */}
+          {userType === 'teacher' && (
+            <View style={styles.infoNote}>
+              <Ionicons name="information-circle" size={20} color="#3498DB" />
+              <Text style={styles.infoText}>
+                Note: Class and section settings can only be modified by administrators.
+              </Text>
+            </View>
+          )}
 
           {userType === 'admin' && (
             <>
@@ -425,10 +449,21 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   infoText: {
-    color: '#7F8C8D',
-    fontSize: 12,
-    marginTop: 5,
-    fontStyle: 'italic',
+    marginLeft: 8,
+    color: '#2C3E50',
+    fontSize: 14,
+    flex: 1,
+  },
+  infoNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E0F2F7',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 15,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#B0C4DE',
   },
   footer: {
     flexDirection: 'row',
