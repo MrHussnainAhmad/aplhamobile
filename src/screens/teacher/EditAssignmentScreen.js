@@ -60,8 +60,13 @@ const EditAssignmentScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     loadUserData();
-    loadTeacherSubjects();
   }, []);
+
+  useEffect(() => {
+    if (assignment) {
+      loadTeacherSubjects();
+    }
+  }, [assignment]);
 
   const loadUserData = async () => {
     try {
@@ -75,7 +80,14 @@ const EditAssignmentScreen = ({ navigation, route }) => {
   const loadTeacherSubjects = async () => {
     try {
       setSubjectsLoading(true);
-      const response = await teacherAPI.getTeacherSubjects(assignment.classId);
+      // Assignment.class is populated with _id, classNumber, section
+      const classId = assignment?.class?._id || assignment?.class;
+      if (!classId) {
+        console.error('No class ID found in assignment object:', assignment);
+        Alert.alert('Error', 'Class information not found in assignment.');
+        return;
+      }
+      const response = await teacherAPI.getTeacherSubjects(classId);
       if (response.data && response.data.subjects) {
         setSubjects(response.data.subjects);
       }
@@ -248,7 +260,10 @@ const EditAssignmentScreen = ({ navigation, route }) => {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.classInfo}>
           <Ionicons name="school-outline" size={20} color="#4A90E2" />
-          <Text style={styles.classText}>{assignment?.className || 'Unknown Class'}</Text>
+          <Text style={styles.classText}>
+            {assignment?.className || 
+             (assignment?.class ? `${assignment.class.classNumber} ${assignment.class.section}` : 'Unknown Class')}
+          </Text>
         </View>
 
         <View style={styles.formSection}>
