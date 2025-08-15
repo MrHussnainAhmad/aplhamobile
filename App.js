@@ -51,6 +51,7 @@ import TeacherSchoolPostsScreen from './src/screens/teacher/SchoolPostsScreen';
 import StudentSchoolPostsScreen from './src/screens/student/SchoolPostsScreen';
 import SelectClassForAssignmentScreen from './src/screens/teacher/SelectClassForAssignmentScreen';
 import CreateAssignmentScreen from './src/screens/teacher/CreateAssignmentScreen';
+import EditAssignmentScreen from './src/screens/teacher/EditAssignmentScreen';
 import TeacherAssignmentsScreen from './src/screens/teacher/TeacherAssignmentsScreen';
 import StudentAssignmentsScreen from './src/screens/student/StudentAssignmentsScreen';
 import AssignmentDetailScreen from './src/screens/student/AssignmentDetailScreen';
@@ -138,6 +139,7 @@ export default function App() {
           <Stack.Screen name="StudentSchoolPosts" component={StudentSchoolPostsScreen} />
           <Stack.Screen name="SelectClassForAssignment" component={SelectClassForAssignmentScreen} />
           <Stack.Screen name="CreateAssignment" component={CreateAssignmentScreen} />
+          <Stack.Screen name="EditAssignment" component={EditAssignmentScreen} />
           <Stack.Screen name="TeacherAssignments" component={TeacherAssignmentsScreen} />
           <Stack.Screen name="StudentAssignments" component={StudentAssignmentsScreen} />
           <Stack.Screen name="AssignmentDetail" component={AssignmentDetailScreen} />
