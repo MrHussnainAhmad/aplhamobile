@@ -219,6 +219,7 @@ export const adminAPI = {
   // Timetable Management
   getTimetable: (classId) => api.get(`/admin/timetable/${classId}`),
   removeTimetableEntry: (entryId) => api.delete(`/admin/timetable/${entryId}`),
+  removeTimetableEntries: (subjectId, classId, timeSlot) => api.delete(`/admin/timetable/subject/${subjectId}`, { data: { classId, timeSlot } }),
   
   // Class Management
   getAllClasses: () => api.get('/classes'),

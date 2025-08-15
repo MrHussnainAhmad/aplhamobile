@@ -464,6 +464,22 @@ const HomeScreen = ({ navigation }) => {
 
         <TouchableOpacity 
           style={styles.menuItem}
+          onPress={() => navigation.navigate('StudentsByClass')}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="people-circle" size={24} color="#8E44AD" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Students by Class</Text>
+              <Text style={styles.menuItemSubtitle}>View students grouped by their classes</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
           onPress={() => navigation.navigate('SelectClassForAssignment')}
         >
           <View style={styles.menuItemContent}>
@@ -637,6 +653,22 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuItemTitle}>Manage Students</Text>
               <Text style={styles.menuItemSubtitle}>Add, edit, and manage student accounts</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('StudentsByClass')}
+        >
+          <View style={styles.menuItemContent}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="people-circle" size={24} color="#8E44AD" />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuItemTitle}>Students by Class</Text>
+              <Text style={styles.menuItemSubtitle}>View students grouped by their classes</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#BDC3C7" />
           </View>

@@ -37,6 +37,7 @@ import ClassManagementMainScreen from './src/screens/admin/ClassManagementMainSc
 import ManageClassesScreen from './src/screens/admin/ManageClassesScreen';
 import ViewClassesScreen from './src/screens/admin/ViewClassesScreen';
 import ManageSubjectsScreen from './src/screens/admin/ManageSubjectsScreen';
+import StudentsByClassScreen from './src/screens/admin/StudentsByClassScreen';
 import AssignClassesWithSearchScreen from './src/screens/admin/AssignClassesWithSearchScreen';
 import GradesManagementScreen from './src/screens/admin/grades/GradesManagementScreen';
 import SelectClassForGradingScreen from './src/screens/admin/grades/SelectClassForGradingScreen';
@@ -123,6 +124,7 @@ export default function App() {
           <Stack.Screen name="ManageClasses" component={ManageClassesScreen} />
           <Stack.Screen name="ViewClasses" component={ViewClassesScreen} />
           <Stack.Screen name="ManageSubjects" component={ManageSubjectsScreen} />
+          <Stack.Screen name="StudentsByClass" component={StudentsByClassScreen} />
           <Stack.Screen name="AssignClassesWithSearch" component={AssignClassesWithSearchScreen} />
           <Stack.Screen name="GradesManagement" component={GradesManagementScreen} />
           <Stack.Screen name="SelectClassForGrading" component={SelectClassForGradingScreen} />

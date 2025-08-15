@@ -14,7 +14,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { adminAPI, teacherAPI } from '../services/api';
+import { Picker } from '@react-native-picker/picker';
+import { adminAPI, teacherAPI, classesAPI } from '../services/api';
 import { storage } from '../utils/storage';
 import VerifiedBadge from '../components/VerifiedBadge';
 
@@ -25,6 +26,8 @@ const ManageStudentsScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [userType, setUserType] = useState(null);
+  const [classes, setClasses] = useState([]);
+  const [selectedClass, setSelectedClass] = useState('all');
 
   useEffect(() => {
     initializeScreen();
@@ -32,7 +35,7 @@ const ManageStudentsScreen = ({ navigation }) => {
 
   useEffect(() => {
     filterStudents();
-  }, [searchQuery, students]);
+  }, [searchQuery, students, selectedClass]);
 
   // Refresh students list when screen comes into focus (e.g., after student update)
   useFocusEffect(
@@ -45,7 +48,10 @@ const ManageStudentsScreen = ({ navigation }) => {
     try {
       const { userType: storedUserType } = await storage.getUserData();
       setUserType(storedUserType);
-      await loadStudents(storedUserType);
+      await Promise.all([
+        loadStudents(storedUserType),
+        loadClasses()
+      ]);
     } catch (error) {
       console.error('Error initializing screen:', error);
       Alert.alert('Error', 'Failed to initialize screen');
@@ -70,27 +76,48 @@ const ManageStudentsScreen = ({ navigation }) => {
     }
   };
 
+  const loadClasses = async () => {
+    try {
+      const response = await classesAPI.getAllClasses();
+      setClasses(response.data.classes || []);
+    } catch (error) {
+      console.error('Error loading classes:', error);
+      // Don't show alert for classes error, just keep empty array
+    }
+  };
+
   const filterStudents = () => {
-    if (!searchQuery.trim()) {
-      setFilteredStudents(students);
-      return;
+    let filtered = students;
+
+    // Filter by class first
+    if (selectedClass !== 'all') {
+      filtered = filtered.filter(student => {
+        if (!student.class) return false;
+        return student.class._id === selectedClass;
+      });
     }
 
-    const filtered = students.filter(student => {
-      const query = searchQuery.toLowerCase();
-      // Only search by student name or student ID
-      return (
-        student.fullname?.toLowerCase().includes(query) ||
-        (student.studentId && student.studentId.toLowerCase().includes(query))
-      );
-    });
+    // Then filter by search query
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(student => {
+        const query = searchQuery.toLowerCase();
+        // Only search by student name or student ID
+        return (
+          student.fullname?.toLowerCase().includes(query) ||
+          (student.studentId && student.studentId.toLowerCase().includes(query))
+        );
+      });
+    }
 
     setFilteredStudents(filtered);
   };
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadStudents();
+    await Promise.all([
+      loadStudents(),
+      loadClasses()
+    ]);
     setRefreshing(false);
   };
 
@@ -241,15 +268,52 @@ const ManageStudentsScreen = ({ navigation }) => {
         <View style={styles.headerRight} />
       </View>
 
-      {/* Updated Search Container - Same style as ManageTeachersScreen */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#7F8C8D" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search by name or student ID..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+      {/* Search and Filter Container */}
+      <View style={styles.filterContainer}>
+        {/* Search Input */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#7F8C8D" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search by name or student ID..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+
+        {/* Class Filter */}
+        <View style={styles.classFilterContainer}>
+          <Ionicons name="school" size={20} color="#7F8C8D" style={styles.filterIcon} />
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={selectedClass}
+              onValueChange={(itemValue) => setSelectedClass(itemValue)}
+              style={styles.picker}
+              dropdownIconColor="#7F8C8D"
+            >
+              <Picker.Item label="All Classes" value="all" />
+              {classes.map((classItem) => (
+                <Picker.Item
+                  key={classItem._id}
+                  label={`${classItem.classNumber}-${classItem.section}`}
+                  value={classItem._id}
+                />
+              ))}
+            </Picker>
+          </View>
+        </View>
+      </View>
+
+      {/* Results Summary */}
+      <View style={styles.resultsSummary}>
+        <Text style={styles.resultsText}>
+          Showing {filteredStudents.length} of {students.length} students
+          {selectedClass !== 'all' && (
+            <Text style={styles.filterInfo}>
+              {' '}(filtered by class)
+            </Text>
+          )}
+        </Text>
       </View>
 
       <FlatList
@@ -264,7 +328,12 @@ const ManageStudentsScreen = ({ navigation }) => {
           <View style={styles.emptyContainer}>
             <Ionicons name="sad-outline" size={50} color="#BDC3C7" />
             <Text style={styles.emptyText}>No students found</Text>
-            <Text style={styles.emptySubText}>Try refreshing or add a new student</Text>
+            <Text style={styles.emptySubText}>
+              {selectedClass !== 'all' 
+                ? 'Try changing the class filter or search criteria'
+                : 'Try refreshing or add a new student'
+              }
+            </Text>
           </View>
         }
       />
@@ -308,16 +377,28 @@ const styles = StyleSheet.create({
   headerRight: {
     width: 24,
   },
-  // Updated Search Container - Same style as ManageTeachersScreen
+  // Filter Container
+  filterContainer: {
+    backgroundColor: '#FFFFFF',
+    margin: 20,
+    borderRadius: 12,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 3,
+  },
+  // Search Container
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
     borderRadius: 8,
-    margin: 20,
     paddingHorizontal: 15,
     borderWidth: 1,
     borderColor: '#E1E8ED',
+    marginBottom: 15,
   },
   searchIcon: {
     marginRight: 10,
@@ -327,6 +408,40 @@ const styles = StyleSheet.create({
     height: 50,
     fontSize: 16,
     color: '#2C3E50',
+  },
+  // Class Filter Container
+  classFilterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: '#E1E8ED',
+  },
+  filterIcon: {
+    marginRight: 10,
+  },
+  pickerContainer: {
+    flex: 1,
+  },
+  picker: {
+    height: 50,
+    color: '#2C3E50',
+  },
+  // Results Summary
+  resultsSummary: {
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  resultsText: {
+    fontSize: 14,
+    color: '#7F8C8D',
+    fontWeight: '500',
+  },
+  filterInfo: {
+    color: '#4A90E2',
+    fontWeight: '600',
   },
   listContainer: {
     paddingHorizontal: 20,

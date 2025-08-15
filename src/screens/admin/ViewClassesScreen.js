@@ -150,8 +150,11 @@ const ViewClassesScreen = ({ navigation }) => {
           <TouchableOpacity
             style={[styles.actionButton, styles.viewStudentsButton]}
             onPress={() => {
-              // Navigate to view students in this class
-              Alert.alert('Coming Soon', 'Student list view will be implemented soon.');
+              // Navigate to view students in this specific class
+              navigation.navigate('StudentsByClass', {
+                classId: classItem._id,
+                className: fullClassName
+              });
             }}
           >
             <Ionicons name="people-circle" size={16} color="#E67E22" />

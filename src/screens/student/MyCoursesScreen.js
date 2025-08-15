@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { storage } from '../../utils/storage';
 import { classesAPI } from '../../services/api';
@@ -137,6 +138,100 @@ const MyCoursesScreen = () => {
     );
   };
 
+  // Group timetable entries by "Full day" and "Half day" patterns
+  const groupTimetableByPattern = (timetable) => {
+    const fullDayPattern = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday'];
+    const groupedTimetable = {
+      'Full day': [],
+      'Half day': [],
+      'Other': []
+    };
+
+    // Check if all full day pattern days have the same entries
+    const fullDayEntries = fullDayPattern.map(day => timetable[day] || []);
+    const hasFullDayPattern = fullDayPattern.every(day => timetable[day] && timetable[day].length > 0);
+    
+    if (hasFullDayPattern) {
+      // Use the first day's entries as the template (they should all be the same)
+      groupedTimetable['Full day'] = fullDayEntries[0] || [];
+    }
+
+    // Check for Friday (Half day)
+    if (timetable['Friday'] && timetable['Friday'].length > 0) {
+      groupedTimetable['Half day'] = timetable['Friday'];
+    }
+
+    // Add any remaining days that don't fit the patterns
+    Object.entries(timetable).forEach(([day, entries]) => {
+      if (entries && entries.length > 0) {
+        if (!fullDayPattern.includes(day) && day !== 'Friday') {
+          // This day doesn't fit the patterns, add it to "Other"
+          groupedTimetable['Other'].push({
+            day,
+            entries
+          });
+        }
+      }
+    });
+
+    return groupedTimetable;
+  };
+
+  const renderGroupedTimetable = (groupedTimetable) => {
+    const sections = [];
+    
+    // Render Full day section
+    if (groupedTimetable['Full day'].length > 0) {
+      sections.push(
+        <View key="full-day" style={styles.dayContainer}>
+          <Text style={[styles.dayHeader, { backgroundColor: '#27AE60' }]}>Full Day</Text>
+          <View style={styles.timetableContainer}>
+            <View style={styles.timetableHeader}>
+              <Text style={styles.headerCell}>Time</Text>
+              <Text style={styles.headerCell}>Subject</Text>
+              <Text style={styles.headerCell}>Teacher</Text>
+            </View>
+            <FlatList
+              data={groupedTimetable['Full day']}
+              renderItem={renderTimetableItem}
+              keyExtractor={(item, index) => `full-day-${item.subject}-${index}`}
+              scrollEnabled={false}
+            />
+          </View>
+        </View>
+      );
+    }
+
+    // Render Half day section
+    if (groupedTimetable['Half day'].length > 0) {
+      sections.push(
+        <View key="half-day" style={styles.dayContainer}>
+          <Text style={[styles.dayHeader, { backgroundColor: '#F39C12' }]}>Half Day</Text>
+          <View style={styles.timetableContainer}>
+            <View style={styles.timetableHeader}>
+              <Text style={styles.headerCell}>Time</Text>
+              <Text style={styles.headerCell}>Subject</Text>
+              <Text style={styles.headerCell}>Teacher</Text>
+            </View>
+            <FlatList
+              data={groupedTimetable['Half day']}
+              renderItem={renderTimetableItem}
+              keyExtractor={(item, index) => `half-day-${item.subject}-${index}`}
+              scrollEnabled={false}
+            />
+          </View>
+        </View>
+      );
+    }
+
+    // Render Other days (if any)
+    groupedTimetable['Other'].forEach(({ day, entries }) => {
+      sections.push(renderDayTimetable(day, entries));
+    });
+
+    return sections;
+  };
+
   const renderSimpleCoursesList = () => (
     <View style={styles.simpleContainer}>
       <Text style={styles.sectionTitle}>All Courses</Text>
@@ -193,29 +288,29 @@ const MyCoursesScreen = () => {
   console.log('  - Full timetable object:', JSON.stringify(timetable, null, 2));
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>My Courses</Text>
-      
-      {hasTimetable ? (
-        <View style={styles.timetableView}>
-          <Text style={styles.sectionTitle}>Weekly Timetable</Text>
-          {Object.entries(timetable).map(([day, entries]) => 
-            renderDayTimetable(day, entries)
-          )}
-        </View>
-      ) : courses.length > 0 ? (
-        renderSimpleCoursesList()
-      ) : (
-        renderEmptyState()
-      )}
-    </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
+        <Text style={styles.title}>My Courses</Text>
+        
+        {hasTimetable ? (
+          <View style={styles.timetableView}>
+            <Text style={styles.sectionTitle}>Weekly Timetable</Text>
+            {renderGroupedTimetable(groupTimetableByPattern(timetable))}
+          </View>
+        ) : courses.length > 0 ? (
+          renderSimpleCoursesList()
+        ) : (
+          renderEmptyState()
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20,
+    paddingTop: 33,
     backgroundColor: '#F5F7FA',
   },
   title: {
@@ -323,21 +418,21 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: '600',
     color: '#555',
-    fontSize: 13,
+    fontSize: 11,
     textAlign: 'center',
   },
   subjectCell: {
     flex: 2,
     fontWeight: 'bold',
     color: '#2C3E50',
-    fontSize: 15,
+    fontSize: 13,
     textAlign: 'center',
   },
   teacherCell: {
     flex: 1,
     fontWeight: '500',
     color: '#4A90E2',
-    fontSize: 13,
+    fontSize: 11,
     textAlign: 'center',
   },
   // Simple courses list styles (if no timetable)

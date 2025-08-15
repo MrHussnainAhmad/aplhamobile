@@ -22,6 +22,7 @@ const ManageClassesScreen = ({ navigation }) => {
   const [editingClassId, setEditingClassId] = useState(null);
   const [editingClassNumber, setEditingClassNumber] = useState("");
   const [editingClassSection, setEditingClassSection] = useState("");
+  const [eyeStates, setEyeStates] = useState({});
 
   useEffect(() => {
     fetchClasses();
@@ -33,6 +34,12 @@ const ManageClassesScreen = ({ navigation }) => {
       const response = await adminAPI.getClasses();
       if (response.data.classes) {
         setClasses(response.data.classes);
+        // Initialize eye states for all classes
+        const initialEyeStates = {};
+        response.data.classes.forEach(cls => {
+          initialEyeStates[cls._id] = true; // true = eye icon, false = eye-off icon
+        });
+        setEyeStates(initialEyeStates);
       }
     } catch (error) {
       console.error("Error fetching classes:", error);
@@ -40,6 +47,13 @@ const ManageClassesScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleEyeState = (classId) => {
+    setEyeStates(prev => ({
+      ...prev,
+      [classId]: !prev[classId]
+    }));
   };
 
   const handleCreateClass = async () => {
@@ -60,6 +74,11 @@ const ManageClassesScreen = ({ navigation }) => {
       });
       if (response.data.class) {
         setClasses([...classes, response.data.class]);
+        // Initialize eye state for new class
+        setEyeStates(prev => ({
+          ...prev,
+          [response.data.class._id]: true
+        }));
         setNewClassNumber("");
         setNewClassSection("");
         Alert.alert("Success", "Class created successfully!");
@@ -117,6 +136,12 @@ const ManageClassesScreen = ({ navigation }) => {
             try {
               await adminAPI.deleteClass(id);
               setClasses(classes.filter((cls) => cls._id !== id));
+              // Remove eye state for deleted class
+              setEyeStates(prev => {
+                const newStates = { ...prev };
+                delete newStates[id];
+                return newStates;
+              });
               Alert.alert("Success", "Class deleted successfully!");
             } catch (error) {
               console.error("Error deleting class:", error);
@@ -198,6 +223,16 @@ const ManageClassesScreen = ({ navigation }) => {
           </>
         ) : (
           <>
+            <TouchableOpacity
+              onPress={() => toggleEyeState(item._id)}
+              style={styles.actionButton}
+            >
+              <Ionicons 
+                name={eyeStates[item._id] ? "eye" : "eye-off"} 
+                size={20} 
+                color="#7F8C8D" 
+              />
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
                 setEditingClassId(item._id);

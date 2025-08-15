@@ -31,6 +31,9 @@ const ManageSubjectsScreen = ({ navigation }) => {
   const [selectedDays, setSelectedDays] = useState([]); // Changed to array for multi-day selection
   const [subjectTimeSlots, setSubjectTimeSlots] = useState({});
   const [subjectAssignments, setSubjectAssignments] = useState([]);
+  
+  // Dropdown state for teacher classes
+  const [expandedTeacherId, setExpandedTeacherId] = useState(null);
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -204,7 +207,7 @@ const ManageSubjectsScreen = ({ navigation }) => {
     setSubjectAssignments([]);
   }, []);
 
-  const handleRemoveSubject = async (teacherId, subject) => {
+  const handleRemoveSubject = async (teacherId, subject, classId, timeSlot) => {
     Alert.alert(
       'Remove Subject',
       `Are you sure you want to remove "${subject}" from this teacher?`,
@@ -217,7 +220,9 @@ const ManageSubjectsScreen = ({ navigation }) => {
             try {
               const response = await adminAPI.removeSubjectFromTeacher({ 
                 teacherId, 
-                subjects: [subject] 
+                subjects: [subject],
+                classId: classId,
+                timeSlot: timeSlot
               });
               if (response.data.teacher) {
                 setTeachers(teachers.map(t => 
@@ -258,19 +263,59 @@ const ManageSubjectsScreen = ({ navigation }) => {
     });
   };
 
-  const renderSubjectChip = (assignment, teacherId, canRemove = true) => (
-    <View key={`${assignment.subject}-${assignment.classId}-${assignment.day}-${assignment.timeSlot}`} style={styles.subjectChip}>
-      <Text style={styles.subjectText}>{assignment.subject} - {assignment.class}</Text>
-      {canRemove && (
-        <TouchableOpacity 
-          onPress={() => handleRemoveSubject(teacherId, assignment.subject)}
-          style={styles.removeButton}
-        >
-          <Ionicons name="close-circle" size={18} color="#E74C3C" />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
+  const renderSubjectChip = (assignment, teacherId, canRemove = true) => {
+    console.log('renderSubjectChip assignment:', assignment);
+    console.log('assignment.subject:', assignment.subject);
+    console.log('assignment.class:', assignment.class);
+    console.log('assignment.day:', assignment.day);
+    console.log('assignment.timeSlot:', assignment.timeSlot);
+    
+    // Handle missing data gracefully
+    const subject = assignment.subject || 'Unknown Subject';
+    const className = assignment.class || 'Unknown Class';
+    const day = assignment.day || 'Unknown Day';
+    const timeSlot = assignment.timeSlot || 'Unknown Time';
+    
+    const displayText = `${subject} - ${className} • ${day} • ${timeSlot}`;
+    console.log('displayText:', displayText);
+    
+    return (
+      <View 
+        key={`${assignment.subject}-${assignment.classId}-${assignment.timeSlot}`} 
+        style={{
+          backgroundColor: '#4A90E2',
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          marginRight: 8,
+          marginBottom: 8,
+          borderRadius: 20,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 13,
+          fontWeight: '600',
+          marginRight: 8,
+        }}>
+          {displayText}
+        </Text>
+        {canRemove && (
+          <TouchableOpacity 
+            onPress={() => handleRemoveSubject(teacherId, assignment.subject, assignment.classId, assignment.timeSlot)}
+            style={{
+              backgroundColor: '#E74C3C',
+              borderRadius: 10,
+              padding: 2,
+            }}
+          >
+            <Ionicons name="close-circle" size={16} color="#FFFFFF" />
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
 
   const renderSubjectButton = (subject) => {
     const isAlreadyAssigned = selectedTeacher?.subjects?.includes(subject);
@@ -298,41 +343,74 @@ const ManageSubjectsScreen = ({ navigation }) => {
     );
   };
 
-  const renderTeacherItem = ({ item: teacher }) => (
-    <View style={styles.teacherCard}>
-      <View style={styles.teacherHeader}>
-        <View style={styles.teacherInfo}>
-          <Text style={styles.teacherName}>{teacher.fullname}</Text>
-          <Text style={styles.teacherEmail}>{teacher.email}</Text>
-          <Text style={styles.teacherStatus}>
-            Verified • {teacher.classes?.map(cls => cls.name).join(', ') || 'No classes'}
-          </Text>
-        </View>
-                 <View style={styles.actionButtons}>
-           <TouchableOpacity
-             style={styles.assignButton}
-             onPress={() => openAssignModal(teacher)}
-           >
-             <Ionicons name="add-circle" size={24} color="#4A90E2" />
-           </TouchableOpacity>
-         </View>
-      </View>
+  const renderTeacherItem = ({ item: teacher }) => {
+    const isExpanded = expandedTeacherId === teacher._id;
+    const hasSubjects = teacher.assignedSubjectsWithClasses && teacher.assignedSubjectsWithClasses.length > 0;
 
-      <View style={styles.subjectsSection}>
-        <Text style={styles.subjectsLabel}>Assigned Subjects:</Text>
-        {console.log('teacher.assignedSubjectsWithClasses:', teacher.assignedSubjectsWithClasses)}
-        {teacher.assignedSubjectsWithClasses && teacher.assignedSubjectsWithClasses.length > 0 ? (
-          <View style={styles.subjectsContainer}>
-            {teacher.assignedSubjectsWithClasses.map(assignment => 
-              renderSubjectChip(assignment, teacher._id)
-            )}
+    return (
+      <View style={styles.teacherCard}>
+        <View style={styles.teacherHeader}>
+          <View style={styles.teacherInfo}>
+            <Text style={styles.teacherName}>{teacher.fullname}</Text>
+            <Text style={styles.teacherEmail}>{teacher.email}</Text>
+            <Text style={styles.teacherStatus}>
+              Verified • {teacher.classes?.map(cls => cls.name).join(', ') || 'No classes'}
+            </Text>
           </View>
-        ) : (
-          <Text style={styles.noSubjectsText}>No subjects assigned yet</Text>
+          <View style={styles.actionButtons}>
+            {hasSubjects && (
+              <TouchableOpacity
+                style={styles.dropdownButton}
+                onPress={() => setExpandedTeacherId(isExpanded ? null : teacher._id)}
+              >
+                <Ionicons 
+                  name={isExpanded ? "chevron-up" : "chevron-down"} 
+                  size={20} 
+                  color="#4A90E2" 
+                />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={styles.assignButton}
+              onPress={() => openAssignModal(teacher)}
+            >
+              <Ionicons name="add-circle" size={24} color="#4A90E2" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Dropdown for assigned subjects */}
+        {isExpanded && hasSubjects && (
+          <View style={styles.subjectsSection}>
+            <Text style={styles.subjectsLabel}>Assigned Subjects:</Text>
+            {console.log('teacher.assignedSubjectsWithClasses:', teacher.assignedSubjectsWithClasses)}
+            <View style={styles.subjectsContainer}>
+              {teacher.assignedSubjectsWithClasses.map(assignment => 
+                renderSubjectChip(assignment, teacher._id)
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* Show subjects section if not expanded but has subjects */}
+        {!isExpanded && hasSubjects && (
+          <View style={styles.subjectsSection}>
+            <Text style={styles.subjectsLabel}>
+              Assigned Subjects: {teacher.assignedSubjectsWithClasses.length} subject{teacher.assignedSubjectsWithClasses.length > 1 ? 's' : ''}
+            </Text>
+          </View>
+        )}
+
+        {/* Show no subjects message if no subjects */}
+        {!hasSubjects && (
+          <View style={styles.subjectsSection}>
+            <Text style={styles.subjectsLabel}>Assigned Subjects:</Text>
+            <Text style={styles.noSubjectsText}>No subjects assigned yet</Text>
+          </View>
         )}
       </View>
-    </View>
-  );
+    );
+  };
 
   // Optimized modal component to prevent re-renders
   const AssignSubjectModal = () => {
@@ -365,11 +443,29 @@ const ManageSubjectsScreen = ({ navigation }) => {
 
     const handleLocalDayToggle = (day) => {
       setLocalSelectedDays(prev => {
+        let newDays;
         if (prev.includes(day)) {
-          return prev.filter(d => d !== day);
+          newDays = prev.filter(d => d !== day);
         } else {
-          return [...prev, day];
+          newDays = [...prev, day];
         }
+        
+        // Auto-set day type based on selected days
+        const fullDayPattern = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday'];
+        const hasFullDayPattern = fullDayPattern.every(d => newDays.includes(d));
+        const hasFriday = newDays.includes('Friday');
+        
+        // If all full day pattern days are selected, show "Full day" indicator
+        if (hasFullDayPattern) {
+          console.log('Full day pattern detected: Monday, Tuesday, Wednesday, Thursday, Saturday');
+        }
+        
+        // If Friday is selected, show "Half day" indicator
+        if (hasFriday) {
+          console.log('Half day pattern detected: Friday');
+        }
+        
+        return newDays;
       });
     };
 
@@ -491,10 +587,25 @@ const ManageSubjectsScreen = ({ navigation }) => {
                     ))}
                   </View>
 
-                  {/* Show "Everyday" option when all days except Sunday are selected */}
-                  {localSelectedDays.length === 6 && !localSelectedDays.includes('Sunday') && (
-                    <View style={styles.everydayContainer}>
-                      <Text style={styles.everydayText}>✓ Marked as "Everyday" (All days except Sunday)</Text>
+                  {/* Show "Full day" indicator when Monday, Tuesday, Wednesday, Thursday, Saturday are selected */}
+                  {(() => {
+                    const fullDayPattern = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday'];
+                    const hasFullDayPattern = fullDayPattern.every(d => localSelectedDays.includes(d));
+                    return hasFullDayPattern && (
+                      <View style={[styles.everydayContainer, { backgroundColor: '#E8F5E8' }]}>
+                        <Text style={[styles.everydayText, { color: '#27AE60' }]}>
+                          ✓ Marked as "Full day" (Monday, Tuesday, Wednesday, Thursday, Saturday)
+                        </Text>
+                      </View>
+                    );
+                  })()}
+
+                  {/* Show "Half day" indicator when Friday is selected */}
+                  {localSelectedDays.includes('Friday') && (
+                    <View style={[styles.everydayContainer, { backgroundColor: '#FEF9E7' }]}>
+                      <Text style={[styles.everydayText, { color: '#F39C12' }]}>
+                        ✓ Marked as "Half day" (Friday)
+                      </Text>
                     </View>
                   )}
 
@@ -517,9 +628,21 @@ const ManageSubjectsScreen = ({ navigation }) => {
                     <Text style={styles.sectionTitle}>Preview:</Text>
                     {localSelectedSubjects.map(subject => {
                       const classObj = classes.find(c => c._id === localSelectedClass);
-                      const dayDisplay = localSelectedDays.length === 6 && !localSelectedDays.includes('Sunday') 
-                        ? 'Everyday' 
-                        : localSelectedDays.join(', ') || 'No days selected';
+                      
+                      // Determine day display with day type information
+                      let dayDisplay;
+                      const fullDayPattern = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday'];
+                      const hasFullDayPattern = fullDayPattern.every(d => localSelectedDays.includes(d));
+                      const hasFriday = localSelectedDays.includes('Friday');
+                      
+                      if (hasFullDayPattern) {
+                        dayDisplay = 'Full day (Mon, Tue, Wed, Thu, Sat)';
+                      } else if (hasFriday) {
+                        dayDisplay = 'Half day (Friday)';
+                      } else {
+                        dayDisplay = localSelectedDays.join(', ') || 'No days selected';
+                      }
+                      
                       return (
                         <View key={subject} style={styles.previewItem}>
                           <Text style={styles.previewSubject}>{subject}</Text>
@@ -760,20 +883,38 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   subjectChip: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 8,
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: 8,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#E1E8ED',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  subjectChipContainer: {
+    marginBottom: 8,
+  },
+  subjectChipContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flex: 1,
   },
   subjectText: {
-    fontSize: 12,
-    color: '#1976D2',
-    fontWeight: '500',
+    fontSize: 14,
+    color: '#2C3E50',
+    fontWeight: '600',
     marginRight: 6,
+    flex: 1,
+    backgroundColor: '#FFE0E0', // Temporary background for debugging
   },
   removeButton: {
     marginLeft: 4,
@@ -1107,6 +1248,110 @@ const styles = StyleSheet.create({
   },
   selectedDayText: {
     color: '#FFFFFF',
+  },
+  dropdownButton: {
+    padding: 8,
+  },
+  classesDropdown: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 10,
+    padding: 15,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#E1E8ED',
+  },
+  classesDropdownTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginBottom: 8,
+  },
+  classItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  classItemText: {
+    fontSize: 14,
+    color: '#2C3E50',
+    marginLeft: 8,
+  },
+  subjectDetailsDropdown: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 10,
+    padding: 15,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#E1E8ED',
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  detailLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginLeft: 8,
+  },
+  detailText: {
+    fontSize: 14,
+    color: '#7F8C8D',
+    flex: 1,
+  },
+  daysList: {
+    marginTop: 8,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  dayItem: {
+    backgroundColor: '#E3F2FD',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    fontSize: 11,
+    color: '#1976D2',
+    fontWeight: '500',
+  },
+  // Fixed subject chip styles
+  subjectChipFixed: {
+    backgroundColor: '#4A90E2',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    marginRight: 8,
+    marginBottom: 8,
+    borderRadius: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 40,
+    borderWidth: 2,
+    borderColor: '#357ABD',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  subjectTextFixed: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+    flex: 1,
+    marginRight: 8,
+    lineHeight: 16,
+  },
+  removeButtonFixed: {
+    backgroundColor: '#E74C3C',
+    borderRadius: 12,
+    padding: 4,
+    marginLeft: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 24,
+    minHeight: 24,
   },
 });
 

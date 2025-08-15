@@ -28,7 +28,7 @@ const API_CONFIG = {
 // - 'IOS_SIMULATOR' for iOS simulator
 // - 'REMOTE_DEVICE' for backend on different device
 // - 'PRODUCTION' for production backend
-const CURRENT_ENV = 'PRODUCTION';
+const CURRENT_ENV = 'REMOTE_DEVICE';
 
 // Helper function to get the current API URL
 export const getApiUrl = () => {
