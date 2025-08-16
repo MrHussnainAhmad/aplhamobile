@@ -8,6 +8,7 @@ import {
   Alert,
   Image,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { adminAPI } from '../../services/api';
@@ -17,6 +18,8 @@ const FeeVoucherDetailPage = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [studentInfo, setStudentInfo] = useState(null);
   const [feeVouchers, setFeeVouchers] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     fetchFeeVouchersDetail();
@@ -34,6 +37,16 @@ const FeeVoucherDetailPage = ({ route, navigation }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openImageModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setModalVisible(true);
+  };
+
+  const closeImageModal = () => {
+    setModalVisible(false);
+    setSelectedImage(null);
   };
 
   if (loading) {
@@ -85,15 +98,29 @@ const FeeVoucherDetailPage = ({ route, navigation }) => {
         ) : (
           <View style={styles.voucherGrid}>
             {feeVouchers.map((voucher) => (
-              <View key={voucher._id} style={styles.voucherItem}>
+              <TouchableOpacity key={voucher._id} style={styles.voucherItem} onPress={() => openImageModal(voucher.imageUrl)}>
                 <Image source={{ uri: voucher.imageUrl }} style={styles.voucherImage} />
                 <Text style={styles.voucherId}>Voucher ID: {voucher.newId}</Text>
                 <Text style={styles.voucherDate}>Uploaded: {new Date(voucher.uploadedAt).toLocaleDateString()}</Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         )}
       </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={closeImageModal}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity style={styles.closeButton} onPress={closeImageModal}>
+            <Ionicons name="close-circle" size={30} color="white" />
+          </TouchableOpacity>
+          <Image source={{ uri: selectedImage }} style={styles.enlargedImage} resizeMode="contain" />
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -228,6 +255,22 @@ const styles = StyleSheet.create({
   voucherDate: {
     fontSize: 12,
     color: '#7F8C8D',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  enlargedImage: {
+    width: '90%',
+    height: '80%',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 1,
   },
 });
 
